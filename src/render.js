@@ -4,7 +4,7 @@ const hash = (x, y, s = 0) => { let h = (x * 374761393 + y * 668265263 + s * 982
 
 // ------------------------------------------------------------------ Casillas
 function renderTiles(rs) {
-  const th = THEMES[rs.def.theme];
+  const th = themeOf(rs);
   const cv = rs.tileCv || document.createElement('canvas');
   cv.width = rs.W * T; cv.height = rs.H * T;
   const c = cv.getContext('2d');
@@ -49,6 +49,18 @@ function renderTiles(rs) {
       R(c, px + 1, py + 1, T - 2, 1, lt(b)); R(c, px + 1, py + 1, 1, T - 2, lt(b));
       R(c, px + 1, py + T - 3, T - 2, 2, dk(b)); R(c, px + T - 3, py + 1, 2, T - 2, dk(b));
       line(c, px + 2, py + 2, px + T - 3, py + T - 3, dk(b));
+    } else if (ch === 'W') {
+      const up = !sol(x, y - 1), wd = '#6a4a30';
+      R(c, px, py, T, T, wd);
+      for (let r = 0; r < 4; r++) { R(c, px, py + r * 4 + 3, T, 1, '#4a3020'); if ((x + r) % 3 === 0) R(c, px + 6, py + r * 4, 1, 3, '#4a3020'); }
+      if (up) { R(c, px, py, T, 2, '#8a6a48'); R(c, px, py, T, 1, '#a8885e'); }
+      if (!sol(x - 1, y)) R(c, px, py, 1, T, '#3a2414');
+      if (!sol(x + 1, y)) R(c, px + T - 1, py, 1, T, '#3a2414');
+      if ((x * 7 + y) % 5 === 0) R(c, px + 3, py + 6, 1, 1, '#c8a050');
+    } else if (ch === 'G') {
+      R(c, px, py, T, T, '#262230'); R(c, px + 1, py + 1, T - 2, T - 2, '#3a3646'); R(c, px + 1, py + 1, T - 2, 2, '#4e4a5c');
+      line(c, px + 1, py + 3 + (x % 2) * 4, px + 14, py + 12, '#2f8bff', 2); line(c, px + 9, py + 1, px + 4, py + 14, '#1a5abf', 1);
+      R(c, px + 6, py + 7, 2, 2, '#9fd0ff'); R(c, px + 2, py + 2, 2, 2, '#5e5a6c'); R(c, px + 12, py + 12, 2, 2, '#5e5a6c');
     } else if (ch === 'B') {
       R(c, px, py, T, T, '#3a3646'); R(c, px + 1, py + 1, T - 2, T - 2, '#4a4656'); R(c, px + 1, py + 1, T - 2, 1, '#5e5a6c');
       line(c, px + 2 + (y % 2) * 3, py + 2, px + 10, py + 13, '#2f8bff'); line(c, px + 12, py + 3, px + 7, py + 8, '#2f8bff');
@@ -65,7 +77,8 @@ function renderTiles(rs) {
       R(c, px, py, T, 4, w); R(c, px, py, T, 1, lt(w)); R(c, px, py + 3, T, 1, dk(w));
       if (x % 3 === 0) R(c, px + 2, py + 4, 1, 3, dk(w));
     } else if (ch === '^') {
-      for (let i = 0; i < 4; i++) { R(c, px + i * 4 + 1, py + 10, 3, 6, '#5a5a6a'); R(c, px + i * 4 + 2, py + 7, 1, 4, '#9a9aaa'); }
+      if (th.cables) { R(c, px, py + 13, T, 3, '#2a2a30'); line(c, px, py + 12, px + 8, py + 8, '#1a1a20', 2); line(c, px + 8, py + 8, px + 15, py + 13, '#1a1a20', 2); rs.anim.push({ x, y, ch: '^' }); }
+      else for (let i = 0; i < 4; i++) { R(c, px + i * 4 + 1, py + 10, 3, 6, '#5a5a6a'); R(c, px + i * 4 + 2, py + 7, 1, 4, '#9a9aaa'); }
     }
   }
   rs.tileCv = cv;
@@ -87,6 +100,8 @@ function drawAnimTiles(c, rs, t) {
         R(c, px + i + ((j / 4) % 2) * 2, py + j, 2, 1, on ? '#ffb547' : 'rgba(255,181,71,0.35)');
         R(c, px + i + 1 + ((j / 4) % 2) * 2, py + j + 2, 1, 1, on ? '#ffe0a8' : 'rgba(255,181,71,0.2)');
       }
+    } else if (ch === '^') {
+      if (Math.random() < 0.15) { R(c, px + 6 + Math.random() * 4, py + 6 + Math.random() * 4, 1, 1, '#ffffff'); R(c, px + 4 + Math.random() * 8, py + 4 + Math.random() * 8, 1, 1, '#9fd0ff'); }
     } else if (ch === 'k') {
       R(c, px + 2, py, 12, T, 'rgba(79,109,255,0.55)');
       for (let i = 0; i < 4; i++) R(c, px + 3 + i * 3, py + ((t * 90 + i * 7 + a.y * 5) % T), 1, 4, '#c8d8ff');
@@ -118,9 +133,10 @@ function bgLayers(name) {
   });
   return (BG_CACHE[name] = L);
 }
+function themeOf(rs) { return THEMES[rs.themeOverride || rs.def.theme]; }
 function drawBackground(c, rs, cam, t) {
-  const th = THEMES[rs.def.theme];
-  const L = bgLayers(rs.def.theme);
+  const th = themeOf(rs);
+  const L = bgLayers(rs.themeOverride || rs.def.theme);
   if (th.interior) {
     const ox = -Math.floor(cam.x * 0.3) % 768;
     c.drawImage(L.far, ox, 0); c.drawImage(L.far, ox + 768, 0);
@@ -130,6 +146,8 @@ function drawBackground(c, rs, cam, t) {
   sky(c, VIEW_W, VIEW_H, th.sky[0], th.sky[1], 8);
   if (th.stars) { const r = rng(3); for (let i = 0; i < 50; i++) R(c, Math.floor(r() * VIEW_W), Math.floor(r() * 90), 1, 1, r() < 0.5 ? '#c9c2e6' : '#7a74a0'); }
   if (th.moon) { R(c, 300, 22, 10, 10, '#f3e7c9'); R(c, 298, 24, 2, 6, '#f3e7c9'); R(c, 304, 24, 2, 2, '#d8cca8'); }
+  if (th.sun) { c.fillStyle = 'rgba(255,240,190,0.25)'; c.fillRect(290, 14, 30, 30); R(c, 296, 20, 18, 18, '#fff4d0'); R(c, 294, 24, 22, 10, '#fff4d0'); R(c, 300, 18, 10, 22, '#fff4d0'); }
+  if (th.clouds) for (let i = 0; i < 5; i++) { const x = ((i * 97 + t * 4 - cam.x * 0.05) % (VIEW_W + 80)) - 40, y = 18 + (i * 23) % 50; c.fillStyle = 'rgba(255,255,255,0.55)'; c.fillRect(Math.round(x), y, 34, 6); c.fillRect(Math.round(x) + 6, y - 4, 20, 5); }
   if (th.ibaia) drawIbaia(c, t, 1);
   if (th.tower) {
     const tx = 250 - cam.x * 0.04;
@@ -140,7 +158,7 @@ function drawBackground(c, rs, cam, t) {
   const fy = th.ibaia ? 40 : 0;
   const ox = -Math.floor(cam.x * 0.15) % 768, oy = Math.floor(-cam.y * 0.05) + fy;
   c.drawImage(L.far, ox, oy); c.drawImage(L.far, ox + 768, oy);
-  if (th.sea) { const sy = 176 - Math.floor(cam.y * 0.05); R(c, 0, sy, VIEW_W, VIEW_H - sy, '#141a34'); for (let i = 0; i < 24; i++) R(c, (i * 37 + Math.floor(t * 8)) % VIEW_W, sy + 4 + (i * 7) % 30, 4, 1, '#3a4a7a'); }
+  if (th.sea) { const sy = 176 - Math.floor(cam.y * 0.05), sc = th.seaCol || ['#141a34', '#3a4a7a']; R(c, 0, sy, VIEW_W, VIEW_H - sy, sc[0]); for (let i = 0; i < 24; i++) R(c, (i * 37 + Math.floor(t * 8)) % VIEW_W, sy + 4 + (i * 7) % 30, 4, 1, sc[1]); }
   const nx = -Math.floor(cam.x * 0.35) % 768, ny = Math.floor(-cam.y * 0.12) + 10 + fy;
   c.drawImage(L.near, nx, ny); c.drawImage(L.near, nx + 768, ny);
 }
@@ -158,7 +176,7 @@ function drawIbaia(c, t, k) {
   for (let i = 0; i < 9; i++) { const x = 30 + i * 38 + (i > 4 ? 12 : 0); if (Math.abs(x - 203) < 40) continue; veil(c, x, 4, base - 70 + (i % 3) * 8, base, t + i); }
 }
 function drawWeather(c, rs, cam, t) {
-  const th = THEMES[rs.def.theme];
+  const th = themeOf(rs);
   if (th.rain) {
     c.fillStyle = 'rgba(160,180,230,0.45)';
     const n = Math.round(90 * th.rain);
@@ -169,6 +187,7 @@ function drawWeather(c, rs, cam, t) {
   }
   if (th.embers) for (let i = 0; i < 30; i++) { const x = (i * 61 + Math.sin(t + i) * 10) % VIEW_W, y = VIEW_H - ((i * 37 + t * 30) % VIEW_H); R(c, x, y, 1, 1, i % 3 ? '#ff8a2a' : '#ffd23a'); }
   if (th.snow) for (let i = 0; i < 40; i++) { const x = (i * 47 + Math.sin(t * 0.7 + i) * 12 + VIEW_W) % VIEW_W, y = (i * 29 + t * 18) % VIEW_H; R(c, x, y, 1, 1, '#e8ffff'); }
+  if (th.drips) for (let i = 0; i < 14; i++) { const x = (i * 71 + 13) % VIEW_W, y = (t * 120 + i * 41) % VIEW_H; R(c, x, y, 1, 3, 'rgba(160,200,200,0.5)'); }
   if (th.fog) { for (let i = 0; i < 4; i++) { c.fillStyle = 'rgba(160,190,190,0.06)'; c.fillRect(0, 120 + i * 18 + Math.sin(t * 0.5 + i) * 6, VIEW_W, 14); } }
   if (th.lightning && Math.random() < 0.004) { G.whiteFlash = 0.15; Audio2.sfx('thunder'); }
 }

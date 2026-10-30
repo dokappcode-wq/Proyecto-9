@@ -538,6 +538,12 @@ CH.txema = template({ skin: '#c28d6a', hair: '#241a12', hairStyle: 'messy', bear
 CH.rosa = template({ skin: '#d8b09a', hair: '#9a9a9a', hairStyle: 'bun', jacket: '#5a4632', pants: '#2a2a30', boots: '#231a1a' });
 CH.pello = template({ skin: '#c28d6a', hair: '#3a2416', hairStyle: 'short', jacket: '#4a5a3a', pants: '#2a2f38', boots: '#3a2c22' });
 CH.martin = template({ skin: '#c49a80', hair: '#4a3a30', hairStyle: 'short', beard: true, jacket: '#3a4a5a', pants: '#2a2a30', boots: '#231a1a' });
+CH.ane = template({ skin: '#d2a07e', hair: '#2a1a12', hairStyle: 'bun', jacket: '#c9a24a', pants: '#3a4a5a', boots: '#4a3428' });
+CH.panadera = template({ skin: '#e0b090', hair: '#6a4a2a', hairStyle: 'bun', jacket: '#e8e0d0', pants: '#5a4a3a', boots: '#3a2a20' });
+CH.pescador = template({ skin: '#b98266', hair: '#5a5a5a', hairStyle: 'short', beard: true, jacket: '#c9a24a', pants: '#2a3a5a', boots: '#1a1a20' });
+CH.vecina = template({ skin: '#d8b09a', hair: '#3a2a20', hairStyle: 'long', jacket: '#3e7cb1', pants: '#2a2a30', boots: '#231a1a' });
+CH.vecino = template({ skin: '#c49a80', hair: '#1a1410', hairStyle: 'buzz', jacket: '#6a3a2a', pants: '#3a3430', boots: '#231d1a' });
+CH.cartero = template({ skin: '#c99a7c', hair: '#4a3a2a', hairStyle: 'slick', jacket: '#4a5a3a', pants: '#2a2f38', boots: '#3a2c22' });
 CH.salaberri = template({ skin: '#c49a80', hair: '#3a3430', hairStyle: 'slick', jacket: '#1f2a44', pants: '#1a1f2e', boots: '#0f0f11', gear: 'cape', cape: '#1f2a44' });
 
 // Retrato: la cabeza y el torso del sprite en reposo

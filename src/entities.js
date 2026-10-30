@@ -231,7 +231,7 @@ class Player {
     if (res.wall && this.state === 'dash') { this.state = 'normal'; }
 
     // Valla: saltar lo que llega a la cintura sin frenar
-    if (this.onGround && this.state === 'normal' && Math.abs(this.vx) > 80 && dir) {
+    if (this.onGround && this.state === 'normal' && dir && (Math.abs(this.vx) > 80 || res.wall === dir)) {
       const tx = Math.floor((dir > 0 ? this.x + this.w + 2 : this.x - 2) / T), ty = Math.floor((this.feet - 1) / T);
       if (solidAt(tx, ty) && !solidAt(tx, ty - 1) && !solidAt(tx, ty - 2) && !rectSolid(this.x, this.y - 18, this.w, 18)) {
         this.vy = -255; this.vaultT = 0.25; this.onGround = false; this.vx = dir * Math.max(Math.abs(this.vx), PH.run);
@@ -273,10 +273,11 @@ class Player {
   tryGrab(dir) {
     const hx = dir > 0 ? this.x + this.w + 1 : this.x - 1;
     const hy = this.y + 2;
-    const tx = Math.floor(hx / T), ty = Math.floor(hy / T);
+    // Indulgente: también agarra si las manos pasan un poco por encima del borde
+    const tx = Math.floor(hx / T), ty = Math.floor((hy + 6) / T);
     if (!solidAt(tx, ty) || solidAt(tx, ty - 1) || solidAt(tx, ty - 2)) return;
     const top = ty * T;
-    if (hy - top > 9) return;
+    if (hy - top > 9 || hy - top < -6) return;
     if (rectSolid(this.x, top - 4, this.w, 26)) return;
     this.state = 'hang'; this.vx = 0; this.vy = 0; this.face = dir;
     this.y = top - 4; this.x = dir > 0 ? tx * T - this.w - 0.01 : (tx + 1) * T + 0.01;
@@ -364,8 +365,8 @@ class Player {
     // Usar: hablar, guardar, copiar, cargar el carro, absorber
     this.using = null;
     const tgt = G.interactTarget;
-    if (tgt && (I.pressed.use || I.pressed.up) && tgt.press) tgt.press();
-    if (tgt && (I.down.use || I.down.up) && tgt.hold && this.onGround && this.state === 'normal') {
+    if (tgt && I.pressed.use && tgt.press) tgt.press();
+    if (tgt && I.down.use && tgt.hold && this.onGround && this.state === 'normal') {
       this.using = tgt; this.vx *= 0.8;
       tgt.hold(dt);
       this.face = sign(tgt.cx - this.cx) || this.face;
@@ -375,19 +376,32 @@ class Player {
   }
   onGroundLocked() { return this.state === 'hang' || this.state === 'climb' || this.state === 'zip'; }
   hand() { return { x: this.cx + this.face * 9, y: this.y + Math.min(10, this.h - 6) }; }
+  // Apuntar: ↑ dispara hacia arriba; ↑ con una dirección, en diagonal
+  aimDir() {
+    const D = Input.down;
+    if (!D.up || this.state === 'hang' || this.state === 'zip') return { ax: this.face, ay: 0 };
+    if (D.left || D.right) return { ax: this.face * 0.7071, ay: -0.7071 };
+    return { ax: 0, ay: -1 };
+  }
+  aimHand(a) {
+    if (a.ay === 0) return { x: this.cx + this.face * 9, y: this.y + Math.min(9, this.h - 7) };
+    if (a.ax === 0) return { x: this.cx + this.face * 2, y: this.y - 4 };
+    return { x: this.cx + this.face * 8, y: this.y + 1 };
+  }
   fire(charged) {
     const act = G.save.active;
-    const h = this.hand();
-    this.castT = 0.18;
+    const a = this.aimDir(), h = this.aimHand(a);
+    this.castT = 0.18; this.aim = a;
+    const shot = (v, type) => G.projs.push(new Proj(h.x, h.y, a.ax * v, a.ay * v, type));
     if (act === 'energia') {
       if (!this.spend('energia', charged ? 20 : 4)) return;
       this.castCol = '#9fd0ff';
-      if (charged) { G.projs.push(new Proj(h.x, h.y - 3, this.face * 380, 0, 'charged')); Audio2.sfx('charge'); G.shake(2); }
-      else { G.projs.push(new Proj(h.x, h.y - 1, this.face * 330, 0, 'bolt')); Audio2.sfx('shot'); }
+      if (charged) { shot(380, 'charged'); Audio2.sfx('charge'); G.shake(2); }
+      else { shot(330, 'bolt'); Audio2.sfx('shot'); }
     } else if (act === 'temperatura') {
       if (!this.spend('temperatura', charged ? 16 : 4)) return;
-      if (charged) { this.castCol = '#b8fff7'; G.projs.push(new Proj(h.x, h.y - 3, this.face * 300, 0, 'ice')); Audio2.sfx('ice'); }
-      else { this.castCol = '#ffb060'; G.projs.push(new Proj(h.x, h.y - 2, this.face * 280, 0, 'fire')); Audio2.sfx('fire'); }
+      if (charged) { this.castCol = '#b8fff7'; shot(300, 'ice'); Audio2.sfx('ice'); }
+      else { this.castCol = '#ffb060'; shot(280, 'fire'); Audio2.sfx('fire'); }
     }
     G.noise();
   }
@@ -459,12 +473,17 @@ class Player {
     const marks = S.marks.filter((m) => m !== 'destino').map((m) => (m === S.active ? PLAYER_MARKS[m].glow : PLAYER_MARKS[m].color));
     if (marks.length) p.marks = marks;
     if (this.using) { p.armF = [6, -1]; p.armGlow = this.using.glowCol || '#f2c45a'; }
-    else if (this.castT > 0) { p.armF = [6, -1]; p.armGlow = this.castCol; }
-    else if (this.charge > 0.25 && Math.floor(this.t * 16) % 2) p.armGlow = S.active === 'temperatura' ? '#b8fff7' : '#9fd0ff';
+    else if (this.castT > 0) { p.armF = this.armFor(this.aim); p.armGlow = this.castCol; }
+    else if (this.charge > 0) {
+      p.armF = this.armFor(this.aimDir());
+      if (this.charge > 0.25 && Math.floor(this.t * 16) % 2) p.armGlow = S.active === 'temperatura' ? '#b8fff7' : '#9fd0ff';
+    }
     return p;
   }
+  armFor(a) { return !a || a.ay === 0 ? [6, -1] : a.ax === 0 ? [1, -7] : [5, -5]; }
   draw(c) {
-    const spr = sprite('jon', CH.jon, this.pose());
+    if (this.ghost) return;
+    const spr = sprite('jon', CH.jon, this.pose(), this.hidden ? '#1a1430' : null);
     const flip = this.face < 0;
     const dx = this.cx - (flip ? 11 : 13), dy = this.feet - 31;
     for (const tr of this.trail) {
@@ -483,6 +502,8 @@ class Proj {
     this.x = x; this.y = y; this.vx = vx; this.vy = vy; this.type = type; this.life = 1.1;
     const big = type === 'charged' || type === 'ice';
     this.w = big ? 10 : type === 'flame' ? 8 : 6; this.h = big ? 8 : type === 'flame' ? 10 : 4;
+    if (Math.abs(vy) > Math.abs(vx) * 1.5) { const w = this.w; this.w = this.h; this.h = w; }
+    else if (vy && vx) { this.w = this.h = Math.max(this.w, this.h) - 1; }
     this.x -= this.w / 2; this.y -= this.h / 2;
     this.dmg = { bolt: 1, charged: 3, fire: 1, ice: 2, flame: 1, ebolt: 1, orb: 1, arrow: 2 }[type];
     this.player = ['bolt', 'charged', 'fire', 'ice', 'flame'].includes(type);
@@ -512,6 +533,7 @@ class Proj {
     const ch = tileAt(tx, ty);
     if (this.player) {
       if (ch === 'B' && (this.type === 'bolt' || this.type === 'charged')) { G.breakTile(tx, ty); if (!this.pierce) return this.kill(); }
+      if (ch === 'G') { if (this.type === 'charged') { G.breakTile(tx, ty); return this.kill(); } Audio2.sfx('block'); floatText(this.cx, this.cy - 6, 'necesita una descarga cargada', '#9fd0ff'); return this.kill(); }
       if (ch === 'I' && (this.type === 'fire' || this.type === 'flame')) { G.meltTile(tx, ty); return this.kill(); }
       if (ch === 'F' && this.type === 'ice') { G.freezeFire(tx, ty); return this.kill(); }
       if (ch === 'k' && this.type === 'ice') { G.freezeFall(tx, ty); return this.kill(); }
@@ -537,6 +559,20 @@ class Proj {
       if (overlap(this, p)) { p.hurt(this.dmg, this.cx); return this.kill(); }
     }
   }
+  // Disparos hacia arriba o en diagonal: una estela en la dirección del vuelo
+  drawStreak(c, f) {
+    const sp = Math.hypot(this.vx, this.vy), dx = this.vx / sp, dy = this.vy / sp;
+    const cols = { bolt: ['#2f8bff', '#9fd0ff', '#ffffff'], charged: ['#2f8bff', '#9fd0ff', '#ffffff'], fire: ['#c03a10', '#ff8a2a', '#ffd23a'], ice: ['#2a8a96', '#2ee6d6', '#e8ffff'] }[this.type] || ['#ffffff', '#ffffff', '#ffffff'];
+    const big = this.type === 'charged' || this.type === 'ice';
+    const len = big ? 10 : 6, w = big ? 4 : 2;
+    const cx = this.cx, cy = this.cy;
+    for (let i = 0; i < len; i++) {
+      const px = Math.round(cx - dx * i), py = Math.round(cy - dy * i);
+      c.fillStyle = i < 2 ? cols[2] : i < len / 2 ? cols[1] : cols[0];
+      c.fillRect(px - (w >> 1), py - (w >> 1), w, w);
+    }
+    if (big && f) { c.fillStyle = cols[2]; c.fillRect(Math.round(cx) - 1, Math.round(cy) - 1, 3, 3); }
+  }
   kill(quiet) {
     this.dead = true;
     if (quiet) return;
@@ -546,6 +582,7 @@ class Proj {
   draw(c) {
     const x = Math.round(this.x), y = Math.round(this.y), t = G.t;
     const f = Math.floor(t * 20) % 2;
+    if (this.player && this.vy && this.type !== 'flame') return this.drawStreak(c, f);
     switch (this.type) {
       case 'bolt': c.fillStyle = '#2f8bff'; c.fillRect(x, y, 6, 4); c.fillStyle = f ? '#ffffff' : '#9fd0ff'; c.fillRect(x + 1, y + 1, 4, 2); break;
       case 'charged':
@@ -621,6 +658,7 @@ class Enemy extends Ent {
   }
   sees(range = 150, cone = 0.55) {
     const p = G.player;
+    if (p.hidden || p.ghost) return false;
     const ex = this.cx, ey = this.y + 6;
     const dx = p.cx - ex, dy = p.cy - ey;
     if (Math.abs(dx) > range || Math.abs(dy) > range * 0.8) return false;
@@ -766,6 +804,15 @@ class Vigia extends Enemy {
     if (G.room.alarm) this.hostile = true;
   }
   get pdc() { return !this.d.hostile; }
+  // El ojo de cristal mira hacia abajo: un cono de luz
+  sees() {
+    const p = G.player;
+    if (p.hidden || p.ghost) return false;
+    const dx = p.cx - this.cx, dy = p.cy - this.cy;
+    if (dy < 0 || dy > 200 || Math.abs(dx) > 10 + dy * 0.24) return false;
+    return los(this.cx, this.cy + 6, p.cx, p.y + 4) || los(this.cx, this.cy + 6, p.cx, p.cy + 6);
+  }
+  beamLen() { let d = 8; while (d < 200 && !solidPx(this.cx, this.cy + d)) d += 4; return d; }
   update(dt) {
     if (!this.common(dt)) {
       if (this.dying) { this.vy += 400 * dt; this.y += this.vy * dt; }
@@ -777,7 +824,7 @@ class Vigia extends Enemy {
       if (this.x < this.patrol[0]) this.face = 1;
       if (this.x > this.patrol[1]) this.face = -1;
       this.y = this.baseY + Math.sin(this.t * 2) * 4;
-      if (G.room.def.stealth && this.sees(120, 1.4)) G.caught(this);
+      if (G.room.def.stealth && this.sees()) G.caught(this);
       if (this.watch > 0) this.watch -= dt;
     } else {
       const tx = p.cx + Math.sin(this.t * 0.9) * 50, ty = p.y - 64;
@@ -802,7 +849,14 @@ class Vigia extends Enemy {
     drawSprite(c, cv, x, y, this.face < 0, this.dying ? Math.max(0, this.dying / 0.6) : 1);
     c.globalAlpha = 1;
     if (this.freeze > 0) { c.fillStyle = 'rgba(184,255,247,0.5)'; c.fillRect(x, y, 16, 12); }
-    if (!this.dying && !this.hostile) { c.fillStyle = 'rgba(58,200,255,0.4)'; for (let i = 0; i < 4; i++) c.fillRect(x + 7 + this.face * i, y + 13 + i * 3, 1, 1); }
+    if (!this.dying && !this.hostile) {
+      if (G.room.def.stealth) {
+        const L = this.beamLen(), cx = this.cx, cy = this.cy + 6;
+        c.fillStyle = 'rgba(255,240,170,0.13)';
+        c.beginPath(); c.moveTo(cx - 2, cy); c.lineTo(cx + 2, cy); c.lineTo(cx + 10 + L * 0.24, cy + L); c.lineTo(cx - 10 - L * 0.24, cy + L); c.closePath(); c.fill();
+        c.fillStyle = 'rgba(255,240,170,0.35)'; c.fillRect(Math.round(cx - 10 - L * 0.24), Math.round(cy + L) - 1, Math.round(20 + L * 0.48), 1);
+      } else { c.fillStyle = 'rgba(58,200,255,0.4)'; for (let i = 0; i < 4; i++) c.fillRect(x + 7 + this.face * i, y + 13 + i * 3, 1, 1); }
+    }
     if (!this.dying && this.hostile && G.room.alarm) this.drawBubble(c, '!!', '#ff4a3a');
     else if (this.watch > 0) this.drawBubble(c, '!', '#ffd23a');
   }
@@ -950,17 +1004,22 @@ class Caracola extends Ent {
 }
 
 // ------------------------------------------------------------------ Personajes que hablan
-const NPC_CH = { iker: 'iker', desconocido: 'desconocido', txema: 'txema', rosa: 'rosa', unai: 'unai', pello: 'pello', narbaiza: 'narbaiza', edurne: 'edurne', martin: 'martin', abuela: 'abuela' };
+const NPC_CH = { iker: 'iker', desconocido: 'desconocido', txema: 'txema', rosa: 'rosa', unai: 'unai', pello: 'pello', narbaiza: 'narbaiza', edurne: 'edurne', martin: 'martin', abuela: 'abuela',
+  ane: 'ane', panadera: 'panadera', pescador: 'pescador', vecina: 'vecina', vecino: 'vecino', cartero: 'cartero' };
 class NPC extends Ent {
   constructor(d) {
     super(d);
     this.w = 10; this.h = 26; this.x += 3; this.feetAt(d.y); this.face = -1;
     this.who = d.who; this.ch = CH[NPC_CH[d.who]];
     this.copyT = 0; this.glowCol = '#f2c45a';
-    if (d.once && G.save.flags['npc_' + G.room.def.id + d.who] && d.leave) this.dead = true;
+    this.fkey = 'npc_' + G.room.def.id + (d.key || d.who);
+    if (d.once && G.save.flags[this.fkey] && d.leave) this.dead = true;
+    if (d.needFlag && !G.save.flags[d.needFlag]) this.dead = true;
+    if (d.hideFlag && G.save.flags[d.hideFlag]) this.dead = true;
   }
+  get hiddenNow() { return this.d.needFlag && !G.save.flags[this.d.needFlag]; }
   get copyable() { return this.d.copy && G.save.flags['allow_' + this.d.copy] && !G.player.has(this.d.copy); }
-  get prompt() { return this.copyable ? 'Copiar su marca (mantén)' : 'Hablar'; }
+  get prompt() { return this.hiddenNow ? null : this.copyable ? 'Copiar su marca (mantén)' : 'Hablar'; }
   press() { if (!this.copyable) this.talk(); }
   get hold() { return this.copyable ? this.copy : null; }
   copy(dt) {
@@ -981,29 +1040,31 @@ class NPC extends Ent {
   }
   release() { if (this.copyT > 0) { this.copyT = 0; G.copyProgress = 0; Audio2.setHum(false); } }
   talk() {
-    const key = 'npc_' + G.room.def.id + this.who;
-    G.save.flags[key] = true;
+    G.save.flags[this.fkey] = true;
     G.runScript(SCRIPTS[this.d.script], () => { if (this.d.leave) this.leaving = true; });
   }
   update(dt) {
     this.t += dt;
     const p = G.player;
     if (this.leaving) {
-      this.face = 1; this.x += 150 * dt; this.runT = (this.runT || 0) + dt;
-      if (this.x > G.room.W * T + 20) this.dead = true;
+      const dir = this.d.leaveDir || 1;
+      this.face = dir; this.x += 150 * dir * dt; this.runT = (this.runT || 0) + dt;
+      if (this.x > G.room.W * T + 20 || this.x < -30) this.dead = true;
       return;
     }
     if (Math.abs(p.cx - this.cx) > 6) this.face = sign(p.cx - this.cx);
-    const key = 'npc_' + G.room.def.id + this.who;
+    const key = this.fkey;
+    if (this.hiddenNow) return;
     if (this.d.auto && !G.save.flags[key] && Math.abs(p.cx - this.cx) < this.d.auto && Math.abs(p.cy - this.cy) < 40 && !G.cine) this.talk();
   }
   pose() {
     if (this.leaving) return MOVE.run(Math.floor(this.runT * 12.5) % 6);
     if (this.d.sit && !G.player.has('energia')) return { ...MOVE.crouch(), blink: false, scarf: undefined };
-    if (IDLE[NPC_CH[this.who]] && ['iker', 'desconocido', 'narbaiza', 'edurne'].includes(this.who)) return IDLE[this.who](this.t);
+    if (['iker', 'desconocido', 'narbaiza', 'edurne'].includes(this.who)) return IDLE[this.who](this.t);
     return BASE_IDLE(this.t, this.d.x);
   }
   draw(c) {
+    if (this.hiddenNow) return;
     const pose = { ...this.pose() };
     if (this.copyT > 0) { pose.armF = [6, -1]; pose.armGlow = PLAYER_MARKS[this.d.copy].glow; }
     const spr = sprite('npc-' + this.who, this.ch, pose);
@@ -1302,9 +1363,301 @@ class Spawner extends Ent {
 class Gate extends Ent {}
 class Exit extends Trigger {}
 
+// ------------------------------------------------------------------ Escondites: agachado dentro, nadie te ve
+class Escondite extends Ent {
+  constructor(d) { super(d); this.w = (d.w || 1) * T; this.h = 2 * T; this.y -= T; this.kind = d.kind || 'barril'; }
+  update(dt) { this.t += dt; }
+  draw(c) {
+    const x = Math.round(this.x), y = Math.round(this.y), on = G.player.hidden && overlap(G.player, this);
+    if (this.kind === 'cortina') {
+      for (let i = 0; i < this.w; i += 2) { c.fillStyle = (i / 2) % 2 ? '#5a1a2a' : '#7a2a3a'; c.fillRect(x + i, y + 2, 2, this.h - 2 + Math.round(Math.sin(this.t * 2 + i) * 0.6)); }
+      c.fillStyle = '#b88a4a'; c.fillRect(x - 1, y, this.w + 2, 2);
+      c.fillStyle = '#d8b060'; for (let i = 1; i < this.w; i += 3) c.fillRect(x + i, y + this.h - 1, 1, 2);
+    } else {
+      for (let k = 0; k < this.w / T; k++) {
+        const bx = x + k * T;
+        c.fillStyle = '#4a3020'; c.fillRect(bx + 1, y + 6, 14, 26);
+        c.fillStyle = '#6a4a30'; c.fillRect(bx + 2, y + 6, 12, 26);
+        c.fillStyle = '#2a2a30'; c.fillRect(bx + 1, y + 10, 14, 2); c.fillRect(bx + 1, y + 26, 14, 2);
+        c.fillStyle = '#8a6a48'; c.fillRect(bx + 3, y + 7, 2, 24);
+      }
+    }
+    if (on) { c.fillStyle = 'rgba(255,240,200,0.5)'; c.fillRect(x + this.w / 2 - 1, y - 6, 2, 2); }
+  }
+}
+// Meta de una carrera contrarreloj
+class Meta extends Ent {
+  constructor(d) { super(d); this.w = 2 * T; this.h = 3 * T; this.y -= 2 * T; }
+  update(dt) {
+    this.t += dt;
+    if (G.race && G.race.id === this.d.id && overlap(this, G.player)) G.raceWin();
+  }
+  draw(c) {
+    if (!G.race || G.race.id !== this.d.id) return;
+    const x = Math.round(this.x) + 8, y = Math.round(this.y);
+    c.fillStyle = '#3a3036'; c.fillRect(x, y, 2, 48);
+    for (let j = 0; j < 4; j++) for (let i = 0; i < 6; i++) { c.fillStyle = (i + j) % 2 ? '#f3ead8' : '#1a1622'; c.fillRect(x + 2 + i * 2 + Math.round(Math.sin(this.t * 6 + i) * 0.8), y + 1 + j * 2, 2, 2); }
+  }
+}
+// Lauburu de latón: +1 de vida máxima
+const LAUBURU = ['..###....', '.#####...', '.###.#...', '..#.##.##', '..####.##', '##.###...', '##.#..###', '...#.####', '....###..'];
+function drawLauburu(c, x, y, col = '#f2c45a', sh = '#8a6a20') {
+  LAUBURU.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === '#') { c.fillStyle = sh; c.fillRect(x + i + 1, y + j + 1, 1, 1); } }));
+  LAUBURU.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === '#') { c.fillStyle = col; c.fillRect(x + i, y + j, 1, 1); } }));
+}
+class Lauburu extends Ent {
+  constructor(d) { super(d); this.w = 10; this.h = 10; this.x += 3; this.baseY = this.y + 3; if (G.save.flags['lb_' + d.id]) this.dead = true; }
+  update(dt) {
+    this.t += dt; this.y = this.baseY + Math.sin(this.t * 2.5) * 2;
+    if (Math.random() < 0.08) G.parts.push({ x: this.cx + (Math.random() - 0.5) * 10, y: this.cy, vx: 0, vy: -14, life: 0.7, max: 0.7, col: '#ffe7a3', g: 0, s: 1 });
+    if (overlap(this, G.player)) { this.dead = true; G.gainLauburu(this.d.id); }
+  }
+  draw(c) {
+    const x = Math.round(this.x), y = Math.round(this.y);
+    c.fillStyle = `rgba(242,196,90,${0.18 + Math.sin(this.t * 3) * 0.08})`; c.fillRect(x - 4, y - 4, 18, 18);
+    drawLauburu(c, x, y);
+  }
+}
+// Objetos de los recados: el gato de la panadera, la red de la cofa
+class Item extends Ent {
+  constructor(d) { super(d); this.w = 12; this.h = 10; this.x += 2; this.feetAt(d.y); if (G.save.flags[d.flag]) this.dead = true; this.glowCol = '#f2c45a'; }
+  get prompt() { return this.d.prompt; }
+  press() { this.dead = true; G.save.flags[this.d.flag] = true; Audio2.sfx('pickup'); burst(this.cx, this.cy, 10, ['#ffe7a3', '#ffffff'], 40); if (this.d.script) G.runScript(SCRIPTS[this.d.script]); }
+  update(dt) { this.t += dt; }
+  draw(c) {
+    const x = Math.round(this.x), y = Math.round(this.y), t = this.t;
+    if (this.d.kind === 'gato') {
+      const tail = Math.round(Math.sin(t * 3) * 1.5);
+      c.fillStyle = '#1a1418'; c.fillRect(x + 2, y + 4, 8, 6); c.fillRect(x + 7, y + 1, 5, 5);
+      c.fillRect(x + 7, y, 1, 1); c.fillRect(x + 11, y, 1, 1); c.fillRect(x, y + 3 + tail, 2, 5);
+      c.fillStyle = Math.floor(t * 0.7) % 4 ? '#c8e84a' : '#1a1418'; c.fillRect(x + 8, y + 2, 1, 1); c.fillRect(x + 10, y + 2, 1, 1);
+    } else {
+      c.fillStyle = '#6a5a3a'; c.fillRect(x, y + 3, 12, 7);
+      c.fillStyle = '#a89068'; for (let i = 0; i < 12; i += 2) c.fillRect(x + i, y + 3 + (i % 4 ? 1 : 3), 1, 1);
+      c.fillStyle = '#c8b088'; c.fillRect(x + 1, y + 3, 10, 1);
+    }
+  }
+}
+// Decorado sin colisión: fuente, puestos del mercado, casa de la abuela, barcos
+class Decor extends Ent {
+  draw(c) {
+    const x = Math.round(this.x), y = Math.round(this.y) + T, t = G.t;
+    switch (this.d.kind) {
+      case 'fuente':
+        c.fillStyle = '#8a8478'; c.fillRect(x - 16, y - 10, 48, 10); c.fillStyle = '#a8a294'; c.fillRect(x - 16, y - 10, 48, 2);
+        c.fillStyle = '#7a7468'; c.fillRect(x + 5, y - 28, 6, 18); c.fillRect(x - 2, y - 30, 20, 3);
+        c.fillStyle = '#6ab0d8'; for (let i = 0; i < 6; i++) c.fillRect(x + 7 + Math.round(Math.sin(t * 4 + i) * 6), y - 30 + ((t * 30 + i * 5) % 20), 1, 2);
+        c.fillStyle = '#4a8ab8'; c.fillRect(x - 14, y - 8, 44, 3);
+        break;
+      case 'puesto': {
+        const col = this.d.col || '#b5544a';
+        c.fillStyle = '#5a4030'; c.fillRect(x, y - 28, 2, 28); c.fillRect(x + 38, y - 28, 2, 28);
+        for (let i = 0; i < 40; i += 4) { c.fillStyle = (i / 4) % 2 ? col : '#e8e0d0'; c.fillRect(x + i, y - 32, 4, 6); }
+        c.fillStyle = '#7a5a3a'; c.fillRect(x - 2, y - 12, 44, 4); c.fillStyle = '#5a4030'; c.fillRect(x, y - 8, 40, 8);
+        const goods = this.d.goods || ['#d8a050', '#c88040'];
+        for (let i = 0; i < 6; i++) { c.fillStyle = goods[i % goods.length]; c.fillRect(x + 3 + i * 6, y - 15, 5, 3); }
+        break;
+      }
+      case 'casa': {
+        const w = (this.d.w || 6) * T, h = (this.d.h || 5) * T;
+        c.fillStyle = '#e8dcc8'; c.fillRect(x, y - h, w, h);
+        c.fillStyle = '#a84a3a'; for (let i = -4; i < w + 4; i += 4) c.fillRect(x + i, y - h - 8 + Math.abs(i - w / 2) / (w / 2) * 2, 4, 8);
+        c.fillStyle = '#6a3a2a'; for (let i = 8; i < w - 8; i += 24) { c.fillRect(x + i, y - h + 10, 10, 2); c.fillRect(x + i, y - h + 6, 2, 12); c.fillRect(x + i + 8, y - h + 6, 2, 12); }
+        c.fillStyle = '#3a5a4a'; for (let i = 10; i < w - 10; i += 24) { c.fillRect(x + i + 2, y - h + 8, 6, 10); }
+        c.fillStyle = '#5a3a2a'; c.fillRect(x + w / 2 - 6, y - 22, 12, 22); c.fillStyle = '#c8a050'; c.fillRect(x + w / 2 + 3, y - 12, 1, 1);
+        break;
+      }
+      case 'barco': {
+        c.fillStyle = '#5a3a2a'; c.fillRect(x, y - 6, 60, 6); c.fillStyle = this.d.col || '#3e7cb1'; c.fillRect(x + 2, y - 10, 56, 4);
+        break;
+      }
+      case 'mastil': {
+        const h = (this.d.h || 8) * T;
+        c.fillStyle = '#5a3a2a'; c.fillRect(x + 7, y - h, 2, h);
+        c.fillStyle = 'rgba(232,224,208,0.85)'; c.beginPath(); c.moveTo(x + 10, y - h + 10); c.lineTo(x + 10 + 18 + Math.sin(t) * 2, y - h / 2); c.lineTo(x + 10, y - 20); c.closePath(); c.fill();
+        break;
+      }
+      case 'atalaya':
+        c.fillStyle = '#4a3a2a'; c.fillRect(x + 1, y - 112, 2, 112); c.fillRect(x + 77, y - 112, 2, 112);
+        for (let k = 0; k < 6; k++) { c.fillStyle = '#3a2a1e'; c.fillRect(x + 1, y - 16 - k * 18, 78, 1); }
+        c.fillStyle = '#1f2a44'; c.fillRect(x + 30, y - 132, 20, 6);
+        break;
+      case 'tienda':
+        c.fillStyle = '#4a4a3a'; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 20, y - 26); c.lineTo(x + 40, y); c.closePath(); c.fill();
+        c.fillStyle = '#2a2a20'; c.beginPath(); c.moveTo(x + 14, y); c.lineTo(x + 20, y - 12); c.lineTo(x + 26, y); c.closePath(); c.fill();
+        c.fillStyle = '#1f2a44'; c.fillRect(x + 18, y - 30, 4, 4);
+        break;
+      case 'hoguera':
+        c.fillStyle = '#3a2a1a'; c.fillRect(x, y - 3, 14, 3);
+        for (let i = 0; i < 5; i++) { c.fillStyle = i % 2 ? '#ffd23a' : '#ff8a2a'; c.fillRect(x + 3 + (i * 3) % 8, y - 6 - ((t * 24 + i * 4) % 9), 2, 3); }
+        c.fillStyle = 'rgba(255,138,42,0.12)'; c.fillRect(x - 16, y - 30, 46, 30);
+        break;
+    }
+  }
+}
+// ------------------------------------------------------------------ Búho Mayor: el vigía de latón del convoy
+class BuhoMayor extends Enemy {
+  constructor(d) {
+    super(d);
+    this.hp = this.max = 40; this.w = 40; this.h = 26; this.hostile = true; this.state = 'idle'; this.st = 1.5;
+    this.face = -1; this.summoned = 0;
+    if (G.save.flags.buho) this.dead = true;
+  }
+  get name() { return 'Búho Mayor · vigía de latón del convoy'; }
+  hitbox() { return { x: this.x + 4, y: this.y + 4, w: this.w - 8, h: this.h - 6 }; }
+  update(dt) {
+    if (!G.save.flags.buho_start) { this.t += dt; this.y = this.d.y * T + Math.sin(this.t * 2) * 3; return; }
+    G.boss = this;
+    if (!this.common(dt)) { if (this.dying) { this.vy += 300 * dt; this.y += this.vy * dt; if (Math.random() < 0.5) burst(this.cx, this.cy, 2, ['#b88a4a', '#e0b878', '#3ac8ff'], 80); } return; }
+    const p = G.player, W = G.room.W * T;
+    this.st -= dt;
+    const goTo = (tx, ty, sp) => { const dx = tx - this.cx, dy = ty - this.cy, d = Math.hypot(dx, dy); if (d < 3) return true; this.x += dx / d * Math.min(d, sp * dt); this.y += dy / d * Math.min(d, sp * dt); return false; };
+    this.face = sign(p.cx - this.cx) || this.face;
+    switch (this.state) {
+      case 'idle':
+        goTo(W / 2 + Math.sin(this.t * 0.7) * W * 0.36, 44 + Math.sin(this.t * 1.9) * 10, 90);
+        if (this.st <= 0) {
+          if (this.hp < this.max * 0.55 && this.summoned < 2) { this.state = 'summon'; this.st = 0.8; }
+          else { this.state = Math.random() < 0.55 ? 'fan' : 'tele'; this.st = 0.6; }
+        }
+        break;
+      case 'fan':
+        if (this.st <= 0) {
+          for (let i = -2; i <= 2; i++) { const a = Math.atan2(p.cy - this.cy, p.cx - this.cx) + i * 0.22; G.projs.push(new Proj(this.cx, this.cy + 8, Math.cos(a) * 150, Math.sin(a) * 150, 'ebolt')); }
+          Audio2.sfx('enemyShot'); this.state = 'idle'; this.st = 1.4 + Math.random();
+        }
+        break;
+      case 'tele':
+        this.x += Math.sin(this.t * 60) * 0.6;
+        if (this.st <= 0) { this.state = 'dive'; this.dive = { x: p.cx, y: Math.min(p.cy - 6, G.room.H * T - 48) }; Audio2.sfx('dash'); }
+        break;
+      case 'dive':
+        if (goTo(this.dive.x, this.dive.y, 300)) { this.state = 'sweep'; this.sweepX = this.cx < W / 2 ? W - 40 : 40; }
+        break;
+      case 'sweep':
+        if (goTo(this.sweepX, this.dive.y, 260)) { this.state = 'idle'; this.st = 1.6; }
+        break;
+      case 'summon':
+        if (this.st <= 0) {
+          for (const k of [-1, 1]) G.spawn({ type: 'vigia', x: Math.floor((this.cx + k * 40) / T), y: 3, hostile: true, patrol: [2, G.room.W - 3] });
+          this.summoned++; Audio2.sfx('alert'); floatText(this.cx, this.y - 6, '¡Llama a los vigías!', '#3ac8ff');
+          this.state = 'idle'; this.st = 2;
+        }
+        break;
+    }
+  }
+  damage(n, fromX, type) {
+    if (!G.save.flags.buho_start) return;
+    super.damage(n, fromX, type);
+    this.vx = 0; this.freeze = Math.min(this.freeze, 0.6);
+  }
+  onDie() {
+    G.boss = null; G.save.flags.buho = true;
+    burst(this.cx, this.cy, 50, ['#b88a4a', '#e0b878', '#3ac8ff', '#ffffff'], 140, 1.2, 200, 2);
+    Audio2.sfx('break'); G.shake(8); G.whiteFlash = 0.4;
+    for (const e of G.ents) if (e instanceof Vigia && !e.dead) e.damage(9, this.cx);
+    G.delay(1.4, () => G.runScript(SCRIPTS.buho_fin));
+  }
+  draw(c) {
+    const f = this.state === 'dive' || this.state === 'sweep' ? 1 : Math.sin(this.t * 14) > 0 ? 0 : 1;
+    const cv = this.flash > 0 ? OWL_HIT[f] : OWL_CV[f];
+    const x = Math.round(this.x) - 4, y = Math.round(this.y) - 5;
+    c.save();
+    c.globalAlpha = this.dying ? Math.max(0, this.dying / 0.6) : 1;
+    if (this.face < 0) { c.translate(x + 48, y); c.scale(-1, 1); c.drawImage(cv, 0, 0, 48, 36); }
+    else c.drawImage(cv, x, y, 48, 36);
+    c.restore();
+    if (this.state === 'tele' || this.state === 'fan') { c.fillStyle = Math.floor(this.t * 20) % 2 ? '#ff4a3a' : '#ffd23a'; c.fillRect(x + 14, y + 13, 4, 3); c.fillRect(x + 29, y + 13, 4, 3); }
+    if (this.freeze > 0) { c.fillStyle = 'rgba(184,255,247,0.45)'; c.fillRect(x, y, 48, 36); }
+  }
+}
+// ------------------------------------------------------------------ Actores de las escenas animadas
+const ACTOR_POSE = {
+  idle: null, walk: (a) => MOVE.run(Math.floor(a.t * 8) % 6), run: (a) => MOVE.run(Math.floor(a.t * 13) % 6),
+  crouch: () => MOVE.crouch(), kneel: () => MOVE.crouch(), fall: () => MOVE.fall(), jump: () => MOVE.jump(), hurt: () => MOVE.fall(),
+  dash: () => MOVE.dash(), roll: () => MOVE.roll(), hang: () => MOVE.hang(), land: () => MOVE.land(), lie: null,
+  cast: () => ({ armF: [7, -2], armB: [-2, 5] }), reach: () => ({ armF: [6, -1], armB: [-1, 6] }), armsup: () => ({ armF: [1, -7], armB: [-1, -7] }),
+  point: () => ({ armF: [7, -4], armB: [-1, 6] }), carry: () => ({ ...MOVE.run(0), armF: [4, -1], armB: [4, 0] }),
+};
+class Actor extends Ent {
+  constructor(d) {
+    super(d);
+    this.id = d.id; this.key = d.ch; this.actor = true; this.t = 0;
+    this.w = 10; this.h = 26;
+    this.x = d.px != null ? d.px : d.x * T + 3;
+    if (d.py != null) this.y = d.py - this.h; else this.feetAt(d.y);
+    this.face = d.face || 1; this.mode = d.mode || 'idle'; this.alpha = d.alpha ?? 1; this.fadeV = 0; this.tx = null; this.speed = 60;
+    this.glow = d.glow || null; this.rot = 0;
+    if (this.key === 'carro') { this.w = 44; this.y -= 2; }
+  }
+  update(dt) {
+    this.t += dt;
+    if (this.fadeV) { this.alpha = clamp(this.alpha + this.fadeV * dt, 0, 1); if (this.alpha <= 0 && this.fadeV < 0) this.dead = true; if (this.alpha >= 1 && this.fadeV > 0) this.fadeV = 0; }
+    if (this.glowT > 0) { this.glowT -= dt; if (this.glowT <= 0) this.glow = null; }
+    if (this.jump) {
+      const j = this.jump; j.t += dt;
+      const k = Math.min(1, j.t / j.dur);
+      this.x = j.x0 + (j.x1 - j.x0) * k; this.y = j.y0 + (j.y1 - j.y0) * k - Math.sin(k * Math.PI) * j.h;
+      if (k >= 1) { this.jump = null; if (j.after) this.mode = j.after; burst(this.cx, this.y + this.h, 4, ['#8a7a8a'], 30, 0.3); }
+    } else if (this.fly) {
+      const f = this.fly, dx = f.x - this.x, dy = f.y - this.y, d = Math.hypot(dx, dy), st = f.speed * dt;
+      if (f.spin) this.rot += f.spin * dt;
+      if (d <= st) { this.x = f.x; this.y = f.y; this.fly = null; } else { this.x += dx / d * st; this.y += dy / d * st; }
+    } else if (this.tx != null) {
+      const dx = this.tx - this.x, st = this.speed * dt;
+      if (Math.abs(dx) <= st) { this.x = this.tx; this.tx = null; this.mode = this.afterMode || 'idle'; }
+      else { this.x += sign(dx) * st; this.face = sign(dx); }
+    }
+    if (this.key === 'carro' && this.tx != null && Math.random() < 0.3) G.parts.push({ x: this.x + 6, y: this.y + this.h, vx: -20, vy: -10, life: 0.4, max: 0.4, col: '#6a5a4a', g: 100, s: 1 });
+  }
+  pose() {
+    const f = ACTOR_POSE[this.mode];
+    let p;
+    if (f) p = f(this);
+    else if (IDLE[this.key] && this.key !== 'paladin') p = IDLE[this.key](this.t);
+    else if (this.key === 'paladin') p = { ...IDLE.paladin(this.t), noArmF: false, armF: [1, 6] };
+    else p = BASE_IDLE(this.t, this.id.length);
+    p = { ...p };
+    if (this.key === 'jon') { const m = G.save.marks.filter((k) => k !== 'destino').map((k) => PLAYER_MARKS[k].color); if (m.length) p.marks = m; }
+    if (this.glow && (this.mode === 'cast' || this.mode === 'reach' || this.mode === 'armsup' || this.mode === 'point')) p.armGlow = this.glow;
+    return p;
+  }
+  draw(c) {
+    const x = Math.round(this.x), y = Math.round(this.y);
+    c.save(); c.globalAlpha = this.alpha;
+    if (this.key === 'carro') {
+      if (this.rot) { c.translate(x + 22, y + 11); c.rotate(this.rot); c.translate(-x - 22, -y - 11); }
+      c.fillStyle = '#2a2420'; c.fillRect(x, y + 2, 44, 16); c.fillStyle = '#4a3a2e'; c.fillRect(x, y + 2, 44, 2);
+      c.fillStyle = '#1a1622'; for (let i = 0; i < 6; i++) c.fillRect(x + 4 + i * 6, y + 6, 2, 10);
+      const wr = Math.floor(this.t * 10) % 2;
+      c.fillStyle = '#1a1622'; c.fillRect(x + 5, y + 17, 7, 7); c.fillRect(x + 32, y + 17, 7, 7);
+      c.fillStyle = '#5a4a3a'; c.fillRect(x + 7 + wr, y + 19, 2, 2); c.fillRect(x + 34 + wr, y + 19, 2, 2);
+      c.fillStyle = '#1f2a44'; c.fillRect(x + 10, y - 1, 24, 3);
+    } else if (this.key === 'owl') {
+      drawSprite(c, OWL_CV[Math.sin(this.t * 20) > 0 ? 0 : 1], x, y, this.face < 0);
+    } else if (this.key === 'naipe') {
+      c.fillStyle = `rgba(242,196,90,${0.25 + Math.sin(this.t * 5) * 0.1})`; c.fillRect(x - 6, y - 6, 18, 22);
+      c.fillStyle = '#f2c45a'; c.fillRect(x, y, 6, 10); c.fillStyle = '#fff1b8'; c.fillRect(x + 1, y + 1, 4, 1); c.fillRect(x + 2, y + 4, 2, 2);
+    } else if (this.key === 'radio') {
+      c.fillStyle = '#5a3a2a'; c.fillRect(x, y + 18, 10, 8); c.fillStyle = '#c8a050'; c.fillRect(x + 1, y + 19, 4, 4); c.fillStyle = '#1a1418'; c.fillRect(x + 6, y + 19, 3, 1); c.fillRect(x + 6, y + 21, 3, 1); c.fillRect(x + 8, y + 14, 1, 4);
+    } else {
+      const ch = this.key === 'paladin' ? PDC.paladin : CH[this.key];
+      const spr = sprite('act-' + this.key, ch, this.pose(), this.tint || null);
+      if (this.glow) { c.fillStyle = this.glow; c.globalAlpha = this.alpha * (0.18 + Math.sin(this.t * 8) * 0.06); c.fillRect(x - 8, y - 6, this.w + 16, this.h + 8); c.globalAlpha = this.alpha; }
+      if (this.mode === 'lie') {
+        c.translate(this.cx, y + this.h - 5); c.rotate(this.face > 0 ? -Math.PI / 2 : Math.PI / 2);
+        drawSprite(c, spr, -13, -26, this.face < 0);
+      } else drawSprite(c, spr, this.cx - (this.face < 0 ? 11 : 13), y + this.h - 31, this.face < 0);
+    }
+    c.restore();
+    if (this.bubble && this.bubble.t > 0) { this.bubble.t -= 1 / 60; G.bubbles.push({ x: this.cx, y: this.y - 10, text: this.bubble.text, a: Math.min(1, this.bubble.t * 2) }); }
+  }
+}
+
 const ENT_CLASSES = {
   paladin: Paladin, reforzado: Paladin, blindado: Paladin, ballestero: Paladin, vigia: Vigia, acolito: Acolito,
   farol: Source, cristal: Source, brasero: Source, arcon: Source, caracola: Caracola, npc: NPC, grillete: Grillete,
   carrorayo: CarroRayo, ancla: Ancla, naipe: Naipe, pagina: Pagina, hint: Hint, trigger: Trigger, exit: Exit, zip: Zip,
   lightning: Lightning, carro: Carro, spawner: Spawner, gate: Gate,
+  escondite: Escondite, meta: Meta, lauburu: Lauburu, item: Item, decor: Decor, buho: BuhoMayor, actor: Actor,
 };
