@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ascend</title>
+<meta name="description" content="Ascend: plataformas 2D en pixel art. Un chico de Eibar con una marca dorada que copia las marcas de los demás.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; background: #05040a; overflow: hidden; touch-action: none; }
+  canvas#screen { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+  #touch { position: fixed; inset: 0; pointer-events: none; font-family: 'Pixelify Sans', monospace; user-select: none; -webkit-user-select: none; }
+  #touch[hidden] { display: none; }
+  #touch button { pointer-events: auto; position: absolute; width: 56px; height: 56px; border-radius: 50%; border: 2px solid rgba(242,196,90,.55);
+    background: rgba(20,13,31,.45); color: #f2c45a; font: 600 14px 'Pixelify Sans', monospace; touch-action: none; }
+  #touch button:active { background: rgba(242,196,90,.35); }
+  #touch .pad { left: 16px; bottom: 16px; width: 168px; height: 120px; position: absolute; }
+  #touch .l { left: 0; bottom: 30px; } #touch .r { left: 112px; bottom: 30px; } #touch .d { left: 56px; bottom: 0; } #touch .u { left: 56px; bottom: 62px; }
+  #touch .a { right: 16px; bottom: 24px; width: 64px; height: 64px; } #touch .b { right: 88px; bottom: 16px; } #touch .x { right: 88px; bottom: 80px; }
+  #touch .y { right: 16px; bottom: 96px; } #touch .c { right: 152px; bottom: 30px; } #touch .q { right: 16px; top: 16px; width: 48px; height: 48px; font-size: 10px; }
+  #touch .p { left: 16px; top: 16px; width: 44px; height: 44px; font-size: 11px; }
+</style>
+</head>
+<body>
+<canvas id="screen" aria-label="Ascend, juego de plataformas"></canvas>
+<div id="touch" hidden>
+  <div class="pad">
+    <button class="l" data-a="left">◀</button><button class="r" data-a="right">▶</button>
+    <button class="u" data-a="up">▲</button><button class="d" data-a="down">▼</button>
+  </div>
+  <button class="a" data-a="jump confirm">Salto</button>
+  <button class="x" data-a="shoot">Disp</button>
+  <button class="b" data-a="dash">Dash</button>
+  <button class="c" data-a="power">Poder</button>
+  <button class="y" data-a="use">Usar</button>
+  <button class="q" data-a="swap">Marca</button>
+  <button class="p" data-a="pause">❚❚</button>
+</div>
+<script src="src/sprites.js"></script>
+<script src="src/data.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/input.js"></script>
+<script src="src/entities.js"></script>
+<script src="src/render.js"></script>
+<script src="src/game.js"></script>
+</body>
+</html>
