@@ -31,6 +31,9 @@ window.RUTAS = (() => {
         L.push({ name: 'salto', f: (f) => ({ [D]: true, jump: f < H }) });
         L.push({ name: 'salto', f: (f) => ({ [D]: f >= 12, jump: f < H }) });
       }
+      // Mantener el salto mucho rato: rebotar alto en toldos y ramas
+      L.push({ name: 'rebote', f: (f) => ({ jump: true, [D]: f >= 30 }) });
+      L.push({ name: 'rebote', f: (f) => ({ jump: true, [D]: f < 10 || f >= 40 }) });
       for (const R of [8, 16, 30, 50]) L.push({ name: 'carrerilla', f: (f) => ({ [D]: true, jump: f >= R && f < R + 18 }) });
       // Zigzag entre dos paredes
       L.push({
@@ -162,6 +165,7 @@ window.RUTAS = (() => {
       for (const pol of pols) {
         restore(p, node.s); restoreEnts(dyn, node.e);
         p.vx = 0; p.runT = 0; p.jumpBuf = 0; p.dashCan = true;
+        S.bars.energia = 100; S.bars.temperatura = 100; // cada intento con la barra llena (hay fuentes cerca)
         const ev = run(p, pol, goal, dyn, picks, got);
         if (!ev) continue;
         const t = node.t + ev.frames;

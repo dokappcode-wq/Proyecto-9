@@ -47,7 +47,7 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
       Object.assign(ASCEND.save.flags, c.flags || {});
       for (const id2 in ROOMS) ASCEND.save.flags['enter_' + id2] = true;
       try {
-        out.push(RUTAS.validate({ room: id, start, goal, marks: c.marks || r.marks || ['destino'], maxNodes: c.maxNodes }));
+        out.push(RUTAS.validate({ room: id, start, goal, marks: c.marks || r.marks || (r.area === 'eibar' || r.area === 'plaza' || r.area === 'pueblo' || r.area === 'tormenta' ? ['destino'] : ['destino', 'energia']), maxNodes: c.maxNodes }));
       } catch (e) { out.push({ room: id, ok: false, error: e.message }); }
     }
     return out;

@@ -272,51 +272,101 @@ room({ id: 'callejon', area: 'plaza', x: 100, y: 0, W: 32, H: 14, theme: 'noche'
 });
 
 // ================================================================== III · Cinco días (el pueblo, de día)
-room({ id: 'muelle', area: 'pueblo', x: -48, y: 0, W: 48, H: 14, theme: 'dia', music: 'title', title: 'El muelle' }, (m) => {
-  m.fill(0, 0, 1, 11);
-  m.fill(2, 11, 9, 3, 'W'); m.e('decor', 6, 10, { kind: 'mastil', h: 8 });
-  m.fill(3, 8, 7, 1, '-'); m.fill(4, 5, 5, 1, '-');
-  m.fill(14, 11, 10, 3, 'W'); m.e('decor', 18, 10, { kind: 'mastil', h: 9 });
-  m.fill(15, 8, 7, 1, '-'); m.fill(16, 5, 5, 1, '-'); m.fill(16, 2, 5, 1, '-');
-  m.fill(26, 10, 10, 4, 'W');
-  m.fill(36, 13, 12, 1);
-  m.e('item', 19, 1, { kind: 'red', flag: 'red', prompt: 'Soltar la red', script: 'red' });
-  m.e('pagina', 6, 4, { id: 'p7' });
-  m.e('npc', 32, 9, { who: 'pescador', script: 'pescador' });
-  m.e('hint', 38, 12, { text: 'El muelle de Patxi' });
+// El pueblo es un nudo: cada recado queda lejos de los otros y se llega por arriba.
+room({ id: 'muelle', area: 'pueblo', x: -64, y: -6, W: 64, H: 20, theme: 'dia', music: 'title', title: 'El muelle',
+  check: { start: { x: 62, y: 18 }, goal: { x: 21, y: 1, w: 4, h: 4 } } }, (m) => {
+  m.fill(48, 19, 16, 1);                             // el muelle de piedra
+  m.fill(50, 17, 2, 2, 'C'); m.set(52, 18, 'C');
+  // Barco 1, el viejo (izquierda)
+  m.fill(2, 16, 12, 4, 'W'); m.deco('mastil', 7, 15, { h: 10 });
+  m.plat(3, 13, 9); m.plat(4, 10, 7); m.plat(5, 7, 5);
+  // Barco 2, la trainera de Patxi: la red está en la cofa
+  m.fill(18, 17, 12, 3, 'W'); m.deco('mastil', 23, 16, { h: 13 });
+  m.plat(19, 14, 9); m.plat(20, 11, 7); m.plat(21, 8, 5); m.plat(22, 5, 3);
+  // Barco 3 (derecha), con una lona tensa en cubierta
+  m.fill(34, 16, 12, 4, 'W'); m.deco('mastil', 39, 15, { h: 9 });
+  m.bounce(43, 15, 2, '#e8e0d0'); m.plat(36, 12, 4); m.plat(41, 9, 4);
+  m.bar(32, 10);                                     // la jarcia entre mástiles
+  m.mover(14, 17, 16, 17, 2, 18, 0.6);               // una boya que va y viene entre los barcos
+  m.e('zip', 25, 4, { x2: 47, y2: 13 });            // de la cofa al muelle
+  m.e('item', 23, 4, { kind: 'red', flag: 'red', prompt: 'Soltar la red', script: 'red' });
+  m.e('pagina', 6, 6, { id: 'p7' });
+  m.e('npc', 56, 18, { who: 'pescador', script: 'pescador' });
+  m.deco('farola', 60, 18); m.deco('cuerda', 23, 6, { w: 16 }); m.deco('maceta', 49, 16);
+  m.arc(47, 18, 44, 15, 2, 1.4); m.arc(43, 13, 38, 11, 2, 1.4); m.ch(34.5, 11.2); m.arc(31.5, 10.5, 26, 10, 2, 1.6);
+  m.col(24, 7, 9.5, 2.5); m.ch(23.5, 3.6); for (const x of [29, 33, 37, 41, 45]) m.ch(x, +(4.6 + (x - 25) * 9 / 22).toFixed(1));
+  m.arc(17, 16, 13, 15, 2, 1.4); m.col(7, 6, 12, 3);
+  m.e('hint', 58, 18, { text: 'El muelle de Patxi' });
+  m.e('hint', 45, 15, { text: 'Lona tensa: rebota en ella como en un toldo' });
 });
 room({ id: 'casa', area: 'pueblo', x: 0, y: 0, W: 32, H: 14, theme: 'dia', music: 'title', title: 'Eibar', sub: 'La casa de amona', onEnter: 'casa_in' }, (m) => {
   m.fill(0, 13, 32, 1);
   m.e('decor', 3, 12, { kind: 'casa', w: 10, h: 6 });
   m.e('npc', 15, 12, { who: 'abuela', script: 'abuela' });
+  m.deco('maceta', 14, 12); m.deco('farola', 27, 12); m.deco('cuerda', 13, 6, { w: 10 });
+  m.plat(14, 8, 4); m.plat(22, 5, 4);                // el balcón de la vecina y el alero de enfrente
+  m.ch(15, 7); m.ch(17, 7); m.arc(18, 7, 22, 4, 2, 1.2); m.ch(24, 4); m.ch(26, 4);
 });
-room({ id: 'calle', area: 'pueblo', x: 32, y: 0, W: 48, H: 14, theme: 'dia', music: 'title', title: 'La calle mayor' }, (m) => {
+room({ id: 'calle', area: 'pueblo', x: 32, y: 0, W: 48, H: 14, theme: 'dia', music: 'title', title: 'La calle mayor',
+  check: { start: { x: 1, y: 12 }, goal: { x: 30, y: 0, w: 4, h: 1 } } }, (m) => {
   m.fill(0, 13, 48, 1);
   m.fill(4, 11, 2, 2, 'C'); m.fill(6, 8, 8, 5); m.fill(18, 6, 6, 7);
+  m.bounce(14, 11, 3, '#3e7cb1');                    // el toldo de la ferretería
+  m.plat(7, 5, 3); m.plat(11, 3, 3);
   m.fill(29, 0, 1, 9); m.fill(34, 0, 1, 10); m.fill(30, 10, 4, 1, '-');
-  m.fill(38, 9, 6, 4);
+  m.fill(38, 9, 6, 4); m.plat(39, 6, 3);
   m.e('npc', 25, 12, { who: 'vecina', script: 'vecina' });
+  m.deco('cartel', 7, 7, { text: 'BURDINDEGIA' }); m.deco('farola', 16, 12); m.deco('farola', 36, 12); m.deco('maceta', 20, 5); m.deco('chimenea', 22, 5, { h: 1 });
+  m.arc(5, 10, 7, 7, 2, 1); m.row(8, 12, 7, 2); m.col(15.5, 6, 9, 3); m.arc(15, 5, 18.5, 5, 2, 1.2); m.row(26, 28, 11.5, 2);
+  m.col(31.5, 2, 8, 3);
   m.e('hint', 31, 12, { text: 'Entre estas dos casas se sube al mirador' });
+  m.e('hint', 12, 12, { text: 'Recados: pan en el mercado (→), pescado en el muelle (←), correo en el mirador (↑)' });
 });
-room({ id: 'mirador', area: 'pueblo', x: 56, y: -26, W: 24, H: 26, theme: 'dia', music: 'title', title: 'El mirador' }, (m) => {
+room({ id: 'mirador', area: 'pueblo', x: 56, y: -26, W: 24, H: 26, theme: 'dia', music: 'title', title: 'El mirador',
+  check: { start: { x: 13, y: 14 }, goal: { x: 14, y: 0, w: 6, h: 4 } } }, (m) => {
   m.fill(5, 20, 1, 6); m.fill(10, 18, 1, 8);
   m.fill(12, 15, 4, 1, '-'); m.fill(5, 12, 4, 1, '-'); m.fill(12, 9, 4, 1, '-'); m.fill(4, 6, 5, 1, '-');
   m.fill(17, 6, 3, 1, '-'); m.fill(13, 4, 9, 1, '-');
+  m.plat(17, 16, 7);                                 // la pasarela que llega desde el mercado
   m.e('pagina', 5, 5, { id: 'p6' });
   m.e('trigger', 15, 1, { w: 4, h: 3, script: 'mirador', once: true });
   m.e('meta', 17, 3, { id: 'ane' });
+  m.deco('cuerda', 16, 10, { w: 8 });
+  m.col(7.5, 17, 23, 3); m.ch(13.5, 14); m.ch(6.5, 11); m.ch(13.5, 8); m.ch(6, 5); m.arc(9, 5, 17, 5, 3, 1.4); m.row(14, 20, 3, 2);
+  m.row(18, 22, 15, 2);
 });
-room({ id: 'mercado', area: 'pueblo', x: 80, y: 0, W: 48, H: 14, theme: 'dia', music: 'title', title: 'El mercado' }, (m) => {
-  m.fill(0, 13, 48, 1); m.fill(47, 0, 1, 13);
-  m.e('decor', 5, 12, { kind: 'puesto', col: '#b5544a', goods: ['#d8a050', '#c88040', '#e8c070'] });
-  m.e('decor', 15, 12, { kind: 'puesto', col: '#3e7cb1', goods: ['#a8b8c8', '#6a8aa8'] });
-  m.e('decor', 24, 12, { kind: 'puesto', col: '#c9a24a', goods: ['#7ab04a', '#c84a3a', '#e8a040'] });
-  m.fill(33, 11, 2, 2, 'C'); m.fill(35, 8, 3, 1, '-'); m.fill(38, 6, 9, 7);
-  m.e('item', 44, 5, { kind: 'gato', flag: 'gato', prompt: 'Coger al gato', script: 'gato' });
-  m.e('npc', 9, 12, { who: 'panadera', script: 'panadera' });
-  m.e('npc', 19, 12, { who: 'vecino', script: 'vecino' });
-  m.e('npc', 29, 12, { who: 'ane', script: 'ane' });
-  m.e('npc', 36, 12, { who: 'cartero', script: 'cartero' });
+room({ id: 'mercado', area: 'pueblo', x: 80, y: -20, W: 48, H: 34, theme: 'dia', music: 'title', title: 'El mercado',
+  check: { start: { x: 1, y: 32 }, goal: { x: 41, y: 0, w: 6, h: 3 } } }, (m) => {
+  m.fill(0, 33, 48, 1); m.fill(47, 0, 1, 33);
+  // Casas de la plaza del mercado, con sus balcones y tejados
+  m.house(0, 17, 13); m.house(14, 13, 12); m.house(27, 20, 10);
+  m.plat(1, 26, 4); m.plat(8, 23, 4);
+  m.fill(9, 13, 2, 4);                               // la chimenea de la casa de Miren
+  m.plat(15, 26, 4); m.plat(22, 17, 4);
+  m.plat(31, 26, 3);
+  m.plat(0, 10, 7);                                  // pasarela al mirador
+  // Los puestos, con toldos que rebotan
+  m.deco('puesto', 5, 32, { col: '#b5544a', goods: ['#d8a050', '#c88040', '#e8c070'] });
+  m.deco('puesto', 15, 32, { col: '#3e7cb1', goods: ['#a8b8c8', '#6a8aa8'] });
+  m.deco('puesto', 24, 32, { col: '#c9a24a', goods: ['#7ab04a', '#c84a3a', '#e8a040'] });
+  m.bounce(5, 30, 3, '#b5544a'); m.bounce(15, 30, 3, '#3e7cb1'); m.bounce(24, 30, 3, '#c9a24a');
+  // El almacén y la torre del reloj: Txuri está en lo más alto
+  m.fill(32, 31, 2, 2, 'C'); m.fill(38, 22, 9, 11);
+  m.fill(41, 3, 6, 19);
+  m.fill(37, 3, 1, 10);                              // el mástil de la bandera: se sube rebotando entre él y la torre
+  m.plat(38, 18, 3); m.plat(38, 14, 3);
+  m.bar(31, 11);                                     // la cuerda de banderines: atajo del tejado de Miren a la torre
+  m.e('item', 43, 2, { kind: 'gato', flag: 'gato', prompt: 'Coger al gato', script: 'gato' });
+  m.e('npc', 9, 32, { who: 'panadera', script: 'panadera' });
+  m.e('npc', 19, 32, { who: 'vecino', script: 'vecino' });
+  m.e('npc', 28, 32, { who: 'ane', script: 'ane' });
+  m.e('npc', 36, 32, { who: 'cartero', script: 'cartero' });
+  m.deco('cuerda', 26, 9, { w: 14 }); m.deco('chimenea', 18, 12, { h: 1 }); m.deco('antena', 33, 19); m.deco('maceta', 2, 25); m.deco('maceta', 16, 25);
+  m.deco('cartel', 42, 12, { text: 'ERLOJUA' });
+  m.arc(25.5, 30, 28, 20, 2, 2); m.arc(30, 19.5, 23.5, 16.5, 2, 1.2); m.col(24, 13, 15, 2); m.row(15, 21, 12.4, 3);
+  m.arc(13.5, 12.5, 10, 12.5, 1, 1); m.arc(8.5, 12, 5, 9.5, 2, 1);
+  m.arc(26, 12.5, 30.5, 11, 2, 1); m.arc(32, 11.5, 38, 13, 3, 1.6); m.col(39.5, 4, 11, 3.5); m.ch(37.5, 3.5); m.ch(43, 1.5); m.ch(36, 21); m.ch(39.5, 17);
+  m.e('hint', 2, 32, { text: 'Los toldos de los puestos rebotan. Mantén el salto para llegar a los balcones' });
 });
 
 // ================================================================== IV · La tormenta
@@ -324,24 +374,55 @@ room({ id: 'ruina', area: 'tormenta', x: -32, y: 0, W: 32, H: 16, theme: 'storm'
   m.fill(0, 13, 32, 3); m.fill(0, 0, 1, 13);
   m.fill(3, 11, 3, 2, 'C'); m.fill(8, 12, 2, 1, 'C'); m.fill(20, 12, 1, 1, 'C');
 });
-room({ id: 'storm1', area: 'tormenta', x: 0, y: 0, W: 56, H: 16, theme: 'storm', music: 'storm', title: 'Eibar', sub: 'La tormenta' }, (m) => {
-  m.fill(0, 13, 56, 3);
-  m.fill(1, 9, 5, 4); m.fill(1, 5, 2, 4);
-  m.fill(10, 11, 2, 2, 'C'); m.set(16, 12, 'C');
-  m.fill(21, 10, 7, 3); m.fill(23, 8, 3, 2);
-  m.fill(31, 12, 2, 1, 'C');
-  m.fill(36, 9, 5, 1, '-');
-  m.fill(44, 13, 5, 1, '^'); m.fill(44, 10, 5, 1, '-');
-  m.e('lightning', 6, 0, { w: 48 });
-  m.e('hint', 6, 8, { text: 'Mira el suelo antes del rayo: donde parpadea, cae' });
-  m.e('hint', 42, 12, { text: 'Cables cortados: no los pises' });
+room({ id: 'storm1', area: 'tormenta', x: 0, y: -6, W: 96, H: 22, theme: 'storm', music: 'storm', title: 'Eibar', sub: 'La tormenta' }, (m) => {
+  m.fill(0, 19, 96, 3);
+  m.fill(3, 17, 2, 2, 'C'); m.set(6, 18, 'C'); m.bounce(1, 16, 2, '#7a5a8a');
+  m.roof(8, 13, 7); m.crumble(15, 13, 3);            // el tejado se viene abajo
+  m.roof(18, 10, 6);
+  m.fill(24, 18, 3, 1, '^'); m.ladder(24, 3, 10, 18); // callejón con cables cortados
+  m.roof(27, 8, 8); m.fill(30, 5, 2, 3);
+  m.bar(37, 6);                                      // el balcón arrancado: queda la barandilla
+  m.roof(41, 9, 6); m.crumble(47, 9, 5);
+  m.fill(44, 18, 8, 1, '^');
+  m.roof(52, 12, 6);
+  m.fill(58, 18, 4, 1, '^'); m.bounce(58, 16, 4, '#5a6a8a'); // un toldo hecho jirones, aún tenso
+  m.roof(62, 6, 8); m.set(65, 5, '#');
+  m.e('zip', 69, 4, { x2: 88, y2: 15 });            // el tendido eléctrico caído
+  m.fill(72, 18, 12, 1, '^');
+  m.roof(76, 14, 4);                                 // un portal: la única pausa sobre los cables
+  m.e('lightning', 6, 0, { w: 88 });
+  m.deco('chimenea', 11, 12, { h: 1 }); m.deco('antena', 21, 9); m.deco('chimenea', 33, 7, { h: 1 }); m.deco('antena', 44, 8);
+  m.deco('farola', 14, 18); m.deco('farola', 54, 11); m.deco('chimenea', 67, 5, { h: 2 }); m.deco('farola', 90, 18);
+  m.arc(5, 17, 9, 12, 2, 1.4); m.row(12, 17, 12, 2); m.arc(18, 11.5, 20, 9, 1, 1); m.arc(24, 9, 27.5, 7, 2, 1.2);
+  m.arc(31, 4, 33, 7, 1, 1); m.arc(35, 7, 41, 7.5, 3, 1.6); m.row(47, 51, 8, 2); m.arc(52, 8, 54, 11, 1, 1);
+  m.col(59.5, 9, 14, 2.5); m.row(63, 68, 4.4, 2); for (const x of [72, 77, 82, 87]) m.ch(x, +(4.6 + (x - 69) * 11 / 19).toFixed(1));
+  m.e('hint', 6, 18, { text: 'Mira el suelo antes del rayo: donde parpadea, cae. No te quedes quieto' });
+  m.e('hint', 22, 9, { text: 'Cables cortados en la calle: mejor por arriba' });
 });
-room({ id: 'storm2', area: 'tormenta', after: ['storm1', 13, 13], W: 48, H: 16, theme: 'storm', music: 'storm' }, (m) => {
+room({ id: 'derrumbe', area: 'tormenta', after: ['storm1', 19, 13], W: 64, H: 18, theme: 'storm', music: 'storm', title: 'La calle hundida' }, (m) => {
+  m.fill(0, 13, 10, 5); m.fill(54, 13, 10, 5);
+  m.fill(10, 17, 44, 1, '^');                        // el agua de la calle, electrificada
+  m.fill(14, 10, 3, 7); m.crumble(17, 10, 4);        // vigas de la casa caída
+  m.fill(21, 8, 3, 9);
+  m.bar(28, 6);
+  m.fill(32, 9, 2, 8);
+  m.fill(36, 6, 2, 11); m.plat(38, 11, 3); m.fill(41, 0, 2, 10); // paredes en pie: por encima de una y por debajo de la otra
+  m.mover(41, 12, 50, 12, 3, 42, 0.8);               // una puerta arrastrada por el agua
+  m.crumble(51, 12, 3);
+  m.e('lightning', 4, 0, { w: 56 });
+  m.deco('farola', 3, 12); m.deco('farola', 58, 12); m.deco('antena', 22, 7);
+  m.arc(9, 12, 14, 9, 2, 1.4); m.row(17, 20, 9, 1.5); m.arc(24, 7.5, 28, 7, 2, 1.2); m.arc(29, 7.5, 32, 8, 2, 1);
+  m.ch(36.5, 5); m.ch(39, 10); m.ch(42, 10.2); m.row(44, 50, 11, 3); m.ch(52.5, 11);
+  m.e('hint', 4, 12, { text: 'La calle se ha hundido. El agua toca los cables: ni se te ocurra caer' });
+});
+room({ id: 'storm2', area: 'tormenta', after: ['derrumbe', 13, 13], W: 48, H: 16, theme: 'storm', music: 'storm', check: { goal: { x: 40, y: 9, w: 6, h: 4 } } }, (m) => {
   m.fill(0, 13, 10, 3); m.fill(10, 15, 6, 1, '^'); m.fill(11, 10, 4, 1, '-'); m.fill(16, 13, 32, 3);
   m.fill(20, 11, 3, 2, 'C'); m.fill(26, 9, 6, 4); m.fill(33, 12, 2, 1, 'C');
+  m.crumble(23, 9, 3);
   m.fill(47, 0, 1, 13);
-  m.e('lightning', 2, 0, { w: 40 });
+  m.e('lightning', 2, 0, { w: 30 });
   m.e('npc', 44, 12, { who: 'desconocido', script: 'desconocido1', once: true, auto: 30, copy: 'energia', sit: true });
+  m.arc(9, 12, 16, 12, 3, 2.2); m.row(21, 25, 8.4, 2); m.row(27, 31, 8, 2);
 });
 
 // ================================================================== V · El despertar (el bosque)
@@ -361,6 +442,9 @@ room({ id: 'forest1', area: 'bosque', x: 0, y: 0, W: 48, H: 14, theme: 'forest',
   m.e('hint', 4, 12, { text: 'X / J  disparo de Energía' });
   m.e('hint', 10, 12, { text: 'Mantén E junto al cristal: absorbes su Energía' });
   m.e('hint', 18, 12, { text: 'Cada marca se gasta. Solo se llena absorbiendo de su fuente' });
+  m.bounce(30, 12, 2, null, 'rama'); m.plat(30, 5, 4);
+  m.deco('arbol', 20, 12, { h: 6 }); m.deco('arbol', 38, 12, { h: 7 });
+  m.arc(19, 12, 22, 10, 2, 1); m.row(23, 27, 8, 2); m.arc(28, 8, 30.5, 11, 1, 0.6); m.col(31, 6, 10, 2); m.row(32, 33, 4, 1); m.arc(34, 4, 40, 8, 3, 0.8); m.row(42, 46, 8, 2);
 });
 room({ id: 'arriba', area: 'bosque', after: ['forest1', 13, 17], W: 48, H: 18, theme: 'forest', music: 'forest', title: 'Bajo las copas' }, (m) => {
   m.fill(0, 17, 48, 1);
@@ -372,16 +456,29 @@ room({ id: 'arriba', area: 'bosque', after: ['forest1', 13, 17], W: 48, H: 18, t
   m.e('vigia', 42, 2, { hostile: true, patrol: [30, 46] });
   m.e('hint', 3, 16, { text: '↑ + X: disparo hacia arriba · ↑ + → + X: en diagonal' });
   m.e('hint', 20, 16, { text: 'La roca con vetas tapa la salida: dispárale desde abajo' });
+  m.plat(8, 13, 4); m.plat(13, 10, 3);
+  m.deco('arbol', 3, 16, { h: 8 }); m.deco('arbol', 36, 6, { h: 4 });
+  m.arc(5, 16, 9, 12, 2, 1.4); m.arc(11, 12, 14, 9, 1, 0.8); m.col(20.5, 8, 14, 3); m.row(26, 46, 6, 4);
 });
-room({ id: 'forest2', area: 'bosque', after: ['arriba', 7, 13], W: 48, H: 14, theme: 'forest', music: 'forest' }, (m) => {
+room({ id: 'forest2', area: 'bosque', after: ['arriba', 7, 13], W: 72, H: 14, theme: 'forest', music: 'forest', check: { marks: ['destino', 'energia'] } }, (m) => {
   m.fill(0, 13, 48, 1);
   m.fill(8, 10, 5, 1, '-'); m.fill(18, 7, 6, 1, '-');
   m.fill(28, 11, 4, 2); m.fill(35, 9, 5, 1, '-');
   m.set(26, 12, 'Y'); m.set(44, 12, 'Y');
+  // El barranco de zarzas: troncos podridos, una rama que rebota y una liana
+  m.fill(48, 13, 18, 1, '^');
+  m.crumble(48, 10, 4); m.bounce(53, 12, 2, null, 'rama'); m.plat(56, 6, 3);
+  m.bar(61, 7);
+  m.fill(66, 13, 6, 1);
   m.e('vigia', 16, 4, { patrol: [8, 24], hostile: true });
   m.e('vigia', 34, 3, { patrol: [28, 42], hostile: true });
   m.e('vigia', 24, 2, { patrol: [14, 36], hostile: true });
+  m.e('vigia', 58, 2, { patrol: [50, 66], hostile: true });
+  m.deco('arbol', 3, 12, { h: 6 }); m.deco('arbol', 46, 12, { h: 7 }); m.deco('arbol', 68, 12, { h: 6 });
+  m.arc(6, 12, 9, 9, 2, 1); m.arc(13, 9, 18, 6, 2, 1.4); m.row(19, 23, 6, 2); m.arc(24, 6, 28, 10, 2, 1);
+  m.row(49, 51, 9, 2); m.col(53.5, 6, 10, 2); m.ch(57, 5); m.arc(59, 5.5, 61, 6, 1, 0.6); m.arc(62, 6, 67, 11, 2, 1.4);
   m.e('hint', 4, 12, { text: 'C / L  onda expansiva · en el aire, un rayo hacia abajo' });
+  m.e('hint', 47, 12, { text: 'Ramas flexibles: rebotan. Los troncos podridos, no aguantan' });
 });
 room({ id: 'cargada', area: 'bosque', after: ['forest2', 13, 13], W: 48, H: 14, theme: 'forest', music: 'forest', title: 'La roca reforzada' }, (m) => {
   m.fill(0, 13, 48, 1);
@@ -402,19 +499,45 @@ room({ id: 'forest3', area: 'bosque', after: ['cargada', 13, 13], W: 48, H: 14, 
   m.set(12, 8, 'Y');
   m.e('vigia', 38, 4, { patrol: [34, 46], hostile: true });
   m.e('hint', 12, 8, { text: 'SHIFT / V  dash en el aire: uno por salto' });
+  m.deco('arbol', 2, 12, { h: 6 }); m.deco('arbol', 40, 8, { h: 5 });
+  m.arc(5, 12, 9, 8, 2, 1); m.arc(20, 8, 29, 8, 4, 2.4); m.row(35, 45, 8, 2.5);
 });
 room({ id: 'dashes', area: 'bosque', after: ['forest3', 9, 9], W: 56, H: 14, theme: 'forest', music: 'forest', title: 'Las copas caídas' }, (m) => {
   m.fill(0, 9, 8, 5);
-  m.fill(16, 9, 4, 5); m.fill(28, 8, 4, 6); m.fill(40, 9, 4, 5); m.fill(52, 9, 4, 5);
-  m.set(4, 8, 'Y'); m.set(29, 7, 'Y');
+  m.fill(15, 9, 4, 5); m.fill(26, 8, 4, 6); m.fill(37, 9, 4, 5); m.fill(48, 9, 8, 5);
+  m.set(4, 8, 'Y'); m.set(27, 7, 'Y');
+  m.arc(8, 8, 15, 8, 4, 2.6); m.arc(19, 8, 26, 7, 4, 2.6); m.arc(30, 7, 37, 8, 4, 2.6); m.arc(41, 8, 48, 8, 4, 2.6);
   m.e('vigia', 34, 3, { hostile: true, patrol: [24, 44] });
   m.e('hint', 4, 8, { text: 'Salto, y en lo alto, dash. El dash vuelve al tocar suelo' });
 });
-room({ id: 'campamento', area: 'bosque', after: ['dashes', 9, 13], W: 56, H: 14, theme: 'forest', music: 'forest', title: 'El campamento de la PDC' }, (m) => {
+room({ id: 'copas', area: 'bosque', after: ['dashes', 9, 9], W: 96, H: 20, theme: 'forest', music: 'forest', title: 'El dosel', check: { marks: ['destino', 'energia'] } }, (m) => {
+  m.fill(0, 9, 6, 11);
+  m.fill(6, 19, 82, 1); m.fill(6, 18, 82, 1, '^');   // abajo, zarzas
+  m.plat(8, 9, 3); m.crumble(12, 9, 3); m.plat(16, 8, 3);
+  m.bar(21, 6); m.plat(25, 7, 4);
+  m.e('zip', 28, 5, { x2: 40, y2: 12 });            // una liana larga
+  m.bounce(43, 15, 4, null, 'rama'); m.plat(44, 6, 4);
+  m.crumble(48, 6, 4); m.plat(53, 6, 3);
+  m.bar(58, 4); m.bar(63, 4); m.plat(67, 6, 4);
+  m.plat(70, 7, 8); m.fill(71, 4, 6, 2);             // un tronco caído: por debajo, deslizándose
+  m.mover(79, 9, 86, 9, 3, 36, 0.6);                 // un tronco colgado de lianas, que se mece
+  m.plat(90, 11, 3); m.plat(92, 14, 3);
+  m.fill(88, 17, 8, 3);
+  m.set(2, 8, 'Y'); m.set(93, 16, 'Y');
+  m.e('vigia', 34, 2, { hostile: true, patrol: [24, 44] });
+  m.e('vigia', 62, 1, { hostile: true, patrol: [52, 72] });
+  m.deco('arbol', 22, 17, { h: 9 }); m.deco('arbol', 50, 17, { h: 9 }); m.deco('arbol', 82, 17, { h: 8 });
+  m.arc(5, 8, 8.5, 8, 2, 1); m.row(12, 14, 8, 2); m.arc(18, 7, 21, 6.5, 1, 0.8); m.arc(22, 6.5, 26, 6, 2, 1);
+  for (const x of [30, 33, 36, 39]) m.ch(x, +(5.6 + (x - 28) * 7 / 12).toFixed(1));
+  m.col(45, 8, 13, 2.5); m.row(46, 47, 5, 1); m.row(48.5, 51, 5, 2.5); m.arc(55, 5, 58, 4.5, 1, 0.8); m.arc(59, 4.5, 63, 4.5, 2, 1.4);
+  m.arc(64, 4.5, 68, 5, 2, 1.2); m.row(71, 76, 6.2, 2.5); m.row(80, 88, 8, 4); m.ch(91, 10); m.ch(93, 13);
+  m.e('hint', 1, 8, { text: 'Las copas de los árboles. Abajo hay zarzas: si caes, duele y vuelves atrás' });
+});
+room({ id: 'campamento', area: 'bosque', after: ['copas', 17, 13], W: 56, H: 14, theme: 'forest', music: 'forest', title: 'El campamento de la PDC' }, (m) => {
   m.fill(0, 13, 56, 1);
   m.e('decor', 6, 12, { kind: 'tienda' }); m.e('decor', 20, 12, { kind: 'tienda' }); m.e('decor', 13, 12, { kind: 'hoguera' });
   m.fill(29, 6, 5, 1, '-'); m.fill(30, 9, 3, 1, '-'); m.e('decor', 29, 12, { kind: 'atalaya' });
-  m.fill(46, 8, 3, 1, '-'); m.fill(50, 5, 3, 1, '-');
+  m.fill(42, 11, 3, 1, '-'); m.fill(46, 8, 3, 1, '-'); m.fill(50, 5, 3, 1, '-');
   m.set(3, 12, 'Y'); m.set(16, 12, 'L'); m.set(40, 12, 'Y');
   m.e('paladin', 22, 12, { patrol: [14, 28], hostile: true });
   m.e('blindado', 37, 12, { patrol: [34, 44], hostile: true });
@@ -423,7 +546,7 @@ room({ id: 'campamento', area: 'bosque', after: ['dashes', 9, 13], W: 56, H: 14,
   m.e('lauburu', 51, 4, { id: 'L3' });
   m.e('hint', 3, 12, { text: 'El blindado para los disparos de frente: pásale por encima con el dash y dispárale por detrás' });
 });
-room({ id: 'buho', area: 'bosque', after: ['campamento', 13, 13], W: 32, H: 14, theme: 'forest', music: 'forest', title: 'El claro' }, (m) => {
+room({ id: 'buho', area: 'bosque', after: ['campamento', 13, 13], W: 32, H: 14, theme: 'forest', music: 'forest', title: 'El claro', check: { flags: { buho: true } } }, (m) => {
   m.fill(0, 13, 32, 1);
   m.fill(6, 9, 4, 1, '-'); m.fill(22, 9, 4, 1, '-'); m.fill(14, 6, 4, 1, '-');
   m.fill(31, 0, 1, 9);
@@ -655,7 +778,7 @@ Object.assign(SCRIPTS, {
         ['do', 'flag', 'pan'], ['do', 'hint', 'Tienes el pan'],
       ], [
         ['say', 'panadera', 'Jon, el pan te lo doy encantada, pero antes hazme un favor.'],
-        ['say', 'panadera', 'Txuri, mi gato, se ha subido al tejado del almacén y no hay quien lo baje. Tú que trepas por todo...'],
+        ['say', 'panadera', 'Txuri, mi gato, se ha subido a lo alto de la torre del reloj y no hay quien lo baje. Tú que trepas por todo...'],
       ]],
     ]],
   ],
@@ -684,12 +807,12 @@ Object.assign(SCRIPTS, {
   ],
   ane: [
     ['if', 'race_ane', [['say', 'ane', 'Vale, vale, eres rápido. Pero el año que viene te gano.']], [
-      ['say', 'ane', '¿Tú eres el que corre por los tejados? Demuéstralo: sube a lo alto del mirador en menos de cincuenta segundos.'],
+      ['say', 'ane', '¿Tú eres el que corre por los tejados? Demuéstralo: sube a lo alto del mirador en menos de cuarenta segundos. Por los tejados, claro.'],
       ['choice', [['¡Vamos!', 'ane_go', true], ['Ahora no', 'ane_go', false]]],
-      ['if', 'ane_go', [['say', 'ane', 'Tres, dos, uno... ¡ya!'], ['do', 'race', 'ane', 50]], []],
+      ['if', 'ane_go', [['say', 'ane', 'Tres, dos, uno... ¡ya!'], ['do', 'race', 'ane', 40]], []],
     ]],
   ],
-  race_ane_ok: [['say', 'jon', 'Cincuenta segundos. Ane va a flipar.'], ['do', 'lauburu', 'L2']],
+  race_ane_ok: [['say', 'jon', 'Cuarenta segundos. Ane va a flipar.'], ['do', 'lauburu', 'L2']],
   race_ane_fail: [['do', 'hint', 'Se acabó el tiempo. Habla con Ane, en el mercado, para volver a intentarlo']],
   // IV · La tormenta
   ruina: [

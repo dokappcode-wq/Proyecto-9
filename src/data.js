@@ -60,9 +60,11 @@ function makeRoom(def, paint) {
     plat(x, y, w) { this.fill(x, y, w, 1, '-'); },                     // toldo o balcón: se cruza desde abajo
     crumble(x, y, w) { this.fill(x, y, w, 1, 'c'); },                  // tejas sueltas
     bar(x, y) { this.e('barra', x, y); },
-    bounce(x, y, w = 2, col) { this.e('rebote', x, y, { w, col }); },
+    bounce(x, y, w = 2, col, kind) { this.e('rebote', x, y, { w, col, kind }); },
     mover(x, y, x2, y2, w = 3, speed = 40, wait = 0.8, k = 0) { this.e('movil', x, y, { x2, y2, w, speed, wait, k }); },
     deco(kind, x, y, props = {}) { this.e('decor', x, y, { kind, ...props }); },
+    // Casa de fondo con tejado transitable en la fila r (el tejado rojo tapa el borde): base es la fila del suelo
+    house(x, r, w, base = H - 1) { this.deco('casa', x, base - 1, { w, h: base - r - 0.5 }); this.plat(x, r, w); },
     // Escalera de balcones en un callejón: para volver a subir si caes a la calle
     ladder(x, w, yTop, yBottom, step = 3) { for (let y = yBottom - step; y > yTop; y -= step) this.plat(x, y, w); },
     // Chispas: puntos, filas y arcos que dibujan la línea de parkour

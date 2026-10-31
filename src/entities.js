@@ -356,7 +356,7 @@ class Player {
   }
   // Barra: Jon cuelga de ella y se balancea; al saltar sale disparado en la dirección del vaivén
   startSwing(bar) {
-    this.state = 'swing'; this.bar = bar; this.setH(26);
+    this.state = 'swing'; this.swingBar = bar; this.setH(26);
     const L = 16;
     this.swA = clamp((this.cx - bar.px) / L, -1, 1);
     this.swW = clamp(this.vx / L + (this.vy > 0 ? sign(this.vx || this.face) * this.vy / L * 0.35 : 0), -11, 11);
@@ -364,7 +364,7 @@ class Player {
     Audio2.sfx('swing');
   }
   updSwing(dt, dir, D, P) {
-    const b = this.bar, L = 16;
+    const b = this.swingBar, L = 16;
     this.swW += -(PH.grav / L) * Math.sin(this.swA) * dt * 0.55 + dir * 5 * dt;
     this.swW *= 1 - 0.25 * dt;
     this.swA = clamp(this.swA + this.swW * dt, -1.35, 1.35);
@@ -1530,8 +1530,12 @@ class Decor extends Ent {
         const w = (this.d.w || 6) * T, h = (this.d.h || 5) * T;
         c.fillStyle = '#e8dcc8'; c.fillRect(x, y - h, w, h);
         c.fillStyle = '#a84a3a'; for (let i = -4; i < w + 4; i += 4) c.fillRect(x + i, y - h - 8 + Math.abs(i - w / 2) / (w / 2) * 2, 4, 8);
-        c.fillStyle = '#6a3a2a'; for (let i = 8; i < w - 8; i += 24) { c.fillRect(x + i, y - h + 10, 10, 2); c.fillRect(x + i, y - h + 6, 2, 12); c.fillRect(x + i + 8, y - h + 6, 2, 12); }
-        c.fillStyle = '#3a5a4a'; for (let i = 10; i < w - 10; i += 24) { c.fillRect(x + i + 2, y - h + 8, 6, 10); }
+        // Una fila de ventanas con contraventanas verdes por cada piso
+        for (let fy = y - h + 6; fy < y - 34; fy += 48) {
+          c.fillStyle = '#6a3a2a'; for (let i = 8; i < w - 8; i += 24) { c.fillRect(x + i, fy + 4, 10, 2); c.fillRect(x + i, fy, 2, 12); c.fillRect(x + i + 8, fy, 2, 12); }
+          c.fillStyle = '#3a5a4a'; for (let i = 10; i < w - 10; i += 24) { c.fillRect(x + i + 2, fy + 2, 6, 10); }
+          if (fy > y - h + 30) { c.fillStyle = 'rgba(90,60,40,0.35)'; c.fillRect(x, fy - 8, w, 2); }
+        }
         c.fillStyle = '#5a3a2a'; c.fillRect(x + w / 2 - 6, y - 22, 12, 22); c.fillStyle = '#c8a050'; c.fillRect(x + w / 2 + 3, y - 12, 1, 1);
         break;
       }
