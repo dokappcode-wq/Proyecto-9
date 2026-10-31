@@ -1568,6 +1568,13 @@ class Decor extends Ent {
         for (let i = 8, k = 0; i < w - 6; i += 12, k++) { const yy = y - 29 + Math.round(Math.sin(i / w * Math.PI) * sag); c.fillStyle = cols[k % cols.length]; c.fillRect(x + i + Math.round(Math.sin(t * 2 + i) * 0.6), yy, 6, 7 + (k % 2) * 2); }
         break;
       }
+      case 'pilar': {
+        // Columna de soportal: de fondo, se pasa por delante
+        const h = (this.d.h || 5) * T;
+        c.fillStyle = '#2a2430'; c.fillRect(x + 4, y - h, 8, h); c.fillStyle = '#3e3646'; c.fillRect(x + 5, y - h, 2, h);
+        c.fillStyle = '#4a4252'; c.fillRect(x + 2, y - h, 12, 3); c.fillRect(x + 2, y - 3, 12, 3);
+        break;
+      }
       case 'antorcha':
         c.fillStyle = '#3a2a1e'; c.fillRect(x + 7, y - 26, 2, 8);
         for (let i = 0; i < 4; i++) { c.fillStyle = i % 2 ? '#ffd23a' : '#ff8a2a'; c.fillRect(x + 6 + (i % 2), y - 30 - ((t * 20 + i * 3) % 6), 3, 3); }

@@ -92,42 +92,69 @@ function room(def, paint) {
 }
 
 // ================================================================== ACTO I · 1 · El barrio de los faroles
-room({ id: 'faroles1', area: 'ibaia', x: 0, y: 0, W: 48, H: 16, theme: 'faroles', music: 'faroles', title: 'El barrio de los faroles', sub: 'Thriller noir · antes Distrito Cero' }, (m) => {
-  m.fill(0, 13, 48, 3); m.fill(0, 0, 1, 13);
-  m.fill(19, 9, 6, 1, '-'); m.fill(27, 6, 5, 1, '-');
-  m.fill(34, 10, 4, 3);
-  m.set(4, 12, 'P'); m.set(7, 12, 'S'); m.set(13, 12, 'L'); m.set(31, 12, 'L');
-  m.e('paladin', 24, 12, { patrol: [16, 32] });
-  m.e('npc', 42, 12, { who: 'txema', script: 'txema' });
-  m.e('hint', 9, 12, { text: 'E junto a la caracola: guardar y hablar con la Centralita' });
+// La calle va por debajo de los soportales; por encima, los tejados llevan a «Los tejados» sin pisar la calle.
+room({ id: 'faroles1', area: 'ibaia', x: 0, y: -14, W: 48, H: 30, theme: 'faroles', music: 'faroles', title: 'El barrio de los faroles', sub: 'Thriller noir · antes Distrito Cero',
+  check: { start: { x: 4, y: 26 }, goal: { x: 46, y: 4, w: 2, h: 6 } } }, (m) => {
+  m.fill(0, 27, 48, 3); m.fill(0, 0, 1, 27);
+  // Casas sobre soportales
+  m.fill(1, 8, 11, 14); m.fill(16, 12, 11, 10); m.fill(30, 6, 9, 16); m.fill(42, 9, 6, 13);
+  for (const x of [5, 10, 17, 25, 31, 37, 43]) m.deco('pilar', x, 26, { h: 5 });
+  // Callejón 1: balcones en zigzag
+  m.plat(12, 19, 2); m.plat(14, 16, 2); m.plat(12, 13, 2); m.plat(14, 10, 2);
+  // Callejón 2: se sube rebotando entre las dos fachadas
+  m.plat(27, 9, 3);
+  // Callejón 3: una barandilla y un tejadillo que no aguanta
+  m.bar(40, 11); m.crumble(39, 18, 3);
+  m.fill(4, 6, 2, 2); m.fill(20, 10, 2, 2); m.fill(34, 4, 1, 2);   // chimeneas
+  m.set(4, 26, 'P'); m.set(7, 26, 'S'); m.set(13, 26, 'L'); m.set(31, 26, 'L'); m.set(23, 11, 'L');
+  m.e('paladin', 24, 26, { patrol: [16, 32] });
+  m.e('npc', 42, 26, { who: 'txema', script: 'txema' });
+  m.deco('antena', 8, 7); m.deco('cuerda', 12, 8, { w: 4 }); m.deco('antena', 36, 5); m.deco('cartel', 18, 21, { text: 'TABERNA' });
+  m.col(13, 18, 9, 3); m.col(15, 15, 9, 3); m.arc(11, 7, 16, 11, 2, 1.2); m.row(18, 25, 11, 3.5); m.col(28.5, 13, 20, 3);
+  m.ch(28.5, 8); m.arc(30, 8, 32, 5, 1, 0.8); m.row(35, 38, 5, 3); m.arc(39, 5, 42, 8, 1, 1); m.ch(40.5, 10); m.row(44, 47, 8, 3);
+  m.e('hint', 9, 26, { text: 'E junto a la caracola: guardar y hablar con la Centralita' });
+  m.e('hint', 14, 26, { text: 'Por los callejones se sube a los tejados' });
 });
-room({ id: 'faroles2', area: 'ibaia', x: 48, y: 0, W: 48, H: 16, theme: 'faroles', music: 'faroles' }, (m) => {
+room({ id: 'faroles2', area: 'ibaia', x: 48, y: 0, W: 48, H: 16, theme: 'faroles', music: 'faroles',
+  check: { start: { x: 1, y: 12 }, goal: { x: 30, y: 0, w: 4, h: 1 } } }, (m) => {
   m.fill(0, 13, 48, 3);
   m.fill(6, 10, 5, 1, '-');
   m.fill(14, 8, 4, 5);
+  m.bounce(19, 11, 3, '#6a3a5a');                    // el toldo de la casa de empeños
   m.fill(29, 0, 1, 7); m.fill(34, 0, 1, 10);
   m.fill(30, 10, 4, 1, '-');
   m.fill(25, 7, 4, 1, '-');
+  m.crumble(38, 9, 4); m.plat(43, 6, 3);
   m.set(22, 12, 'L');
   m.e('acolito', 40, 9);
   m.e('acolito', 9, 7);
   m.e('npc', 4, 12, { who: 'pello', script: 'pello' });
+  m.deco('farola', 12, 12); m.deco('farola', 37, 12); m.deco('cartel', 15, 7, { text: 'BAHITETXEA' }); m.deco('cuerda', 35, 5, { w: 12 });
+  m.arc(5, 12, 8, 9, 2, 1); m.arc(11, 9, 14, 7, 1, 0.8); m.row(15, 17, 7, 2); m.col(20.5, 6, 10, 2); m.row(25, 28, 6, 3);
+  m.col(31.5, 2, 9, 3.5); m.row(38.5, 41, 8, 2.5); m.ch(44, 5);
 });
-room({ id: 'tejados', area: 'ibaia', x: 48, y: -14, W: 48, H: 14, theme: 'roofs', music: 'faroles', title: 'Los tejados' }, (m) => {
+room({ id: 'tejados', area: 'ibaia', x: 48, y: -14, W: 48, H: 14, theme: 'roofs', music: 'faroles', title: 'Los tejados',
+  check: { start: { x: 1, y: 8 }, goal: { x: 46, y: 0, w: 2, h: 4 } } }, (m) => {
   m.fill(0, 9, 12, 5);
   m.fill(12, 11, 17, 3); m.fill(29, 10, 1, 4); m.fill(34, 10, 1, 4);
   m.fill(35, 11, 13, 3);
   m.fill(6, 4, 5, 1, '-'); m.fill(15, 6, 5, 1, '-'); m.fill(22, 3, 4, 1, '-');
+  m.crumble(12, 8, 3); m.bar(27, 5);
   m.fill(38, 4, 10, 1); m.fill(38, 5, 1, 6, 'F'); m.fill(47, 5, 1, 6);
   m.fill(35, 8, 3, 1, '-'); m.fill(35, 5, 3, 1, '-');
+  m.e('zip', 26, 2, { x2: 37, y2: 7 });
   m.set(2, 8, 'L');
   m.set(23, 2, 'g');
   m.e('pagina', 43, 10, { id: 'p2' });
   m.e('ballestero', 8, 8);
   m.e('vigia', 26, 5, { patrol: [16, 34] });
+  m.deco('antena', 3, 8); m.deco('chimenea', 18, 10, { h: 1 }); m.deco('antena', 44, 3);
+  m.arc(6, 8, 8, 3.5, 1, 1); m.row(9, 13, 7, 2); m.arc(14, 7, 16, 5, 1, 0.8); m.arc(20, 5, 23, 2, 1, 0.8);
+  m.arc(26, 2.5, 29, 4.5, 1, 0.8); m.arc(30, 5, 35, 4, 2, 1); m.row(39, 46, 3, 2.5);
   m.e('hint', 36, 10, { text: 'Aquí falta otra marca' });
 });
-room({ id: 'cocheras', area: 'ibaia', x: 96, y: -14, W: 48, H: 30, theme: 'faroles', music: 'faroles', title: 'Las cocheras', sub: 'El Ancla del barrio', veilFlag: 'ancla1' }, (m) => {
+room({ id: 'cocheras', area: 'ibaia', x: 96, y: -14, W: 48, H: 30, theme: 'faroles', music: 'faroles', title: 'Las cocheras', sub: 'El Ancla del barrio', veilFlag: 'ancla1',
+  check: { start: { x: 2, y: 5 }, goal: { x: 36, y: 22, w: 8, h: 5 } } }, (m) => {
   m.fill(0, 27, 48, 3);
   m.fill(0, 4, 1, 2); m.fill(0, 7, 1, 7);
   m.fill(0, 6, 12, 1, '-');
@@ -135,37 +162,55 @@ room({ id: 'cocheras', area: 'ibaia', x: 96, y: -14, W: 48, H: 30, theme: 'farol
   m.fill(16, 24, 4, 1, '-'); m.fill(21, 21, 4, 1, '-'); m.fill(15, 18, 4, 1, '-');
   m.fill(9, 15, 4, 1, '-'); m.fill(14, 12, 4, 1, '-'); m.fill(8, 9, 4, 1, '-');
   m.fill(28, 17, 5, 1, '-'); m.fill(34, 21, 4, 1, '-');
+  // La pasarela de la grúa y el montacargas de las cocheras
+  m.bar(15, 4); m.fill(20, 6, 18, 1, '-'); m.crumble(26, 6, 4);
+  m.mover(43, 26, 43, 7, 3, 44, 1.2);
   m.clear(20, 27, 4, 3); m.fill(20, 27, 4, 1, 'V');
   m.set(12, 26, 'L'); m.set(30, 26, 'L'); m.set(3, 5, 'L');
   m.e('npc', 4, 26, { who: 'rosa', script: 'rosa' });
   m.e('carrorayo', 8, 26);
   m.e('ancla', 40, 26, { n: 1 });
+  m.deco('farola', 26, 26);
+  m.row(3, 11, 5, 2); m.arc(12, 5, 15, 4.5, 1, 0.6); m.arc(16, 4.5, 20, 5, 1, 0.6); m.row(21, 37, 5, 4); m.col(44, 9, 24, 5);
+  m.col(10, 8, 14, 3); m.ch(16, 11); m.ch(17, 17); m.ch(23, 20); m.ch(18, 23);
 });
-room({ id: 'pozo', area: 'ibaia', x: 108, y: 16, W: 24, H: 28, theme: 'pozo', music: 'faroles', title: 'El pozo del velo' }, (m) => {
+room({ id: 'pozo', area: 'ibaia', x: 108, y: 16, W: 24, H: 28, theme: 'pozo', music: 'faroles', title: 'El pozo del velo',
+  check: { start: { x: 9, y: 1 }, goal: 'bottom' } }, (m) => {
   m.fill(0, 0, 8, 28); m.fill(14, 0, 10, 28);
   m.clear(8, 27, 6, 1);
   for (let k = 0; k < 9; k++) m.fill(k % 2 ? 11 : 8, 2 + k * 3, 3, 1, '-');
   m.set(13, 4, 'L');
+  for (let k = 0; k < 8; k++) m.ch(k % 2 ? 9.5 : 11.5, 3.5 + k * 3);
 });
 
 // ================================================================== ACTO I · 2 · La Forja
-room({ id: 'forja1', area: 'ibaia', x: 96, y: 44, W: 48, H: 16, theme: 'forja', music: 'forja', title: 'La Forja', sub: 'Huelga y sabotaje · antes La Fundición' }, (m) => {
-  m.fill(0, 13, 48, 3); m.fill(0, 0, 20, 1); m.fill(26, 0, 22, 1);
+// Bajo el pozo, un foso de escoria: vagonetas colgadas, chorros de vapor y pasarelas.
+room({ id: 'forja1', area: 'ibaia', x: 96, y: 44, W: 48, H: 16, theme: 'forja', music: 'forja', title: 'La Forja', sub: 'Huelga y sabotaje · antes La Fundición',
+  check: { start: { x: 21, y: 3 }, goal: 'right' } }, (m) => {
+  m.fill(0, 13, 14, 3); m.fill(34, 13, 14, 3); m.fill(14, 15, 20, 1, '^');   // el foso de escoria
+  m.fill(0, 0, 20, 1); m.fill(26, 0, 22, 1);
   m.fill(0, 1, 1, 8); m.fill(1, 9, 2, 4, 'F');
-  m.fill(8, 9, 6, 1, '-'); m.fill(30, 9, 6, 1, '-');
+  m.fill(8, 9, 6, 1, '-'); m.fill(36, 9, 6, 1, '-');
   m.fill(20, 10, 3, 1, '-'); m.fill(23, 7, 3, 1, '-'); m.fill(20, 4, 3, 1, '-'); m.fill(23, 1, 3, 1, '-');
-  m.fill(15, 11, 3, 2, 'C');
-  m.set(6, 12, 'T'); m.set(40, 12, 'T'); m.set(24, 12, 'S');
-  m.e('blindado', 32, 12, { patrol: [26, 44] });
+  m.mover(14, 12, 30, 12, 4, 46, 0.9);               // la vagoneta colgante
+  m.bounce(16, 14, 2, null, 'vapor'); m.bounce(29, 14, 2, null, 'vapor');
+  m.fill(11, 11, 3, 2, 'C');
+  m.set(6, 12, 'T'); m.set(44, 12, 'T'); m.set(38, 12, 'S');
+  m.e('blindado', 40, 12, { patrol: [35, 46] });
   m.e('acolito', 12, 6);
+  m.ch(21, 3); m.ch(24, 6); m.ch(21, 9); m.row(16, 30, 10.5, 3.5); m.col(17, 8, 12, 2); m.col(30, 8, 12, 2); m.row(37, 41, 8, 2);
   m.e('hint', 5, 12, { text: 'Un muro de fuego. Haría falta hielo' });
+  m.e('hint', 36, 12, { text: 'Rejillas de vapor: el chorro te lanza hacia arriba' });
 });
-room({ id: 'taller', area: 'ibaia', x: 144, y: 44, W: 48, H: 16, theme: 'forja', music: 'forja', title: 'El taller de temple' }, (m) => {
+room({ id: 'taller', area: 'ibaia', x: 144, y: 44, W: 48, H: 16, theme: 'forja', music: 'forja', title: 'El taller de temple',
+  check: { start: { x: 1, y: 12 }, goal: { x: 36, y: 9, w: 8, h: 4 } } }, (m) => {
   m.fill(0, 13, 48, 3); m.fill(0, 0, 48, 1); m.fill(47, 1, 1, 12);
   m.fill(0, 1, 1, 8);
   m.fill(8, 3, 1, 10, 'k');
   m.fill(9, 5, 8, 1); m.fill(17, 1, 1, 5); m.fill(4, 1, 1, 10);
   m.fill(20, 9, 5, 1, '-'); m.fill(28, 6, 4, 1, '-');
+  m.mover(33, 12, 33, 4, 3, 36, 1);                  // el montacargas de los lingotes
+  m.fill(36, 4, 10, 1, '-'); m.bounce(24, 12, 2, null, 'vapor');
   m.set(22, 12, 'T'); m.set(30, 12, 'R');
   m.e('pagina', 14, 4, { id: 'p3' });
   m.e('hint', 10, 12, { text: 'Una cascada. Ponte detrás y hiélala: se podría trepar' });
@@ -174,34 +219,41 @@ room({ id: 'taller', area: 'ibaia', x: 144, y: 44, W: 48, H: 16, theme: 'forja',
   m.e('grillete', 44, 11, { id: 'g2' });
   m.e('paladin', 26, 12, { patrol: [18, 34] });
   m.e('reforzado', 14, 12, { patrol: [10, 18] });
+  m.row(20, 24, 8, 2); m.col(24.5, 6, 10, 2); m.row(28, 31, 5, 3); m.col(34, 5, 11, 3); m.row(37, 45, 3, 2);
 });
-room({ id: 'escarcha', area: 'ibaia', x: 48, y: 44, W: 48, H: 16, theme: 'escarcha', music: 'forja', title: 'Las cámaras de escarcha' }, (m) => {
+room({ id: 'escarcha', area: 'ibaia', x: 48, y: 44, W: 48, H: 16, theme: 'escarcha', music: 'forja', title: 'Las cámaras de escarcha',
+  check: { start: { x: 5, y: 12 }, goal: { x: 4, y: 0, w: 3, h: 2 }, marks: ['destino', 'energia', 'temperatura'] } }, (m) => {
   m.fill(0, 13, 48, 3);
   m.fill(0, 1, 4, 12); m.fill(8, 0, 40, 1);
   m.fill(7, 0, 1, 13, 'k');
   m.fill(14, 9, 2, 4, 'I'); m.fill(14, 1, 2, 8);
   m.fill(22, 10, 6, 1, '-'); m.fill(23, 6, 3, 1, '-');
+  m.crumble(17, 7, 3);                               // carámbanos: se rompen al pisarlos
   m.fill(30, 1, 2, 12, 'F');
-  m.fill(36, 9, 5, 1, '-');
+  m.fill(36, 9, 5, 1, '-'); m.crumble(41, 6, 3); m.bar(34, 5);
   m.set(20, 12, 'R'); m.set(42, 12, 'T');
   m.e('pagina', 24, 5, { id: 'p4' });
   m.e('acolito', 25, 6); m.e('acolito', 40, 5);
+  m.arc(16, 12, 22, 9, 2, 1.4); m.row(23, 27, 9, 2); m.ch(24.5, 5); m.row(36, 40, 8, 2); m.arc(35, 4, 41, 5, 2, 1); m.row(8.5, 13, 12, 1.5);
   m.e('hint', 18, 12, { text: 'El hielo se derrite con fuego' });
   m.e('hint', 10, 12, { text: 'Ponte detrás de la cascada y hiélala (X mantenido). El fuego la deshiela' });
 });
-room({ id: 'antorcha', area: 'ibaia', x: 48, y: 28, W: 48, H: 16, theme: 'forja', music: 'forja', title: 'La Antorcha', sub: 'El Ancla de la Forja' }, (m) => {
+room({ id: 'antorcha', area: 'ibaia', x: 48, y: 28, W: 48, H: 16, theme: 'forja', music: 'forja', title: 'La Antorcha', sub: 'El Ancla de la Forja',
+  check: { start: { x: 8, y: 12 }, goal: { x: 38, y: 9, w: 8, h: 4 }, marks: ['destino', 'energia', 'temperatura'] } }, (m) => {
   m.fill(0, 0, 48, 1); m.fill(0, 1, 4, 15); m.fill(47, 1, 1, 15);
   m.fill(7, 13, 41, 3);
   m.fill(16, 9, 5, 1, '-'); m.fill(25, 6, 5, 1, '-');
+  m.bounce(10, 12, 2, null, 'vapor'); m.plat(9, 5, 4); m.bar(21, 3);
   m.fill(33, 1, 1, 12, 'F'); m.fill(37, 1, 1, 12, 'F');
   m.set(14, 12, 'T'); m.set(22, 12, 'R'); m.set(29, 12, 'T');
   m.e('ancla', 42, 12, { n: 2 });
+  m.col(11, 6, 10, 2); m.row(10, 12, 4, 2); m.arc(13, 4, 21, 4, 3, 0.8); m.arc(22, 4, 26, 5, 1, 0.6); m.row(17, 20, 8, 3);
 });
 
 const START_ROOM = 'eibar1';
 
 // Puntos de reaparición por zona (si no hay caracola)
-const AREA_START = { eibar: ['eibar1', 2, 7], plaza: ['plaza', 2, 12], pueblo: ['casa', 14, 12], tormenta: ['ruina', 13, 12], bosque: ['forest1', 3, 12], ibaia: ['faroles1', 4, 12] };
+const AREA_START = { eibar: ['eibar1', 2, 7], plaza: ['plaza', 2, 12], pueblo: ['casa', 14, 12], tormenta: ['ruina', 13, 12], bosque: ['forest1', 3, 12], ibaia: ['faroles1', 4, 26] };
 
 // ------------------------------------------------------------------ Marcas que el jugador puede llevar
 const PLAYER_MARKS = {

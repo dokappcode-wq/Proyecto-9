@@ -33,13 +33,13 @@ En pantallas táctiles aparecen botones en pantalla.
 
 ### Prólogo (alrededor de una hora)
 
-Cinco capítulos jugables con 33 salas y dificultad progresiva. Cada uno enseña algo nuevo:
+Cinco capítulos jugables con 35 salas y dificultad progresiva. Cada sala tiene una línea de parkour continua, marcada con chispas doradas, y caerse no mata pero cuesta tiempo volver a subir. Cada capítulo enseña algo nuevo:
 
-- **I · La última noche.** Tejados de Eibar con Iker: correr, saltar, vallas, deslizarse, salto de pared, esprintar, lonas, cornisas, tendederos (tirolinas) y una carrera contrarreloj contra Iker. Después, el acantilado (rodar), el desagüe (arrastrarse) y la fortaleza en sigilo: paladines con cono de visión, ojos de cristal con foco, cajas, barriles y cortinas para esconderse. La cámara de los naipes, la huida por la torre y la carrera por las murallas.
+- **I · La última noche.** Tejados de Eibar con Iker: correr, saltar, vallas, deslizarse, salto de pared, esprintar, toldos elásticos, cornisas, tendederos (tirolinas y barras) y una carrera contrarreloj contra Iker. Después, el acantilado (rodar y rocas que se desmoronan), el desagüe (arrastrarse, la balsa y el montacargas) y la fortaleza en sigilo: paladines con cono de visión, ojos de cristal con foco, cajas, barriles y cortinas para esconderse. La cámara de los naipes, que se deja por la tirolina, la huida por la torre y la carrera por las murallas.
 - **II · La plaza.** Narbaiza tortura a Martín con la Marca de Sangre delante de todo el pueblo. Esa noche, Iker se despide en el callejón.
-- **III · Cinco días.** El pueblo de día: recados para amona (el gato de la panadera, la red de la cofa, el barco del correo visto desde el mirador), vecinos que hablan, el reto de Ane y el montaje de los cinco días hasta la tormenta.
-- **IV · La tormenta.** La casa derrumbada, las calles bajo los rayos, la copia de la Energía y la decisión.
-- **V · El despertar.** El ataque al convoy en el viaducto y el bosque: disparo, absorción, **disparo hacia arriba** contra los vigías, descarga cargada contra la roca reforzada, rayo hacia abajo, dash, el campamento de la PDC y el jefe **Búho Mayor**, que solo cae disparándole desde abajo.
+- **III · Cinco días.** El pueblo de día, con cada recado lejos de los otros y siempre por arriba: la red en la cofa de la trainera (vergas, jarcia y tirolina entre tres barcos), el gato de la panadera en lo alto de la torre del reloj (toldos de los puestos, balcones, banderines y saltos de pared) y el barco del correo visto desde el mirador. Vecinos que hablan, el reto de Ane por los tejados del mercado y el montaje de los cinco días hasta la tormenta.
+- **IV · La tormenta.** La casa derrumbada, los tejados bajo los rayos con cables cortados en la calle, **la calle hundida** (vigas, paredes en pie y una puerta a la deriva sobre agua electrificada), la copia de la Energía y la decisión.
+- **V · El despertar.** El ataque al convoy en el viaducto y el bosque: disparo, absorción, **disparo hacia arriba** contra los vigías, descarga cargada contra la roca reforzada, rayo hacia abajo, dash, el barranco de zarzas con ramas que rebotan, **el dosel** (lianas, ramas podridas, un tronco que se mece), el campamento de la PDC y el jefe **Búho Mayor**, que solo cae disparándole desde abajo.
 
 La historia se cuenta con **escenas animadas en el propio motor**: actores que andan, corren, caen y usan sus marcas, con cámara, bandas de cine, rayos, partículas y bocadillos. Entre salas contiguas hay una **transición de deslizamiento**, y al cambiar de capítulo, un fundido con el título.
 
@@ -47,14 +47,17 @@ Extras del prólogo: tres **lauburus de latón** (+1 de vida máxima), cuatro p�
 
 ### Acto I
 
-- **El barrio de los faroles**: la Centralita y las caracolas de bronce (guardado), la PDC que vigila y se alarma, los Acólitos y el Ancla de las cocheras, que se rompe cargando el carro de rayo de Rosa.
-- **La Forja**: el pozo del velo, Unai encadenado, la copia de la **Temperatura** (con permiso), las cámaras de escarcha y el Ancla de la Antorcha, que solo se agrieta con frío y calor alternos.
+- **El barrio de los faroles**: la calle bajo los soportales y, por encima, los tejados del barrio, que llevan a «Los tejados» por los callejones. La Centralita y las caracolas de bronce (guardado), la PDC que vigila y se alarma, los Acólitos y el Ancla de las cocheras (con su grúa y su montacargas), que se rompe cargando el carro de rayo de Rosa.
+- **La Forja**: el pozo del velo, el foso de escoria con vagonetas colgantes y rejillas de vapor, Unai encadenado, la copia de la **Temperatura** (con permiso), las cámaras de escarcha y el Ancla de la Antorcha, que solo se agrieta con frío y calor alternos.
 
 ### Sistemas
 
 - **Parkour con los números de la biblia**: casillas de 16 px, resolución interna de 384 × 216, carrera de 8 casillas/s y sprint de 11, salto variable de unas 3,5 casillas, tiempo de gracia de 0,1 s, salto guardado de 0,12 s y dash de 4,5 casillas en 0,15 s. Ningún movimiento corta el impulso.
 - **Absorción**: ninguna marca da poder infinito. La Energía se recarga en faroles de tormenta y cristales de rayo, y la Temperatura en braseros y arcones de escarcha.
 - **Puertas de marca**: rocas con vetas (Energía), rocas reforzadas (descarga cargada), muros de fuego, hielo y cascadas (Temperatura), velos (Anclas).
+- **Piezas de parkour**: toldos, lonas, ramas y rejillas de vapor que rebotan (mantén el salto para subir más), barras para balancearse, tirolinas, plataformas móviles y montacargas, y tejas o ramas podridas que se caen poco después de pisarlas.
+- **Racha**: encadenar movimientos sin pararse (pared, cornisa, valla, deslizarse, rodar, dash, tirolina, toldo, barra, salto largo) sube la racha; cada 5 te cura un corazón, o te recarga las marcas si ya estás a tope. Se pierde si pasan unos segundos sin encadenar nada o al recibir daño.
+- **Chispas**: marcan la línea buena de cada sala. La pausa cuenta las que llevas y tu mejor racha.
 
 ## Modo admin
 
@@ -77,6 +80,16 @@ src/render.js     casillas por tema, fondos con paralaje, clima, viñetas de las
 src/audio.js      efectos y música sintetizados con WebAudio
 src/input.js      teclado, mando y táctil
 src/game.js       bucle, estados, salas, guiones, menús, mapa y guardado (localStorage)
+tools/rutas.js    validador de rutas: busca, con la física real del juego, el camino más rápido de cada sala
+tools/validar.js  pasa el validador por todas las salas (necesita Playwright con Chromium)
 ```
 
 Las salas se conectan por su posición en el mundo: al salir por un borde se entra en la sala vecina de la misma zona.
+
+## Validar las rutas
+
+```bash
+node tools/validar.js
+```
+
+Para cada sala, el validador prueba combinaciones de movimientos (andar, saltar, carrerilla, salto de pared, deslizarse, dash, rebotes, esperar a las plataformas) con la física del juego y dice si se puede ir de la entrada a la salida, cuánto se tarda como mínimo, qué movimientos usa y qué chispas o coleccionables quedan fuera de alcance. Se le pueden pasar salas sueltas: `node tools/validar.js mercado muelle`. Cada sala puede afinar la comprobación con `check` (entrada, meta, marcas y banderas).

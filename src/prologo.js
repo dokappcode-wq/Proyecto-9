@@ -323,16 +323,17 @@ room({ id: 'calle', area: 'pueblo', x: 32, y: 0, W: 48, H: 14, theme: 'dia', mus
   m.e('hint', 12, 12, { text: 'Recados: pan en el mercado (→), pescado en el muelle (←), correo en el mirador (↑)' });
 });
 room({ id: 'mirador', area: 'pueblo', x: 56, y: -26, W: 24, H: 26, theme: 'dia', music: 'title', title: 'El mirador',
-  check: { start: { x: 13, y: 14 }, goal: { x: 14, y: 0, w: 6, h: 4 } } }, (m) => {
+  check: { start: { x: 7, y: 18 }, goal: { x: 14, y: 0, w: 6, h: 4 } } }, (m) => {
   m.fill(5, 20, 1, 6); m.fill(10, 18, 1, 8);
   m.fill(12, 15, 4, 1, '-'); m.fill(5, 12, 4, 1, '-'); m.fill(12, 9, 4, 1, '-'); m.fill(4, 6, 5, 1, '-');
   m.fill(17, 6, 3, 1, '-'); m.fill(13, 4, 9, 1, '-');
   m.plat(17, 16, 7);                                 // la pasarela que llega desde el mercado
+  m.plat(6, 19, 4); m.plat(7, 16, 3);                // rellanos al salir del hueco entre las casas
   m.e('pagina', 5, 5, { id: 'p6' });
   m.e('trigger', 15, 1, { w: 4, h: 3, script: 'mirador', once: true });
   m.e('meta', 17, 3, { id: 'ane' });
   m.deco('cuerda', 16, 10, { w: 8 });
-  m.col(7.5, 17, 23, 3); m.ch(13.5, 14); m.ch(6.5, 11); m.ch(13.5, 8); m.ch(6, 5); m.arc(9, 5, 17, 5, 3, 1.4); m.row(14, 20, 3, 2);
+  m.col(7.5, 20, 23, 3); m.ch(8, 15); m.ch(13.5, 14); m.ch(6.5, 11); m.ch(13.5, 8); m.ch(6, 5); m.arc(9, 5, 17, 5, 3, 1.4); m.row(14, 20, 3, 2);
   m.row(18, 22, 15, 2);
 });
 room({ id: 'mercado', area: 'pueblo', x: 80, y: -20, W: 48, H: 34, theme: 'dia', music: 'title', title: 'El mercado',
@@ -365,7 +366,7 @@ room({ id: 'mercado', area: 'pueblo', x: 80, y: -20, W: 48, H: 34, theme: 'dia',
   m.deco('cartel', 42, 12, { text: 'ERLOJUA' });
   m.arc(25.5, 30, 28, 20, 2, 2); m.arc(30, 19.5, 23.5, 16.5, 2, 1.2); m.col(24, 13, 15, 2); m.row(15, 21, 12.4, 3);
   m.arc(13.5, 12.5, 10, 12.5, 1, 1); m.arc(8.5, 12, 5, 9.5, 2, 1);
-  m.arc(26, 12.5, 30.5, 11, 2, 1); m.arc(32, 11.5, 38, 13, 3, 1.6); m.col(39.5, 4, 11, 3.5); m.ch(37.5, 3.5); m.ch(43, 1.5); m.ch(36, 21); m.ch(39.5, 17);
+  m.arc(26, 12.5, 30.5, 11, 2, 1); m.arc(32, 11.5, 38, 13, 3, 1.6); m.col(39.5, 4, 11, 3.5); m.ch(37.5, 3.5); m.ch(36, 21); m.ch(39.5, 17);
   m.e('hint', 2, 32, { text: 'Los toldos de los puestos rebotan. Mantén el salto para llegar a los balcones' });
 });
 
@@ -922,6 +923,6 @@ Object.assign(SCRIPTS, {
     ['say', 'radio', '...shhhh... si alguien me oye... shhhh... baja por la sierra... busca las caracolas de bronce...'],
     ['say', 'jon', '¿La radio de amona?'],
     ['title', 'Acto I', 'Ibaia, la ciudad de los diez velos', 3.5],
-    ['goto', 'faroles1', 4, 12],
+    ['goto', 'faroles1', 4, 26],
   ],
 });
