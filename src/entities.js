@@ -1019,7 +1019,9 @@ class NPC extends Ent {
   }
   get hiddenNow() { return this.d.needFlag && !G.save.flags[this.d.needFlag]; }
   get copyable() { return this.d.copy && G.save.flags['allow_' + this.d.copy] && !G.player.has(this.d.copy); }
-  get prompt() { return this.hiddenNow ? null : this.copyable ? 'Copiar su marca (mantén)' : 'Hablar'; }
+  // Mientras corre su carrera, el Iker de la salida es el corredor, no este
+  get racing() { return !!this.d.racer && !!G.race && G.race.id === this.d.racer; }
+  get prompt() { return this.hiddenNow || this.racing ? null : this.copyable ? 'Copiar su marca (mantén)' : 'Hablar'; }
   press() { if (!this.copyable) this.talk(); }
   get hold() { return this.copyable ? this.copy : null; }
   copy(dt) {
@@ -1054,7 +1056,7 @@ class NPC extends Ent {
     }
     if (Math.abs(p.cx - this.cx) > 6) this.face = sign(p.cx - this.cx);
     const key = this.fkey;
-    if (this.hiddenNow) return;
+    if (this.hiddenNow || this.racing) return;
     if (this.d.auto && !G.save.flags[key] && Math.abs(p.cx - this.cx) < this.d.auto && Math.abs(p.cy - this.cy) < 40 && !G.cine) this.talk();
   }
   pose() {
@@ -1064,7 +1066,7 @@ class NPC extends Ent {
     return BASE_IDLE(this.t, this.d.x);
   }
   draw(c) {
-    if (this.hiddenNow) return;
+    if (this.hiddenNow || this.racing) return;
     const pose = { ...this.pose() };
     if (this.copyT > 0) { pose.armF = [6, -1]; pose.armGlow = PLAYER_MARKS[this.d.copy].glow; }
     const spr = sprite('npc-' + this.who, this.ch, pose);
@@ -1592,6 +1594,19 @@ class Actor extends Ent {
   }
   update(dt) {
     this.t += dt;
+    // Ruta propia (p. ej. el corredor de la carrera): no bloquea al jugador
+    if (this.route && !this.jump && !this.fly && this.tx == null) {
+      const s = this.route.shift();
+      if (!s) this.route = null;
+      else if (s.arrive) { this.route = null; G.raceArrive(); }
+      else if (s.jump != null) {
+        this.face = sign(s.jump) || this.face; this.mode = 'jump';
+        this.jump = { x0: this.x, y0: this.y, x1: this.x + s.jump * T, y1: this.y + (s.dy || 0) * T, h: (s.h || 1) * T, t: 0, dur: s.dur || 0.5, after: 'run' };
+      } else {
+        this.speed = s.speed || 70; this.tx = s.x * T + 3; this.mode = 'run'; this.afterMode = 'run';
+        this.face = sign(this.tx - this.x) || this.face;
+      }
+    }
     if (this.fadeV) { this.alpha = clamp(this.alpha + this.fadeV * dt, 0, 1); if (this.alpha <= 0 && this.fadeV < 0) this.dead = true; if (this.alpha >= 1 && this.fadeV > 0) this.fadeV = 0; }
     if (this.glowT > 0) { this.glowT -= dt; if (this.glowT <= 0) this.glow = null; }
     if (this.jump) {

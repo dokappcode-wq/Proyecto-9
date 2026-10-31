@@ -3,13 +3,25 @@
 const SAVE_KEY = 'ascend-partida-v2';
 const FONT = "'Pixelify Sans', 'VT323', ui-monospace, monospace";
 
+const PAUSE_TABS = ['Mapa', 'Marcas', 'Páginas', 'Controles', 'Opciones'];
+// Punto de aparición de un admin: la casilla de suelo más baja entre las primeras columnas
+function spawnPoint(r) {
+  let best = null;
+  for (let x = 1; x <= Math.min(r.W - 2, 12); x++) {
+    for (let y = r.H - 2; y >= 0; y--) {
+      if (!SOLID.has(r.grid[y][x]) && SOLID.has(r.grid[y + 1][x])) { if (!best || y > best.y) best = { x, y }; break; }
+    }
+  }
+  return best || { x: 2, y: r.H - 2 };
+}
+
 const G = {
   state: 'title', t: 0, save: null, room: null, roomStates: {}, ents: [], player: null,
   projs: [], parts: [], waves: [], platforms: [], texts: [], hints: [], toasts: [],
   cam: { x: 0, y: 0 }, shakeT: 0, shakeA: 0, whiteFlash: 0, fadeFlash: 0, barFlash: {},
   cine: false, queue: [], dlg: null, scriptDone: null, interactTarget: null, copyProgress: 0, copyMark: 'energia',
   banner: null, lastBanner: null, menu: { sel: 0, tab: 0 }, entry: null, caughtT: 0, dieT: 0, reinforce: 0, markPop: 0,
-  titleT: 0, timers: [], bubbles: [], streams: [], bolts: [], waitT: 0, waitFn: null, camLock: null,
+  titleT: 0, graceT: 0, adminOn: /admin/i.test(location.href), adminSession: false, timers: [], bubbles: [], streams: [], bolts: [], waitT: 0, waitFn: null, camLock: null,
   fade: 0, fadeTarget: 0, fadeSpeed: 2, cutscene: false, letterbox: 0, titleCard: null, trans: null, race: null, boss: null,
   delay(s, fn) { this.timers.push({ s, fn }); },
 
@@ -20,10 +32,11 @@ const G = {
     };
   },
   hasSave() { try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; } },
-  writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.save)); } catch (e) { /* sin almacenamiento */ } },
+  writeSave() { if (this.adminSession) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.save)); } catch (e) { /* sin almacenamiento */ } },
   readSave() { try { return JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { return null; } },
 
-  start(load) {
+  start(load, admin) {
+    this.adminSession = !!admin;
     this.save = (load && this.readSave()) || this.newSave();
     const S = this.save;
     S.hp = S.maxHp;
@@ -35,7 +48,7 @@ const G = {
     this.cam.x = this.camTarget().x; this.cam.y = this.camTarget().y;
     this.lastBanner = null; this.showBanner();
     this.fade = this.fadeTarget = 0; this.cutscene = false; this.queue = []; this.dlg = null; this.cine = false;
-    this.enterScript();
+    if (!admin) this.enterScript();
   },
 
   // ---------------------------------------------------------------- Salas
@@ -66,6 +79,7 @@ const G = {
     return rs;
   },
   loadRoom(id, px, py) {
+    this.graceT = 1.2;
     const rs = this.roomStates[id] || (this.roomStates[id] = this.buildRoom(id));
     this.room = rs; this.ents = rs.ents;
     this.projs = []; this.platforms = []; this.waves = []; this.parts = this.parts.filter((p) => !p.seek).slice(-60);
@@ -130,12 +144,19 @@ const G = {
     burst(this.player.cx, this.player.cy, 24, ['#f2c45a', '#ffe7a3', '#ffffff'], 90, 0.8);
     this.titleCard = { title: 'Lauburu de latón', sub: '+1 de vida máxima', t: 0, dur: 2.6, lb: true };
   },
-  raceWin() {
-    const r = this.race; this.race = null;
-    Audio2.sfx('pickup');
-    this.toast(`¡Conseguido! ${(r.max - r.t).toFixed(1)} s`);
-    this.save.flags['race_' + r.id] = true;
-    if (SCRIPTS['race_' + r.id + '_ok']) this.runScript(SCRIPTS['race_' + r.id + '_ok']);
+  raceWin() { this.endRace(true); },
+  // El corredor ha llegado a la meta: gana él
+  raceArrive() { if (this.race && this.race.id === 'iker') this.endRace(false); },
+  endRace(won) {
+    const r = this.race;
+    if (!r) return;
+    this.race = null;
+    const runner = this.actor(r.id + '_r');
+    if (runner) { runner.route = null; runner.fadeV = -1.5; }
+    if (won) { this.save.flags['race_' + r.id] = true; Audio2.sfx('pickup'); this.toast(`¡Conseguido! ${(r.max - r.t).toFixed(1)} s`); }
+    else Audio2.sfx('hurt');
+    const s = SCRIPTS['race_' + r.id + (won ? '_ok' : '_fail')];
+    if (s) this.runScript(s); else this.toast(won ? '¡Conseguido!' : 'Se acabó el tiempo');
   },
   saveAt(e) {
     const S = this.save;
@@ -165,7 +186,7 @@ const G = {
     this.cine = false;
   },
   caught(e) {
-    if (this.caughtT > 0 || this.cine) return;
+    if (this.caughtT > 0 || this.cine || this.graceT > 0) return;
     this.caughtT = 1.1; this.cine = true;
     e.watch = 2; Audio2.sfx('alert');
     this.toast('¡Te han visto!');
@@ -392,6 +413,7 @@ const G = {
       case 'all': S.flags[args[0]] = args[1].every((f) => S.flags[f]); break;
       case 'hideNpc': for (const e of this.ents) if (e instanceof NPC && e.who === args[0]) e.dead = true; break;
       case 'race': this.race = { id: args[0], t: args[1], max: args[1] }; Audio2.sfx('alert'); this.toast('¡Contrarreloj!'); break;
+      case 'racerGo': { const a = this.actor('iker_r'); if (a) a.route = RACE_ROUTE.map((s) => ({ ...s })); break; }
       case 'lauburu': this.gainLauburu(args[0]); break;
       case 'heal': S.hp = S.maxHp; break;
       case 'bossStart': S.flags.buho_start = true; Audio2.setMusic('ancla'); break;
@@ -464,7 +486,7 @@ const G = {
     this.bolts = this.bolts.filter((b) => b.life > 0);
     if (this.race && !this.cine) {
       this.race.t -= dt;
-      if (this.race.t <= 0) { const id = this.race.id; this.race = null; Audio2.sfx('hurt'); if (SCRIPTS['race_' + id + '_fail']) this.runScript(SCRIPTS['race_' + id + '_fail']); else this.toast('Se acabó el tiempo'); }
+      if (this.race.t <= 0) this.endRace(false);
     }
     if (this.boss && (this.boss.dead || this.boss.dying)) this.boss = null;
     // Muerte y sala perdida por sigilo
@@ -481,6 +503,7 @@ const G = {
     this.updateDialog(dt);
     for (const tm of this.timers) if ((tm.s -= dt) <= 0) tm.fn();
     this.timers = this.timers.filter((tm) => tm.s > 0);
+    if (this.graceT > 0) this.graceT -= dt;
     if (this.shakeT > 0) { this.shakeT -= dt; if (this.shakeT <= 0) this.shakeA = 0; }
     for (const k in this.barFlash) this.barFlash[k] -= dt;
     if (this.whiteFlash > 0) this.whiteFlash -= dt;
@@ -545,7 +568,44 @@ const G = {
     this.cam.x += (ct.x - this.cam.x) * k; this.cam.y += (ct.y - this.cam.y) * Math.min(1, dt * (this.camLock ? this.camLock.speed : 9));
   },
   // ---------------------------------------------------------------- Título
-  titleOpts() { return this.hasSave() ? ['Continuar', 'Nueva partida', 'Controles'] : ['Nueva partida', 'Controles']; },
+  // Admin: ir a cualquier sala para verla. Sus partidas no escriben el progreso real.
+  adminList() {
+    const order = ['eibar', 'plaza', 'pueblo', 'tormenta', 'bosque', 'ibaia'];
+    const short = { eibar: 'Eibar', plaza: 'Plaza', pueblo: 'Pueblo', tormenta: 'Tormenta', bosque: 'Bosque', ibaia: 'Ibaia' };
+    const rooms = Object.values(ROOMS)
+      .sort((a, b) => order.indexOf(a.area) - order.indexOf(b.area))
+      .map((r) => ({ id: r.id, label: `${short[r.area] || r.area} · ${r.title || r.id}` }));
+    return [{ action: 'max', label: 'Marcas y vida al máximo' }, ...rooms];
+  },
+  adminMax() {
+    const S = this.save;
+    for (const m of ['destino', 'energia', 'temperatura']) if (!S.marks.includes(m)) S.marks.push(m);
+    S.bars.energia = 100; S.bars.temperatura = 100; S.hp = S.maxHp;
+    if (!S.active || S.active === 'destino') S.active = 'energia';
+    this.toast('Admin: marcas y vida al máximo');
+  },
+  adminGo(id) {
+    const r = ROOMS[id];
+    if (!r) return;
+    this.adminSession = true;
+    const sp = spawnPoint(r);
+    this.roomStates = {}; this.timers = []; this.race = null; this.boss = null; this.trans = null;
+    this.queue = []; this.dlg = null; this.cine = false; this.cutscene = false; this.camLock = null;
+    this.waitFn = null; this.waitT = 0; this.scriptDone = null; this.titleCard = null;
+    this.fade = this.fadeTarget = 0; this.caughtT = 0; this.dieT = 0;
+    const p = this.player;
+    p.ghost = false; p.state = 'normal'; p.setH(26); p.vx = 0; p.vy = 0; p.inv = 2; p.charge = 0; p.trail = [];
+    delete this.save.flags['enter_' + id];   // así también se ven las escenas de entrada
+    this.loadRoom(id, sp.x * T + 3, (sp.y + 1) * T - 26);
+    const ct = this.camTarget(); this.cam.x = ct.x; this.cam.y = ct.y;
+    this.state = 'play'; this.lastBanner = null;
+    this.enterScript();
+  },
+  titleOpts() {
+    const o = this.hasSave() ? ['Continuar', 'Nueva partida', 'Controles'] : ['Nueva partida', 'Controles'];
+    if (this.adminOn) o.push('Admin');
+    return o;
+  },
   updateTitle(dt) {
     this.titleT += dt;
     if (this.menu.controls) { if (Input.ok() || Input.pressed.pause || Input.pressed.shoot) { this.menu.controls = false; Audio2.sfx('select'); } return; }
@@ -559,22 +619,30 @@ const G = {
       Audio2.sfx('pickup');
       if (o === 'Continuar') this.start(true);
       else if (o === 'Nueva partida') this.start(false);
+      else if (o === 'Admin') { this.start(false, true); this.state = 'pause'; this.menu.tab = this.tabs().indexOf('Admin'); this.menu.sel = 0; }
       else this.menu.controls = true;
     }
   },
-  pauseTabs: ['Mapa', 'Marcas', 'Páginas', 'Controles', 'Opciones'],
+  tabs() { return this.adminOn ? [...PAUSE_TABS, 'Admin'] : PAUSE_TABS; },
   updatePause() {
     const m = this.menu;
     if (Input.pressed.pause || Input.pressed.map) { this.state = 'play'; Audio2.sfx('select'); return; }
-    if (Input.pressed.left || Input.pressed.swap && false) { m.tab = (m.tab + this.pauseTabs.length - 1) % this.pauseTabs.length; m.sel = 0; Audio2.sfx('select'); }
-    if (Input.pressed.right || Input.pressed.swap) { m.tab = (m.tab + 1) % this.pauseTabs.length; m.sel = 0; Audio2.sfx('select'); }
-    if (this.pauseTabs[m.tab] === 'Opciones') {
+    const nTabs = this.tabs().length;
+    if (Input.pressed.left) { m.tab = (m.tab + nTabs - 1) % nTabs; m.sel = 0; Audio2.sfx('select'); }
+    if (Input.pressed.right || Input.pressed.swap) { m.tab = (m.tab + 1) % nTabs; m.sel = 0; Audio2.sfx('select'); }
+    if (this.tabs()[m.tab] === 'Opciones') {
       if (Input.pressed.up || Input.pressed.down) { m.sel = (m.sel + 1) % 3; Audio2.sfx('select'); }
       if (Input.ok()) {
         if (m.sel === 0) { this.state = 'play'; }
         else if (m.sel === 1) { Audio2.toggleMute(); }
         else { this.state = 'title'; this.menu.sel = 0; Audio2.setMusic('title'); Audio2.setRain(0); Audio2.setHum(false); }
       }
+    }
+    if (this.tabs()[m.tab] === 'Admin') {
+      const list = this.adminList(), n = list.length;
+      if (Input.pressed.up) { m.sel = (m.sel + n - 1) % n; Audio2.sfx('select'); }
+      if (Input.pressed.down) { m.sel = (m.sel + 1) % n; Audio2.sfx('select'); }
+      if (Input.ok()) { const it = list[m.sel]; if (it.action === 'max') this.adminMax(); else this.adminGo(it.id); }
     }
   },
 };
@@ -870,12 +938,26 @@ function drawControls(x, y) {
 }
 
 // ------------------------------------------------------------------ Pausa: mapa, marcas, páginas
+// Lista de salas del admin: una ventana de filas con la selección centrada
+function drawAdmin() {
+  const list = G.adminList(), m = G.menu, rows = 12, lh = 12, top = 34;
+  txt('Admin · elige una sala para verla', VIEW_W / 2, 22, 7, '#f2c45a', 'center');
+  const off = clamp(m.sel - Math.floor(rows / 2), 0, Math.max(0, list.length - rows));
+  for (let i = off; i < Math.min(list.length, off + rows); i++) {
+    const it = list[i], y = top + (i - off) * lh, sel = i === m.sel;
+    txt((sel ? '▸ ' : '  ') + it.label, 36, y, 6.8, sel ? '#f2c45a' : '#c8c0d8');
+    if (it.id) txt(it.id, VIEW_W - 36, y, 6, '#7a74a0', 'right');
+  }
+  txt(`${m.sel + 1} / ${list.length}`, VIEW_W - 36, 22, 6, '#7a74a0', 'right');
+  txt('↑ ↓ elegir · Espacio o E ir · ← → pestañas · M cerrar', VIEW_W / 2, VIEW_H - 12, 6, '#7a74a0', 'center');
+}
 function renderPause() {
   SC.fillStyle = 'rgba(5,4,10,0.86)'; SC.fillRect(0, 0, screen.width, screen.height);
   const m = G.menu;
-  G.pauseTabs.forEach((tb, i) => txt(tb, 40 + i * 76, 8, 8, i === m.tab ? '#f2c45a' : '#7a74a0', 'center'));
+  const tabs = G.tabs(), step = (VIEW_W - 72) / (tabs.length - 1);
+  tabs.forEach((tb, i) => txt(tb, 36 + i * step, 8, 7.5, i === m.tab ? '#f2c45a' : '#7a74a0', 'center'));
   txt('◂ ▸', VIEW_W - 14, 8, 7, '#7a74a0', 'right');
-  const tab = G.pauseTabs[m.tab];
+  const tab = tabs[m.tab];
   if (tab === 'Mapa') drawMap();
   else if (tab === 'Marcas') drawMarks();
   else if (tab === 'Páginas') {
@@ -888,7 +970,8 @@ function renderPause() {
       if (have) { const ls = wrap(PAGES[id][1], VIEW_W - 60, 5.8); ls.slice(0, 3).forEach((l, i) => txt(l, 30, y + 9 + i * 7, 5.8, '#c8c0d8')); y += 9 + Math.min(3, ls.length) * 7 + 6; }
       else y += 14;
     }
-  } else if (tab === 'Controles') drawControls(50, 30);
+  } else if (tab === 'Admin') drawAdmin();
+  else if (tab === 'Controles') drawControls(50, 30);
   else {
     ['Seguir jugando', Audio2.muted ? 'Activar sonido' : 'Silenciar', 'Volver al título'].forEach((o, i) => txt((i === m.sel ? '▸ ' : '') + o, VIEW_W / 2, 70 + i * 16, 9, i === m.sel ? '#f2c45a' : '#b5aed0', 'center'));
     const tm = Math.floor(G.save.time);
@@ -987,6 +1070,14 @@ function frame(now) {
   }
   requestAnimationFrame(frame);
 }
+// Escribir «gaur» en el título activa la opción Admin (o añade #admin al enlace).
+// La clave no usa letras de confirmar (E, I, Z, K), para no elegir nada por error.
+let typedKeys = '';
+addEventListener('keydown', (e) => {
+  if (!e.key || e.key.length !== 1) return;
+  typedKeys = (typedKeys + e.key.toLowerCase()).slice(-4);
+  if (typedKeys === 'gaur') G.adminOn = true;
+});
 Input.init();
 Audio2.setMusic('title');
 window.ASCEND = G;

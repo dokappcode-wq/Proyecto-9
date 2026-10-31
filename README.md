@@ -56,6 +56,15 @@ Extras del prólogo: tres **lauburus de latón** (+1 de vida máxima), cuatro p�
 - **Absorción**: ninguna marca da poder infinito. La Energía se recarga en faroles de tormenta y cristales de rayo, y la Temperatura en braseros y arcones de escarcha.
 - **Puertas de marca**: rocas con vetas (Energía), rocas reforzadas (descarga cargada), muros de fuego, hielo y cascadas (Temperatura), velos (Anclas).
 
+## Modo admin
+
+Sirve para revisar cualquier pantalla sin jugar hasta llegar. Se abre de una de estas formas:
+
+- En el título, escribe `gaur`: aparece la opción **Admin**.
+- Añade `#admin` al final de la dirección de la página.
+
+En la pausa aparece la pestaña **Admin**, con la lista de salas por capítulo. Elige una y pulsa Espacio o E: te lleva a esa sala y reproduce su escena de entrada. La primera fila da marcas y vida al máximo. Una sesión de admin **no guarda** el progreso: tu partida real queda intacta.
+
 ## Estructura
 
 ```

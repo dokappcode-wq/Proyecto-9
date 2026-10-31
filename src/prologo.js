@@ -1,6 +1,18 @@
 // El prólogo: cinco capítulos jugables, de los tejados de Eibar a la primera vista de Ibaia.
 'use strict';
 
+// Trayecto de Iker en la carrera. Coordenadas de casilla: x, y como tope de la casilla que pisa.
+// Cada salto lleva dx casillas, dy filas de altura (negativo, subir) y h casillas de arco.
+const RACE_ROUTE = [
+  { x: 5.2, speed: 66 }, { jump: 4.0, h: 1.4, dur: 0.5, dy: 0 },
+  { x: 13.0, speed: 66 }, { jump: 5.2, h: 2.2, dur: 0.6, dy: -1 },
+  { x: 22.5, speed: 66 }, { jump: 1.6, h: 0.8, dur: 0.35, dy: 1 },
+  { x: 31.5, speed: 66 }, { jump: 4.8, h: 3.8, dur: 0.8, dy: -3 },
+  { x: 37.6, speed: 66 }, { jump: 1.6, h: 0.6, dur: 0.35, dy: 1 },
+  { x: 41.0, speed: 66 }, { jump: 4.3, h: 1.6, dur: 0.55, dy: 0 },
+  { x: 56.5, speed: 66 }, { arrive: true },
+];
+
 // ================================================================== I · La última noche (Eibar, de noche)
 room({ id: 'eibar1', area: 'eibar', x: 0, y: 0, W: 48, H: 14, theme: 'eibar', music: 'eibar', title: 'Eibar', sub: 'Prólogo · La última noche', onEnter: 'intro' }, (m) => {
   m.fill(0, 8, 10, 6);
@@ -40,14 +52,13 @@ room({ id: 'carrera', area: 'eibar', after: ['tendederos', 13, 10], W: 64, H: 14
   m.fill(0, 10, 6, 4);
   m.fill(9, 10, 5, 4); m.set(11, 9, '#');
   m.fill(18, 9, 6, 5);
-  m.fill(24, 10, 9, 4); m.fill(27, 0, 3, 9);
+  m.fill(24, 10, 9, 4); m.fill(27, 0, 3, 5);   // el pilar deja paso bajo él (antes cerraba el camino)
   m.fill(36, 7, 2, 7);
   m.fill(38, 8, 4, 6);
   m.fill(45, 8, 6, 6);
   m.fill(51, 8, 5, 1, '-'); m.fill(51, 13, 5, 1, '^');
   m.fill(56, 8, 8, 6);
-  m.e('npc', 4, 9, { who: 'iker', key: 'iker_a', script: 'iker_reto', once: true, auto: 50, leave: true, leaveDir: -1 });
-  m.e('npc', 60, 7, { who: 'iker', key: 'iker_b', script: 'iker_meta', needFlag: 'iker_reto' });
+  m.e('npc', 4, 9, { who: 'iker', key: 'iker_a', script: 'iker_reto', once: true, auto: 50, racer: 'iker' });
   m.e('meta', 57, 7, { id: 'iker' });
   m.e('hint', 33, 9, { text: 'Lo que no alcanzas de un salto, lo alcanzas agarrándote' });
 });
@@ -106,13 +117,18 @@ room({ id: 'patio', area: 'eibar', after: ['fort1', 5, 5], W: 48, H: 16, theme: 
 room({ id: 'almacen', area: 'eibar', after: ['patio', 15, 13], W: 48, H: 14, theme: 'fort', music: 'fort', stealth: true, title: 'El almacén' }, (m) => {
   m.fill(0, 0, 48, 1); m.fill(0, 13, 48, 1); m.fill(0, 1, 1, 9); m.fill(47, 1, 1, 9);
   m.fill(4, 9, 6, 1, '-'); m.fill(12, 6, 8, 1, '-'); m.fill(22, 6, 6, 1, '-'); m.fill(30, 6, 8, 1, '-'); m.fill(40, 9, 5, 1, '-');
-  m.fill(22, 11, 2, 2, 'C');
-  m.e('paladin', 12, 12, { patrol: [6, 20] });
-  m.e('paladin', 34, 12, { patrol: [26, 44] });
+  // Pasarela alta: el guardia ve hacia abajo solo a unas casillas; por debajo se pasa
+  m.fill(14, 8, 11, 1, '-');
+  m.fill(29, 11, 2, 2, 'C');
+  m.e('paladin', 18, 7, { patrol: [15, 23], face: 1 });
+  // Segunda pasarela, sobre la salida: también se pasa por debajo
+  m.fill(36, 8, 9, 1, '-');
+  m.e('paladin', 40, 7, { patrol: [37, 43], face: -1 });
+  m.e('escondite', 33, 12, { kind: 'cortina', w: 2 });
   m.e('escondite', 9, 12, { kind: 'cortina', w: 2 });
-  m.e('escondite', 37, 12, { kind: 'cortina', w: 2 });
   m.e('pagina', 16, 5, { id: 'p8' });
-  m.e('hint', 2, 12, { text: 'Tras una cortina, agachado, los guardias pasan de largo' });
+  m.e('hint', 2, 12, { text: 'El de la pasarela solo ve lo que tiene justo debajo: pasa por abajo' });
+  m.e('hint', 30, 12, { text: 'Tras una cortina, agachado, nadie te ve. Espera a que el guardia se dé la vuelta' });
 });
 room({ id: 'torre', area: 'eibar', after: ['almacen', 13, 27], W: 24, H: 28, theme: 'fort', music: 'fort', stealth: true, title: 'La torre' }, (m) => {
   m.fill(0, 0, 24, 1); m.fill(0, 1, 1, 23); m.fill(23, 1, 1, 1); m.fill(23, 5, 1, 23);
@@ -372,11 +388,13 @@ Object.assign(SCRIPTS, {
     ['player', 'show'],
   ],
   iker_reto: [
-    ['say', 'iker', 'Te estaba esperando. ¿Una carrera hasta el acantilado? Yo voy por la calle; tú, por los tejados.'],
+    ['say', 'iker', 'Te estaba esperando. ¿Una carrera hasta el final de los tejados? Yo corro por la calle; tú, por lo alto.'],
     ['say', 'jon', 'Por la calle es más corto.'],
     ['say', 'iker', 'Por eso. ¡Ya!'],
     ['do', 'flag', 'iker_reto'],
     ['do', 'race', 'iker', 26],
+    ['actor', 'iker_r', 'iker', 4, 9, { face: 1 }],
+    ['do', 'racerGo'],
   ],
   race_iker_ok: [
     ['say', 'iker', '¿Ya estás aquí? Seguro que has hecho trampa.'],
@@ -384,10 +402,8 @@ Object.assign(SCRIPTS, {
     ['say', 'iker', 'Toma, anda. Lo gané en las fiestas. Que te dé suerte ahí dentro.'],
     ['do', 'lauburu', 'L1'],
   ],
-  race_iker_fail: [['do', 'hint', 'Iker ha llegado antes. Ve a buscarle al final de los tejados.']],
-  iker_meta: [
-    ['if', 'race_iker', [['say', 'iker', 'La próxima vez voy yo por los tejados.']],
-      [['say', 'iker', '¡Lento! Las sidras corren de tu cuenta.'], ['say', 'jon', 'Había un gato en el camino.']]],
+  race_iker_fail: [
+    ['say', 'iker', 'Te he dejado sitio en la meta. Vuelve a hablar conmigo y lo intentamos otra vez.'],
   ],
   iker2: [
     ['say', 'iker', 'Por el desagüe. Los paladines miran hacia el mar, no hacia dentro.'],
