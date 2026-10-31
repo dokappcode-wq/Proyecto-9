@@ -37,7 +37,7 @@ const Audio2 = {
     const g = this.ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     s.connect(f); f.connect(g); g.connect(this.sfxGain); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.02);
   },
-  sfx(name) {
+  sfx(name, arg) {
     if (!this.ctx) return;
     switch (name) {
       case 'jump': this.tone(220, 0.12, 'square', 0.08, 260); break;
@@ -69,6 +69,11 @@ const Audio2 = {
       case 'veil': [196, 247, 294, 392, 494].forEach((f, i) => this.tone(f, 1.6, 'triangle', 0.08, 0, i * 0.12)); this.noise(1.5, 0.15, 300, 1, 'lowpass'); break;
       case 'thunder': this.noise(1.6, 0.35, 200, 0.7, 'lowpass', 0, -120); break;
       case 'card': this.tone(1046, 0.6, 'triangle', 0.08); this.tone(1568, 0.8, 'triangle', 0.06, 0, 0.15); break;
+      case 'bounce': this.tone(180, 0.18, 'triangle', 0.12, 420); this.noise(0.08, 0.06, 900); break;
+      case 'swing': this.noise(0.15, 0.07, 1200, 2, 'bandpass', 0, -600); break;
+      case 'racha': [784, 988, 1175].forEach((f, i) => this.tone(f, 0.12, 'square', 0.05, 0, i * 0.05)); break;
+      case 'chispa': this.tone(1046 * Math.pow(2, Math.min(12, arg || 0) / 12), 0.09, 'triangle', 0.06); break;
+      case 'crumble': this.noise(0.25, 0.08, 500, 1, 'lowpass', 0, -200); break;
       case 'die': this.tone(400, 0.8, 'triangle', 0.12, -330); break;
     }
   },

@@ -15,7 +15,7 @@ function renderTiles(rs) {
   const edgeCol = mix(th.body, INK, 0.6), lit = mix(th.cap, '#fff1d0', 0.25);
   for (let y = 0; y < rs.H; y++) for (let x = 0; x < rs.W; x++) {
     const ch = rs.grid[y][x], px = x * T, py = y * T;
-    if (ch === 'F' || ch === 'V' || ch === 'k') { rs.anim.push({ x, y, ch }); continue; }
+    if (ch === 'F' || ch === 'V' || ch === 'k' || ch === 'c') { rs.anim.push({ x, y, ch }); continue; }
     if (ch === '#') {
       const up = !sol(x, y - 1), down = !sol(x, y + 1), left = !sol(x - 1, y), right = !sol(x + 1, y);
       R(c, px, py, T, T, th.body);
@@ -100,6 +100,13 @@ function drawAnimTiles(c, rs, t) {
         R(c, px + i + ((j / 4) % 2) * 2, py + j, 2, 1, on ? '#ffb547' : 'rgba(255,181,71,0.35)');
         R(c, px + i + 1 + ((j / 4) % 2) * 2, py + j + 2, 1, 1, on ? '#ffe0a8' : 'rgba(255,181,71,0.2)');
       }
+    } else if (ch === 'c') {
+      // Teja suelta: tiembla cuando la pisan
+      const cr = rs.crumbles && rs.crumbles.get(a.x + ',' + a.y);
+      const j = cr && !cr.gone ? Math.round((Math.random() - 0.5) * 2) : 0;
+      R(c, px + j, py, T, 6, '#8a5a50'); R(c, px + j, py, T, 1, '#b07a6a');
+      for (let i = 0; i < 4; i++) R(c, px + j + i * 4 + (a.y % 2) * 2, py + 2, 1, 3, '#5a3a38');
+      R(c, px + j + 3, py + 6, 10, 3, '#6a4a44'); R(c, px + j + 5, py + 9, 2, 2, '#4a3034');
     } else if (ch === '^') {
       if (Math.random() < 0.15) { R(c, px + 6 + Math.random() * 4, py + 6 + Math.random() * 4, 1, 1, '#ffffff'); R(c, px + 4 + Math.random() * 8, py + 4 + Math.random() * 8, 1, 1, '#9fd0ff'); }
     } else if (ch === 'k') {
@@ -287,6 +294,19 @@ function drawHeart(c, x, y, full) {
 }
 function drawHUD(c) {
   const S = G.save;
+  // Chispas recogidas, arriba a la derecha
+  if (S.chispas) {
+    const n = String(S.chispas), x = VIEW_W - 10 - n.length * 4;
+    R(c, x - 12, 4, n.length * 4 + 16, 9, 'rgba(11,10,23,0.55)');
+    R(c, x - 9, 5, 3, 7, '#f2c45a'); R(c, x - 10, 7, 5, 3, '#f2c45a'); R(c, x - 8, 8, 1, 1, '#fff1b8');
+    digits(c, n, x, 6, '#ffe7a3');
+  }
+  // Barra de racha bajo los corazones
+  const pl = G.player;
+  if (pl.racha >= 2) {
+    const w = Math.min(60, pl.racha * 4);
+    R(c, 4, 14, 62, 2, 'rgba(11,10,23,0.55)'); R(c, 5, 14, Math.round(w * Math.min(1, pl.rachaT / 2.4)), 2, pl.racha >= 10 ? '#ffe7a3' : '#f2c45a');
+  }
   R(c, 4, 4, S.maxHp * 9 + 2, 9, 'rgba(11,10,23,0.55)');
   for (let i = 0; i < S.maxHp; i++) drawHeart(c, 6 + i * 9, 5, i < S.hp);
   let y = 16;

@@ -9,12 +9,12 @@ const VIEW_W = 384, VIEW_H = 216;
 //  F  muro de fuego (Temperatura: hielo)  V  velo de la Defensa (cae al romper el Ancla)
 //  k  cascada (se congela y se trepa)     K  cascada helada    ^  pinchos / cristales
 //  X  reja (se abre con un evento)   W  madera (cascos, muelles)   G  roca reforzada (descarga cargada)
-const SOLID = new Set(['#', 'C', 'B', 'G', 'I', 'F', 'V', 'K', 'X', 'W']);
+const SOLID = new Set(['#', 'C', 'B', 'G', 'I', 'F', 'V', 'K', 'X', 'W', 'c']);
 
 // Letras de entidad dentro del mapa
 const ENT_LETTERS = {
   P: 'spawn', L: 'farol', Y: 'cristal', T: 'brasero', R: 'arcon', S: 'caracola',
-  p: 'paladin', r: 'reforzado', b: 'blindado', x: 'ballestero', o: 'vigia', a: 'acolito', g: 'pagina',
+  p: 'paladin', r: 'reforzado', b: 'blindado', x: 'ballestero', o: 'vigia', a: 'acolito', g: 'pagina', '*': 'chispa',
 };
 
 const NAMES = {
@@ -37,6 +37,7 @@ const THEMES = {
   roofs: { sky: ['#1a2040', '#5a4a6a'], far: '#2a2a4a', near: '#22223e', win: '#ffd48a', body: '#3c2e3e', cap: '#7a5a5a', dark: '#241a2a', roof: true, rain: 0.7, veils: true, tower: true },
   pozo: { sky: ['#0e0c1c', '#2a1a20'], far: '#1a1424', near: '#140f1c', win: null, body: '#33283a', cap: '#4e3e52', dark: '#1c1522', brick: true, interior: true },
   forja: { sky: ['#2a1418', '#a8542a'], far: '#3a1a1a', near: '#2a1414', win: '#ff8a2a', body: '#3a2622', cap: '#6a4030', dark: '#22140f', brick: true, embers: true, interior: true, glow: '#ff8a2a' },
+  acantilado: { sky: ['#1a1838', '#6a3a58'], far: '#2a2448', near: '#221d3a', win: null, body: '#3e3a44', cap: '#6a6a58', dark: '#2a2630', grass: true, moon: true, stars: true, sea: true },
   dia: { sky: ['#5a8ac0', '#f0dcb0'], far: '#8a9ab8', near: '#7a8aa8', win: '#3a5a4a', body: '#d8ccb4', cap: '#a84a3a', dark: '#9a8a70', roof: true, sea: true, seaCol: ['#3a6a9a', '#a8c8e0'], sun: true, clouds: true },
   atardecer: { sky: ['#4a2a4a', '#f0905a'], far: '#5a3a5a', near: '#4a2e4a', win: '#ffcf7a', body: '#a89078', cap: '#8a3a2e', dark: '#6a5a4a', roof: true, sea: true, seaCol: ['#4a3a5a', '#d8805a'], clouds: true },
   noche: { sky: ['#0e0e22', '#2a2448'], far: '#1e1a34', near: '#18142a', win: '#ffcf7a', body: '#4a4050', cap: '#6a4a4a', dark: '#2a222e', roof: true, stars: true, moon: true },
@@ -54,6 +55,23 @@ function makeRoom(def, paint) {
     set(x, y, ch) { if (g[y] && x >= 0 && x < W) g[y][x] = ch; },
     clear(x, y, w = 1, h = 1) { this.fill(x, y, w, h, '.'); },
     e(type, x, y, props = {}) { ents.push({ type, x, y, ...props }); },
+    // Piezas de parkour
+    roof(x, top, w, ch = '#') { this.fill(x, top, w, H - top, ch); },   // bloque hasta el suelo de la sala
+    plat(x, y, w) { this.fill(x, y, w, 1, '-'); },                     // toldo o balcón: se cruza desde abajo
+    crumble(x, y, w) { this.fill(x, y, w, 1, 'c'); },                  // tejas sueltas
+    bar(x, y) { this.e('barra', x, y); },
+    bounce(x, y, w = 2, col) { this.e('rebote', x, y, { w, col }); },
+    mover(x, y, x2, y2, w = 3, speed = 40, wait = 0.8, k = 0) { this.e('movil', x, y, { x2, y2, w, speed, wait, k }); },
+    deco(kind, x, y, props = {}) { this.e('decor', x, y, { kind, ...props }); },
+    // Escalera de balcones en un callejón: para volver a subir si caes a la calle
+    ladder(x, w, yTop, yBottom, step = 3) { for (let y = yBottom - step; y > yTop; y -= step) this.plat(x, y, w); },
+    // Chispas: puntos, filas y arcos que dibujan la línea de parkour
+    ch(x, y) { this.e('chispa', x, y); },
+    row(x0, x1, y, step = 2) { for (let x = x0; x <= x1; x += step) this.ch(x, y); },
+    col(x, y0, y1, step = 2) { for (let y = y0; y <= y1; y += step) this.ch(x, y); },
+    arc(x0, y0, x1, y1, n = 4, h = 2) {
+      for (let i = 1; i <= n; i++) { const t = i / (n + 1); this.ch(+(x0 + (x1 - x0) * t).toFixed(1), +(y0 + (y1 - y0) * t - h * 4 * t * (1 - t)).toFixed(1)); }
+    },
   };
   paint(m);
   // Letras de entidades

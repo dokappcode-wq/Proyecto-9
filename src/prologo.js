@@ -14,45 +14,96 @@ const RACE_ROUTE = [
 ];
 
 // ================================================================== I · La última noche (Eibar, de noche)
-room({ id: 'eibar1', area: 'eibar', x: 0, y: 0, W: 48, H: 14, theme: 'eibar', music: 'eibar', title: 'Eibar', sub: 'Prólogo · La última noche', onEnter: 'intro' }, (m) => {
-  m.fill(0, 8, 10, 6);
-  m.fill(13, 8, 9, 6); m.set(17, 7, '#');
-  m.fill(25, 9, 9, 5); m.fill(28, 0, 3, 8);
-  m.fill(34, 0, 2, 7); m.fill(34, 9, 5, 5);
-  m.fill(39, 3, 9, 11);
-  m.e('hint', 2, 7, { text: '← →  correr' });
+// Cada sala tiene una línea de parkour continua. Entre los tejados hay callejones con
+// balcones: caer no mata, pero cuesta volver a subir. Las chispas marcan la línea buena.
+room({ id: 'eibar1', area: 'eibar', x: 0, y: 0, W: 72, H: 20, theme: 'eibar', music: 'eibar', title: 'Eibar', sub: 'Prólogo · La última noche', onEnter: 'intro' }, (m) => {
+  m.fill(0, 19, 72, 1);
+  m.roof(0, 8, 10);
+  m.ladder(10, 3, 8, 19);
+  m.roof(13, 8, 9); m.set(17, 7, '#');
+  m.ladder(22, 3, 9, 19);
+  m.roof(25, 9, 9); m.fill(28, 0, 3, 8);
+  m.fill(34, 0, 2, 7); m.roof(34, 9, 5);
+  m.roof(39, 3, 9);
+  m.roof(48, 5, 9); m.set(52, 4, '#');
+  m.ladder(57, 3, 5, 19);
+  m.roof(60, 3, 12);
+  // Detalles
+  m.deco('chimenea', 3, 7, { h: 1 }); m.deco('antena', 6, 7); m.deco('chimenea', 20, 7, { h: 1 });
+  m.deco('cuerda', 9, 8, { w: 5 }); m.deco('cuerda', 21, 8, { w: 5 });
+  m.deco('maceta', 32, 8); m.deco('antena', 44, 2); m.deco('chimenea', 66, 2, { h: 2 });
+  m.deco('farola', 5, 18); m.deco('farola', 30, 18); m.deco('farola', 52, 18);
+  m.deco('cartel', 14, 7, { text: 'ARRANTZALE' });
+  // Chispas: la línea de parkour
+  m.arc(8.5, 7, 13.5, 7, 3, 1.6); m.arc(16, 6.6, 18.6, 6.6, 2, 1); m.arc(20.5, 7, 25.5, 8, 3, 1.6);
+  m.row(27, 31, 8.2); m.col(37, 1.5, 7.5); m.arc(56, 4, 60.5, 2.5, 3, 1.4); m.row(63, 69, 2);
+  m.e('hint', 2, 7, { text: '← →  correr · las chispas doradas marcan el camino' });
   m.e('hint', 9, 7, { text: 'ESPACIO / Z  saltar · suelta antes para saltar menos' });
   m.e('hint', 15, 7, { text: 'Corre contra lo bajo: lo saltas sin frenar' });
   m.e('hint', 25, 8, { text: '↓ corriendo: deslizarse por debajo' });
   m.e('hint', 36, 8, { text: 'Salta contra una pared, y otra vez hacia la otra' });
+  m.e('hint', 11, 18, { text: 'Si caes a la calle, vuelve a subir por los balcones' });
 });
-room({ id: 'puerto', area: 'eibar', after: ['eibar1', 3, 3], W: 48, H: 14, theme: 'eibar', music: 'eibar', title: 'Los tejados del puerto' }, (m) => {
-  m.fill(0, 3, 8, 11);
-  m.fill(11, 5, 10, 9);
-  m.fill(27, 6, 8, 8);
-  m.fill(35, 9, 4, 1, '-'); m.fill(35, 12, 4, 2);
-  m.fill(40, 7, 3, 1, '-');
-  m.fill(43, 4, 5, 10);
-  m.e('pagina', 36, 11, { id: 'p5' });
-  m.e('hint', 12, 4, { text: 'Corre sin soltar: al rato esprintas y saltas mucho más lejos' });
-  m.e('hint', 33, 5, { text: 'Las lonas aguantan. ↓ + salto para bajar a través de ellas' });
+room({ id: 'puerto', area: 'eibar', after: ['eibar1', 3, 3], W: 80, H: 20, theme: 'eibar', music: 'eibar', title: 'Los tejados del puerto' }, (m) => {
+  m.fill(0, 19, 80, 1);
+  m.roof(0, 3, 8);
+  m.roof(10, 6, 12);                                 // pista para esprintar
+  m.ladder(22, 6, 7, 19);                            // si fallas el salto largo, se vuelve por aquí
+  m.roof(28, 7, 8);
+  m.roof(36, 11, 4); m.bounce(36, 10, 4, '#3e7cb1');  // puesto del mercado con toldo elástico
+  m.roof(40, 2, 8);                                  // la casa alta: solo con el toldo
+  m.plat(49, 5, 3); m.plat(53, 8, 3);                // lonas para bajar
+  m.plat(49, 16, 3); m.plat(53, 13, 3); m.plat(49, 10, 3);
+  m.roof(57, 10, 3); m.roof(61, 7, 2);
+  m.roof(64, 4, 16); m.set(66, 3, '#'); m.fill(70, 0, 2, 3); m.set(76, 3, '#');
+  m.e('pagina', 50, 18, { id: 'p5' });
+  m.deco('chimenea', 3, 2, { h: 1 }); m.deco('maceta', 12, 5); m.deco('antena', 18, 5); m.deco('chimenea', 31, 6, { h: 2 });
+  m.deco('cartel', 36, 10, { text: 'ARRAINA' }); m.deco('puesto', 24, 18, { col: '#c84a3a' }); m.deco('farola', 45, 18);
+  m.deco('antena', 44, 1); m.deco('cuerda', 47, 4, { w: 10 }); m.deco('chimenea', 73, 3, { h: 1 });
+  m.arc(21.5, 5, 28.5, 6, 4, 1.6); m.col(38, 0, 8); m.row(41, 46, 1);
+  m.arc(47.5, 1.5, 50.5, 4, 2, 1); m.arc(52, 4, 54.5, 7, 2, 1); m.arc(56, 7, 58.5, 9, 2, 1);
+  m.arc(59.5, 9, 61.5, 6, 2, 1.2); m.arc(62.5, 6, 64.5, 3, 2, 1.2); m.arc(65, 3, 67.5, 3, 2, 1); m.row(70, 71, 3.2, 1); m.arc(75, 3, 77.5, 3, 2, 1);
+  m.e('hint', 12, 5, { text: 'Corre sin soltar: al rato esprintas y saltas mucho más lejos' });
+  m.e('hint', 31, 6, { text: 'Toldo elástico: rebota. Mantén el salto al caer encima y subirás mucho más' });
+  m.e('hint', 65, 3, { text: 'Encadena movimientos sin pararte: la racha sube y cada 5 te cura' });
 });
-room({ id: 'fachada', area: 'eibar', after: ['puerto', 4, 16], W: 32, H: 17, theme: 'eibar', music: 'eibar', title: 'La fachada de la cofradía' }, (m) => {
-  m.fill(0, 16, 20, 1); m.fill(20, 4, 12, 13);
-  m.fill(14, 12, 3, 1); m.fill(8, 8, 3, 1); m.fill(13, 4, 4, 1);
-  m.e('hint', 4, 15, { text: 'Cornisas: salta junto al borde y empuja hacia él. ↑ o salto para subir, ↓ para soltarte' });
+room({ id: 'fachada', area: 'eibar', after: ['puerto', 4, 27], W: 32, H: 28, theme: 'eibar', music: 'eibar', title: 'La fachada de la cofradía' }, (m) => {
+  m.fill(0, 27, 20, 1);
+  m.fill(0, 6, 4, 17);                               // casa de la izquierda: se entra por debajo
+  m.roof(20, 4, 12);                                 // la cofradía
+  m.fill(14, 23, 3, 1); m.fill(8, 19, 3, 1); m.fill(14, 15, 3, 1); m.fill(8, 11, 3, 1); m.fill(13, 7, 4, 1);
+  m.plat(4, 9, 2);                                   // balcón para el tejado de la izquierda
+  for (const [x, y] of [[15, 22], [9, 18], [15, 14], [9, 10], [14, 6]]) m.deco('maceta', x, y);
+  m.deco('cartel', 21, 10, { text: 'KOFRADIA' }); m.deco('farola', 2, 26); m.deco('chimenea', 1, 5, { h: 1 }); m.deco('antena', 27, 3);
+  m.ch(15, 21); m.ch(9, 17); m.ch(15, 13); m.ch(9, 9); m.ch(14.5, 5); m.arc(16.5, 5, 20.5, 2.5, 2, 1);
+  m.row(0.5, 2.5, 4.5, 1);
+  m.e('hint', 4, 26, { text: 'Cornisas: salta junto al borde y empuja hacia él. ↑ o salto para subir, ↓ para soltarte' });
 });
-room({ id: 'tendederos', area: 'eibar', after: ['fachada', 4, 4], W: 48, H: 16, theme: 'eibar', music: 'eibar', title: 'Los tendederos' }, (m) => {
-  m.fill(0, 4, 6, 12); m.fill(20, 9, 6, 7); m.fill(41, 13, 7, 3);
+room({ id: 'tendederos', area: 'eibar', after: ['fachada', 4, 4], W: 72, H: 18, theme: 'eibar', music: 'eibar', title: 'Los tendederos' }, (m) => {
+  m.fill(0, 17, 72, 1);
+  m.roof(0, 4, 6);
   m.e('zip', 5, 2, { x2: 19, y2: 7 });
-  m.e('zip', 25, 7, { x2: 40, y2: 11 });
+  m.ladder(6, 14, 9, 17);
+  m.roof(20, 9, 6);
+  m.bar(30, 7); m.bar(36, 7);                        // barras de tendedero sobre la calle
+  m.ladder(26, 4, 9, 17);                            // si caes, se vuelve al principio de las barras
+  m.roof(42, 9, 8);
+  m.e('zip', 49, 7, { x2: 63, y2: 10 });
+  m.plat(60, 15, 4);
+  m.bounce(52, 16, 3, '#c9a24a'); m.plat(54, 6, 3);   // ruta alta opcional
+  m.roof(64, 13, 8);
+  m.deco('cuerda', 6, 5, { w: 14 }); m.deco('cuerda', 26, 4, { w: 16 }); m.deco('cuerda', 50, 4, { w: 14 });
+  m.deco('maceta', 21, 8); m.deco('antena', 46, 8); m.deco('chimenea', 68, 12, { h: 1 }); m.deco('farola', 33, 16);
+  m.ch(9, 3.4); m.ch(12, 4.4); m.ch(15, 5.4); m.arc(26, 8, 30, 8.5, 2, 1); m.arc(31, 8.5, 36, 8.5, 3, 2); m.arc(37, 8.5, 42.5, 8, 3, 2);
+  m.ch(53, 8.2); m.ch(56, 9); m.ch(59, 9.8); m.row(54.5, 56.5, 5); m.col(53, 7, 13, 3);
   m.e('hint', 2, 3, { text: 'Salta a la cuerda de tender: te deslizas. Salta para soltarte' });
+  m.e('hint', 21, 8, { text: 'Barras: salta hacia ellas y te agarras. ← → para balancearte, salto para soltarte' });
 });
 room({ id: 'carrera', area: 'eibar', after: ['tendederos', 13, 10], W: 64, H: 14, theme: 'eibar', music: 'eibar', title: 'La carrera' }, (m) => {
   m.fill(0, 10, 6, 4);
   m.fill(9, 10, 5, 4); m.set(11, 9, '#');
   m.fill(18, 9, 6, 5);
-  m.fill(24, 10, 9, 4); m.fill(27, 0, 3, 5);   // el pilar deja paso bajo él (antes cerraba el camino)
+  m.fill(24, 10, 9, 4); m.fill(27, 0, 3, 5);
   m.fill(36, 7, 2, 7);
   m.fill(38, 8, 4, 6);
   m.fill(45, 8, 6, 6);
@@ -60,31 +111,46 @@ room({ id: 'carrera', area: 'eibar', after: ['tendederos', 13, 10], W: 64, H: 14
   m.fill(56, 8, 8, 6);
   m.e('npc', 4, 9, { who: 'iker', key: 'iker_a', script: 'iker_reto', once: true, auto: 50, racer: 'iker' });
   m.e('meta', 57, 7, { id: 'iker' });
+  m.deco('chimenea', 2, 9, { h: 1 }); m.deco('antena', 21, 8); m.deco('maceta', 31, 9); m.deco('chimenea', 47, 7, { h: 1 }); m.deco('antena', 60, 7);
+  m.arc(5.5, 9, 9.5, 9, 3, 1.4); m.arc(10.5, 8.5, 12, 8.5, 1, 1); m.arc(13.5, 9, 18.5, 8, 3, 1.8);
+  m.arc(32.5, 9, 36.5, 6, 3, 1.8); m.arc(41.5, 7, 45.5, 7, 3, 1.4); m.row(52, 55, 7);
   m.e('hint', 33, 9, { text: 'Lo que no alcanzas de un salto, lo alcanzas agarrándote' });
 });
-room({ id: 'acantilado', area: 'eibar', after: ['carrera', 8, 3], W: 48, H: 24, theme: 'eibar', music: 'eibar', title: 'El acantilado' }, (m) => {
-  m.fill(0, 3, 8, 21);
-  m.fill(10, 9, 5, 2);
-  m.fill(18, 13, 6, 2);
-  m.fill(28, 17, 4, 1, '-');
-  m.fill(24, 21, 24, 3);
-  m.fill(38, 6, 10, 12);
-  for (let x = 38; x < 48; x += 2) m.set(x, 5, '#');
-  m.e('hint', 9, 8, { text: 'Cae desde alto y pulsa ↓ al tocar el suelo: ruedas y no te haces daño' });
-  m.e('hint', 18, 12, { text: 'Contra una pared en el aire: te deslizas y te agarras a las cornisas' });
-  m.e('npc', 34, 20, { who: 'iker', script: 'iker2', once: true, auto: 60 });
+room({ id: 'acantilado', area: 'eibar', after: ['carrera', 8, 3], W: 48, H: 40, theme: 'acantilado', music: 'eibar', title: 'El acantilado' }, (m) => {
+  m.fill(0, 3, 8, 31);                               // la última casa, sobre la roca
+  m.fill(10, 8, 5, 3);                               // primer saliente
+  m.crumble(15, 11, 6); m.fill(21, 11, 4, 3);        // rocas sueltas
+  m.fill(22, 14, 3, 14); m.fill(28, 8, 2, 20);       // la chimenea de roca: deslizarse por las paredes
+  m.bar(33, 6);                                      // ruta alta: a la muralla por la barra
+  m.fill(0, 34, 48, 6);                              // la playa
+  m.fill(38, 14, 10, 17);                            // muralla de la fortaleza (el desagüe, abajo)
+  for (let x = 38; x < 48; x += 2) m.set(x, 13, '#');
+  m.fill(16, 32, 2, 2); m.fill(32, 33, 1, 1);
+  m.e('npc', 34, 33, { who: 'iker', script: 'iker2', once: true, auto: 60 });
+  m.deco('chimenea', 2, 2, { h: 1 }); m.deco('antena', 5, 2); m.deco('farola', 36, 33);
+  m.arc(7.5, 2.5, 11, 7, 3, 1); m.row(15.5, 20.5, 10, 1); m.col(26, 14, 26, 3);
+  m.ch(28.5, 6.5); m.arc(30, 6.5, 33, 7, 2, 0.6); m.arc(34, 7.5, 38.5, 11.5, 3, 1.5); m.row(39, 46, 12);
+  m.row(19, 35, 32.5, 4);
+  m.e('hint', 10, 7, { text: 'Cae desde alto y pulsa ↓ al tocar el suelo: ruedas y no te haces daño' });
+  m.e('hint', 15, 10, { text: 'Rocas sueltas: se caen poco después de pisarlas. ¡No te pares!' });
+  m.e('hint', 21, 10, { text: 'Contra una pared en el aire te deslizas despacio' });
 });
-room({ id: 'desague', area: 'eibar', after: ['acantilado', 21, 13], W: 48, H: 14, theme: 'tunel', music: 'fort', title: 'El desagüe' }, (m) => {
-  m.fill(0, 0, 48, 2); m.fill(0, 13, 48, 1); m.fill(0, 2, 1, 8);
-  m.fill(6, 2, 8, 10);
-  m.fill(16, 13, 3, 1, '^');
-  m.fill(22, 9, 4, 4);
-  m.fill(26, 2, 12, 5); m.fill(26, 9, 12, 4);
-  m.fill(40, 2, 8, 10);
-  m.e('hint', 2, 12, { text: '↓ quieto: agáchate. Así te arrastras por donde no cabe nadie' });
-  m.e('hint', 15, 12, { text: 'Rejas rotas: mejor por encima' });
+room({ id: 'desague', area: 'eibar', after: ['acantilado', 34, 15], W: 64, H: 16, theme: 'tunel', music: 'fort', title: 'El desagüe' }, (m) => {
+  m.fill(0, 0, 64, 2); m.fill(0, 15, 64, 1); m.fill(0, 2, 1, 10);
+  m.fill(6, 2, 8, 12);                               // gateo
+  m.fill(16, 15, 4, 1, '^');
+  m.fill(24, 15, 14, 1, '^');                        // canal con rejas rotas
+  m.mover(23, 13, 34, 13, 3, 38, 0.8);               // la balsa
+  m.mover(40, 14, 40, 7, 3, 42, 1);                  // el montacargas
+  m.fill(43, 7, 14, 8); m.fill(43, 2, 14, 2);        // el conducto de arriba
+  m.clear(48, 7, 4, 6); m.fill(48, 13, 4, 1, '^'); m.crumble(48, 7, 4);
+  m.fill(59, 2, 5, 12);                              // gateo final
+  m.row(7, 13, 14.2); m.arc(15, 13, 20.5, 13, 3, 1.8); m.row(25, 36, 11.5, 3); m.col(41, 7, 13, 2); m.row(44, 55, 5.5, 2); m.row(59, 63, 14.2);
+  m.e('hint', 2, 14, { text: '↓ quieto: agáchate. Así te arrastras por donde no cabe nadie' });
+  m.e('hint', 21, 14, { text: 'La balsa cruza el canal: súbete y deja que te lleve' });
+  m.e('hint', 39, 14, { text: 'El montacargas sube solo. Espera encima' });
 });
-room({ id: 'fort1', area: 'eibar', after: ['desague', 13, 13], W: 48, H: 14, theme: 'fort', music: 'fort', stealth: true, title: 'La fortaleza', sub: 'Que no te vean' }, (m) => {
+room({ id: 'fort1', area: 'eibar', after: ['desague', 15, 13], W: 48, H: 14, theme: 'fort', music: 'fort', stealth: true, title: 'La fortaleza', sub: 'Que no te vean' }, (m) => {
   m.fill(0, 0, 48, 1); m.fill(0, 13, 48, 1);
   m.fill(0, 1, 1, 9);
   m.fill(47, 1, 1, 1); m.fill(47, 5, 1, 8);
@@ -96,6 +162,7 @@ room({ id: 'fort1', area: 'eibar', after: ['desague', 13, 13], W: 48, H: 14, the
   m.set(31, 4, 'C');
   m.e('paladin', 20, 12, { patrol: [10, 30] });
   m.e('paladin', 40, 4, { guard: true });
+  m.ch(9, 8); m.ch(17, 5); m.ch(20, 5); m.col(43.5, 6, 11, 2.5);
   m.e('hint', 2, 12, { text: 'Si un paladín te ve, vuelves a la entrada. ↓ quieto: agacharte tras las cajas' });
   m.e('hint', 17, 5, { text: 'Desde arriba no te ven' });
   m.e('hint', 38, 12, { text: 'Un hueco entre dos paredes: salta de una a otra' });
@@ -111,6 +178,7 @@ room({ id: 'patio', area: 'eibar', after: ['fort1', 5, 5], W: 48, H: 16, theme: 
   m.e('escondite', 23, 14, { kind: 'barril' });
   m.e('escondite', 32, 14, { kind: 'barril' });
   m.e('escondite', 42, 14, { kind: 'barril' });
+  m.ch(10.5, 13.5); m.ch(19.5, 13.5); m.ch(28.5, 13.5); m.ch(37.5, 13.5);
   m.e('hint', 3, 4, { text: 'Ojos de cristal: no pases bajo su luz. Bajo los tejadillos no te ven' });
   m.e('hint', 22, 14, { text: 'Agachado junto a un barril, nadie te ve' });
 });
@@ -127,6 +195,7 @@ room({ id: 'almacen', area: 'eibar', after: ['patio', 15, 13], W: 48, H: 14, the
   m.e('escondite', 33, 12, { kind: 'cortina', w: 2 });
   m.e('escondite', 9, 12, { kind: 'cortina', w: 2 });
   m.e('pagina', 16, 5, { id: 'p8' });
+  m.row(23, 26, 4.8); m.row(31, 36, 4.8);
   m.e('hint', 2, 12, { text: 'El de la pasarela solo ve lo que tiene justo debajo: pasa por abajo' });
   m.e('hint', 30, 12, { text: 'Tras una cortina, agachado, nadie te ve. Espera a que el guardia se dé la vuelta' });
 });
@@ -143,38 +212,49 @@ room({ id: 'torre', area: 'eibar', after: ['almacen', 13, 27], W: 24, H: 28, the
   m.e('escondite', 12, 20, { kind: 'cortina', w: 2 });
   m.e('escondite', 9, 14, { kind: 'cortina', w: 2 });
   m.e('escondite', 13, 8, { kind: 'cortina', w: 2 });
+  m.ch(2, 22.5); m.ch(20, 16.5); m.ch(2, 10.5); m.ch(19, 5.5);
   m.e('hint', 3, 26, { text: 'Espera bajo el rellano a que el guardia te dé la espalda' });
 });
-room({ id: 'fort2', area: 'eibar', after: ['torre', 5, 27], W: 32, H: 28, theme: 'fortout', music: 'fort', title: 'La cámara de los naipes' }, (m) => {
+room({ id: 'fort2', area: 'eibar', after: ['torre', 5, 27], W: 32, H: 28, theme: 'fortout', music: 'fort', title: 'La cámara de los naipes', check: { flags: { naipe: true } } }, (m) => {
   m.fill(0, 0, 1, 24);
   m.fill(1, 20, 31, 1); m.clear(22, 20, 3, 1);
-  m.fill(31, 20, 1, 8);
+  m.fill(31, 7, 1, 21);                              // la salida está arriba: solo por la tirolina
   m.fill(0, 27, 32, 1);
   m.fill(13, 25, 3, 2);
   m.set(18, 26, 'C');
   m.fill(19, 23, 5, 1, '-');
   m.e('gate', 22, 20, { w: 3, h: 1, flag: 'naipe' });
   m.e('naipe', 14, 24);
+  // Andamios en zigzag: se suben atravesándolos desde abajo hasta la tirolina
   m.fill(25, 17, 5, 1, '-');
-  m.fill(17, 14, 6, 1, '-');
-  m.fill(25, 11, 5, 1, '-');
-  m.fill(14, 8, 7, 1, '-');
+  m.fill(19, 14, 8, 1, '-');
+  m.fill(22, 11, 8, 1, '-');
+  m.fill(14, 8, 10, 1, '-');
   m.fill(3, 5, 10, 1);
   m.fill(3, 6, 2, 14);
-  m.e('zip', 12, 4, { x2: 31, y2: 15 });
-  m.e('spawner', 0, 0, { flag: 'naipe', list: [['ballestero', 7, 4], ['vigia', 22, 6], ['paladin', 26, 16, { patrol: [25, 29] }], ['paladin', 18, 13, { patrol: [17, 22] }]] });
+  m.e('zip', 12, 4, { x2: 32, y2: 5 });
+  m.e('spawner', 0, 0, { flag: 'naipe', list: [['ballestero', 7, 4], ['vigia', 22, 6], ['paladin', 26, 16, { patrol: [25, 29] }], ['paladin', 21, 13, { patrol: [19, 26] }]] });
+  m.ch(27, 15.5); m.ch(20.5, 12.5); m.ch(27, 9.5); m.ch(17, 6.5); m.ch(15, 7); m.ch(21, 7); m.row(16, 30, 5.6, 3);
+  m.deco('antorcha', 6, 26); m.deco('antorcha', 26, 26);
 });
-room({ id: 'murallas', area: 'eibar', after: ['fort2', 17, 10], W: 64, H: 14, theme: 'fortout', music: 'ancla', title: 'Las murallas', sub: '¡Corre!' }, (m) => {
-  m.fill(0, 10, 14, 4); for (const x of [4, 8, 12]) m.set(x, 9, '#');
-  m.fill(17, 10, 10, 4); for (const x of [20, 24]) m.set(x, 9, '#');
-  m.fill(25, 7, 2, 1, '-'); m.fill(27, 5, 4, 9);
-  m.fill(31, 10, 8, 4); m.set(35, 9, '#');
-  m.fill(43, 10, 21, 4); for (const x of [47, 51]) m.set(x, 9, '#');
+room({ id: 'murallas', area: 'eibar', after: ['fort2', 7, 10], W: 96, H: 16, theme: 'fortout', music: 'ancla', title: 'Las murallas', sub: '¡Corre!', check: { goal: { x: 90, y: 0, w: 6, h: 13 } } }, (m) => {
+  m.roof(0, 10, 14); for (const x of [4, 8, 12]) m.set(x, 9, '#');
+  m.roof(17, 10, 10); for (const x of [20, 24]) m.set(x, 9, '#');
+  m.plat(25, 7, 2); m.roof(27, 5, 4);
+  m.bar(35, 3);                                      // de torre a torre por la barra
+  m.roof(41, 5, 4);
+  m.crumble(45, 8, 10);                              // almenas que se desmoronan
+  m.roof(55, 10, 8); m.plat(58, 7, 3);
+  m.roof(63, 4, 3);
+  m.e('zip', 65, 2, { x2: 90, y2: 9 });              // la tirolina hasta el acantilado
+  m.roof(66, 13, 30);
   m.e('paladin', 21, 9, { patrol: [17, 26], hostile: true });
   m.e('ballestero', 29, 4, { hostile: true });
-  m.e('paladin', 48, 9, { patrol: [43, 55], hostile: true });
-  m.e('vigia', 40, 3, { hostile: true, patrol: [34, 50] });
-  m.e('exit', 59, 0, { w: 5, h: 10, script: 'endP1' });
+  m.e('paladin', 58, 9, { patrol: [55, 62], hostile: true });
+  m.e('vigia', 40, 2, { hostile: true, patrol: [34, 50] });
+  m.e('exit', 90, 0, { w: 6, h: 12, script: 'endP1' });
+  m.arc(13.5, 9, 17.5, 9, 3, 1.4); m.arc(25.5, 6, 28, 4, 2, 0.8); m.arc(31, 4, 35, 4.5, 2, 0.8); m.arc(36, 4.5, 41.5, 4, 3, 1.6);
+  m.row(46, 54, 7, 2); m.arc(61, 6, 63.5, 3, 2, 1); m.ch(70, 3.5); m.ch(76, 5.2); m.ch(82, 6.8);
   m.e('hint', 2, 9, { text: 'Sin marcas con las que pelear: esquiva y no te pares' });
 });
 
@@ -436,7 +516,7 @@ Object.assign(SCRIPTS, {
   ],
   endP1: [
     ['jonActor'],
-    ['move', 'jon', 63, { run: true }],
+    ['move', 'jon', 93, { run: true }],
     ['jump', 'jon', 5, 1.5, { dy: 9, dur: 1, mode: 'fall', then: 'fall' }],
     ['fade', 'out', 0.5], ['sfx', 'land'],
     ['wait', 0.6],

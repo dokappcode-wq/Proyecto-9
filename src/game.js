@@ -81,6 +81,9 @@ const G = {
   loadRoom(id, px, py) {
     this.graceT = 1.2;
     const rs = this.roomStates[id] || (this.roomStates[id] = this.buildRoom(id));
+    // Las tejas que se cayeron vuelven a su sitio
+    if (rs.crumbles && rs.crumbles.size) { for (const c of rs.crumbles.values()) rs.grid[c.ty][c.tx] = 'c'; rs.crumbles.clear(); renderTiles(rs); }
+    rs.crumbles = rs.crumbles || new Map();
     this.room = rs; this.ents = rs.ents;
     this.projs = []; this.platforms = []; this.waves = []; this.parts = this.parts.filter((p) => !p.seek).slice(-60);
     const p = this.player;
@@ -135,6 +138,20 @@ const G = {
     this.showBanner();
     this.writeSave();
     if (!noEnter) this.enterScript();
+  },
+  // Chispas: cada una recarga un poco las marcas; cada 40, un fragmento de Destino (+1 vida)
+  pickChispa(e) {
+    const S = this.save;
+    S.flags[e.key] = true; S.chispas = (S.chispas || 0) + 1;
+    for (const m of S.marks) if (S.bars[m] != null) S.bars[m] = Math.min(100, S.bars[m] + 3);
+    this.chispaChain = this.chispaT > 0 ? (this.chispaChain || 0) + 1 : 0; this.chispaT = 0.9;
+    Audio2.sfx('chispa', this.chispaChain);
+    burst(e.cx, e.cy, 5, ['#f2c45a', '#fff1b8'], 40, 0.3);
+    if (S.chispas % 40 === 0 && (S.chispaVidas || 0) < 4) {
+      S.chispaVidas = (S.chispaVidas || 0) + 1; S.maxHp++; S.hp = S.maxHp;
+      this.titleCard = { title: 'Fragmento de Destino', sub: `${S.chispas} chispas · +1 de vida máxima`, t: 0, dur: 2.6, lb: true };
+      Audio2.sfx('copy');
+    }
   },
   gainLauburu(id) {
     const S = this.save;
@@ -224,6 +241,25 @@ const G = {
     if (!r.def.stealth) this.reinforce = 3;
   },
   // ---------------------------------------------------------------- Casillas que cambian
+  // Tejas sueltas ('c'): tiemblan al pisarlas, caen y vuelven a los 3 s
+  updateCrumbles(dt) {
+    const rs = this.room, p = this.player;
+    if (!rs.crumbles) rs.crumbles = new Map();
+    if (p.onGround && !p.ghost) {
+      const ty = Math.floor((p.feet + 1) / T);
+      for (let tx = Math.floor(p.x / T); tx <= Math.floor((p.x + p.w - 0.01) / T); tx++) {
+        const k = tx + ',' + ty;
+        if (tileAt(tx, ty) === 'c' && !rs.crumbles.has(k)) { rs.crumbles.set(k, { tx, ty, t: 0.45, gone: false }); Audio2.sfx('crumble'); }
+      }
+    }
+    let changed = false;
+    for (const [k, c] of rs.crumbles) {
+      c.t -= dt;
+      if (!c.gone && c.t <= 0) { c.gone = true; c.t = 3; rs.grid[c.ty][c.tx] = '.'; changed = true; burst(c.tx * T + 8, c.ty * T + 6, 8, ['#7a5a5a', '#5a4048', '#a07a6a'], 60, 0.7, 300, 2); }
+      else if (c.gone && c.t <= 0 && !overlap(p, { x: c.tx * T, y: c.ty * T, w: T, h: T })) { rs.grid[c.ty][c.tx] = 'c'; rs.crumbles.delete(k); changed = true; }
+    }
+    if (changed) this.tileChanged();
+  },
   tileChanged() { for (const id in this.roomStates) this.roomStates[id].edgeCache.clear(); renderTiles(this.room); },
   breakTile(tx, ty) {
     // La roca entera: todas las casillas con vetas conectadas
@@ -509,6 +545,8 @@ const G = {
     if (this.whiteFlash > 0) this.whiteFlash -= dt;
     if (this.fadeFlash > 0) this.fadeFlash -= dt;
     if (this.markPop > 0) this.markPop -= dt * 2;
+    if (this.comboPop) { this.comboPop.t -= dt * 0.9; if (this.comboPop.t <= 0) this.comboPop = null; }
+    if (this.chispaT > 0) this.chispaT -= dt;
     if (this.panT > 0) this.panT -= dt;
     if (this.banner) { this.banner.life -= dt; if (this.banner.life <= 0) this.banner = null; }
     for (const t of this.toasts) t.life -= dt;
@@ -523,6 +561,7 @@ const G = {
     }
     // Plataformas temporales (hielo, enemigos congelados)
     this.platforms = this.platforms.filter((p) => !p.frozen && (p.life -= dt) > 0);
+    this.updateCrumbles(dt);
     // Objetivo de E
     const p = this.player;
     this.interactTarget = null;
@@ -805,6 +844,12 @@ function renderOverlay() {
   const it = G.interactTarget;
   if (it && !G.cine) txt(`[${keyName('use')}] ${it.prompt}`, it.cx - cx, it.y - cy - 12, 6.5, '#ffffff', 'center');
   // Nombre de la marca al cambiar
+  // Racha: el último movimiento y el multiplicador
+  const cp = G.comboPop, pl = G.player;
+  if (cp && pl.racha >= 2 && !G.cine) {
+    const a = Math.min(1, cp.t * 2);
+    txt(`${cp.name}  ×${pl.racha}`, VIEW_W / 2, 22, pl.racha >= 10 ? 9 : 7.5, pl.racha >= 10 ? '#ffe7a3' : '#f2c45a', 'center', true, a);
+  }
   if (G.markPop > 0 && G.save.active && G.save.active !== 'destino') txt(PLAYER_MARKS[G.save.active].name, 22, 31, 7, PLAYER_MARKS[G.save.active].glow, 'left', true, Math.min(1, G.markPop * 2));
   // Rótulo del barrio
   if (G.banner) {
@@ -975,7 +1020,7 @@ function renderPause() {
   else {
     ['Seguir jugando', Audio2.muted ? 'Activar sonido' : 'Silenciar', 'Volver al título'].forEach((o, i) => txt((i === m.sel ? '▸ ' : '') + o, VIEW_W / 2, 70 + i * 16, 9, i === m.sel ? '#f2c45a' : '#b5aed0', 'center'));
     const tm = Math.floor(G.save.time);
-    txt(`Tiempo: ${Math.floor(tm / 60)} min ${tm % 60} s`, VIEW_W / 2, 130, 6.5, '#7a74a0', 'center');
+    txt(`Tiempo: ${Math.floor(tm / 60)} min ${tm % 60} s · Chispas: ${G.save.chispas || 0} · Mejor racha: ×${(G.save.stats && G.save.stats.racha) || 0}`, VIEW_W / 2, 130, 6.5, '#7a74a0', 'center');
     txt('La partida se guarda en las caracolas de bronce y al cambiar de capítulo', VIEW_W / 2, 142, 6, '#7a74a0', 'center');
   }
 }
