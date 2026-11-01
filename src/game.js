@@ -813,8 +813,54 @@ function renderWorld() {
   if (G.fadeFlash > 0) fade = Math.max(fade, G.fadeFlash * 2);
   if (fade > 0) { c.fillStyle = `rgba(5,4,10,${Math.min(1, fade)})`; c.fillRect(0, 0, VIEW_W, VIEW_H); }
 }
+// Misión actual: el primer recado pendiente cuyo requisito ya está hecho
+function missionState() {
+  const F = G.save.flags;
+  if (!F.recados_on) return null;
+  const cur = RECADOS.find((r) => !F[r.flag] && (!r.after || F[r.after])) || null;
+  const done = ['pan', 'pescado', 'correo'].filter((f) => F[f]).length;
+  if (done === 3) return null;
+  return { cur, done, total: 3 };
+}
+// Marcador de misión: rombo dorado que flota sobre el objetivo; si está fuera, se queda en el borde
+function drawMissionMarker(cx, cy) {
+  const ms = missionState();
+  if (!ms || !ms.cur || G.dlg || G.cine) return;
+  const r = ms.cur;
+  let sx = r.x * T - cx, sy = r.y * T - cy + Math.sin(G.t * 4) * 2;
+  const inRoom = r.room === G.room.def.id;
+  if (!inRoom) return;
+  const edge = sx < 8 || sx > VIEW_W - 8 || sy < 8 || sy > VIEW_H - 8;
+  sx = clamp(sx, 8, VIEW_W - 8); sy = clamp(sy, 8, VIEW_H - 8);
+  const a = edge ? 0.6 : 1;
+  SC.globalAlpha = a;
+  const col = Math.floor(G.t * 6) % 2 ? '#ffe7a3' : '#f2c45a';
+  for (let dy = -4; dy <= 4; dy++) {
+    const w = 9 - 2 * Math.abs(dy);
+    SC.fillStyle = '#0b0a17'; SC.fillRect(OX + (sx - w / 2 - 1) * S, OY + (sy + dy - 1) * S, (w + 2) * S, S);
+  }
+  for (let dy = -3; dy <= 3; dy++) {
+    const w = 7 - 2 * Math.abs(dy);
+    SC.fillStyle = col; SC.fillRect(OX + (sx - w / 2) * S, OY + (sy + dy) * S, w * S, S);
+  }
+  SC.globalAlpha = 1;
+}
+// Panel de misión: qué hay que hacer y cuántos recados llevas
+function drawMissionPanel() {
+  const ms = missionState();
+  if (!ms || G.dlg || G.cine) return;
+  const lines = ms.cur ? wrap(ms.cur.text, 150, 6) : ['Todos los recados, hechos.'];
+  const where = ms.cur ? ms.cur.place : '';
+  const h = 12 + lines.length * 8 + (where ? 8 : 0);
+  box(4, 33, 160, h, 'rgba(11,10,23,0.72)', '#f2c45a');
+  txt(`RECADOS DE AMONA · ${ms.done}/${ms.total}`, 8, 36, 5, '#f2c45a', 'left', false);
+  lines.forEach((l, i) => txt(l, 8, 44 + i * 8, 6, '#f3ead8', 'left', false));
+  if (where) txt('> ' + where.toUpperCase(), 8, 44 + lines.length * 8, 4.5, '#9fd0ff', 'left', false);
+}
 function renderOverlay() {
   const cx = G.cam.x, cy = G.cam.y;
+  drawMissionMarker(cx, cy);
+  drawMissionPanel();
   // Pistas en el mundo
   // La pista más cercana, en una franja fija abajo
   const hint = G.hints.reduce((m, h) => (!m || h.a > m.a ? h : m), null);

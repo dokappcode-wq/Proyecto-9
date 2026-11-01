@@ -58,6 +58,8 @@ function makeRoom(def, paint) {
     // Piezas de parkour
     roof(x, top, w, ch = '#') { this.fill(x, top, w, H - top, ch); },   // bloque hasta el suelo de la sala
     plat(x, y, w) { this.fill(x, y, w, 1, '-'); },                     // toldo o balcón: se cruza desde abajo
+    // Balcón con barandilla y cajón de flores; el decorado va en la fila de encima
+    balcon(x, y, w) { this.plat(x, y, w); this.deco('balcon', x, y - 1, { w }); },
     crumble(x, y, w) { this.fill(x, y, w, 1, 'c'); },                  // tejas sueltas
     bar(x, y) { this.e('barra', x, y); },
     bounce(x, y, w = 2, col, kind) { this.e('rebote', x, y, { w, col, kind }); },
@@ -272,6 +274,15 @@ const PAGES = {
 // ------------------------------------------------------------------ Guiones
 // ['say', quién, texto] · ['choice', [[texto, flag, valor], ...]] · ['card', título, subtítulo, texto, escena]
 // ['do', acción, ...args] · ['if', flag, [sí], [no]]
+// Recados de amona: el marcador de misión sale de aquí. (x, y) es el punto de la sala donde flota el rombo.
+const RECADOS = [
+  { flag: 'gato', place: 'El mercado', room: 'mercado', x: 43.5, y: 0, text: 'Sube a la torre del reloj y coge a Txuri, el gato de la panadera', after: null },
+  { flag: 'pan', place: 'El mercado', room: 'mercado', x: 9.5, y: 28.5, text: 'Lleva el gato a la panadera: abajo, a la izquierda del mercado', after: 'gato' },
+  { flag: 'red', place: 'El muelle', room: 'muelle', x: 23.5, y: 0, text: 'Sube a la cofa de la trainera y suelta la red de Patxi', after: null },
+  { flag: 'pescado', place: 'El muelle', room: 'muelle', x: 56.5, y: 15, text: 'Habla con Patxi, el pescador, para llevarle el pescado a amona', after: 'red' },
+  { flag: 'correo', place: 'El mirador', room: 'mirador', x: 17, y: 0, text: 'Sube al mirador a ver el barco del correo', after: null },
+];
+
 const SCRIPTS = {
   centralita1: [
     ['say', 'centralita', 'Por fin. Aquí la Centralita. Te oí bajar por la sierra, chico del naipe dorado.'],

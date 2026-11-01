@@ -1568,6 +1568,17 @@ class Decor extends Ent {
         for (let i = 8, k = 0; i < w - 6; i += 12, k++) { const yy = y - 29 + Math.round(Math.sin(i / w * Math.PI) * sag); c.fillStyle = cols[k % cols.length]; c.fillRect(x + i + Math.round(Math.sin(t * 2 + i) * 0.6), yy, 6, 7 + (k % 2) * 2); }
         break;
       }
+      case 'balcon': {
+        // Barandilla de forja, cajón de flores y soportes bajo el voladizo (y = borde superior del balcón)
+        const w = (this.d.w || 2) * T, b = y;
+        c.fillStyle = '#3a2a22'; c.fillRect(x, b - 9, w, 1);
+        for (let i = 0; i < w; i += 4) c.fillRect(x + i, b - 8, 1, 8);
+        c.fillStyle = '#5a4030'; c.fillRect(x, b - 8, w, 1);
+        c.fillStyle = '#6a3a2a'; c.fillRect(x + 1, b - 4, w - 2, 3);
+        for (let i = 2; i < w - 2; i += 5) { c.fillStyle = '#3f8a3a'; c.fillRect(x + i, b - 6, 3, 2); c.fillStyle = (i / 5) % 2 ? '#d8506a' : '#f0c040'; c.fillRect(x + i + 1, b - 7, 1, 1); }
+        c.fillStyle = '#4a3428'; for (let i = 3; i < w; i += w - 6) { c.fillRect(x + i, b + 4, 1, 5); c.fillRect(x + i - 1, b + 6, 3, 1); }
+        break;
+      }
       case 'pilar': {
         // Columna de soportal: de fondo, se pasa por delante
         const h = (this.d.h || 5) * T;

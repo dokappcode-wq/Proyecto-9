@@ -336,38 +336,46 @@ room({ id: 'mirador', area: 'pueblo', x: 56, y: -26, W: 24, H: 26, theme: 'dia',
   m.col(7.5, 20, 23, 3); m.ch(8, 15); m.ch(13.5, 14); m.ch(6.5, 11); m.ch(13.5, 8); m.ch(6, 5); m.arc(9, 5, 17, 5, 3, 1.4); m.row(14, 20, 3, 2);
   m.row(18, 22, 15, 2);
 });
+// El mercado: la calle abajo, una pasarela de balcones a media altura y una callejuela en zigzag hasta la torre.
+// Las fachadas son decorado; lo que se pisa tiene soporte visible (paredes, voladizos y toldos que rebotan).
 room({ id: 'mercado', area: 'pueblo', x: 80, y: -20, W: 48, H: 34, theme: 'dia', music: 'title', title: 'El mercado',
-  check: { start: { x: 1, y: 32 }, goal: { x: 41, y: 0, w: 6, h: 3 } } }, (m) => {
-  m.fill(0, 33, 48, 1); m.fill(47, 0, 1, 33);
-  // Casas de la plaza del mercado, con sus balcones y tejados
-  m.house(0, 17, 13); m.house(14, 13, 12); m.house(27, 20, 10);
-  m.plat(1, 26, 4); m.plat(8, 23, 4);
-  m.fill(9, 13, 2, 4);                               // la chimenea de la casa de Miren
-  m.plat(15, 26, 4); m.plat(22, 17, 4);
-  m.plat(31, 26, 3);
-  m.plat(0, 10, 7);                                  // pasarela al mirador
-  // Los puestos, con toldos que rebotan
-  m.deco('puesto', 5, 32, { col: '#b5544a', goods: ['#d8a050', '#c88040', '#e8c070'] });
-  m.deco('puesto', 15, 32, { col: '#3e7cb1', goods: ['#a8b8c8', '#6a8aa8'] });
-  m.deco('puesto', 24, 32, { col: '#c9a24a', goods: ['#7ab04a', '#c84a3a', '#e8a040'] });
-  m.bounce(5, 30, 3, '#b5544a'); m.bounce(15, 30, 3, '#3e7cb1'); m.bounce(24, 30, 3, '#c9a24a');
-  // El almacén y la torre del reloj: Txuri está en lo más alto
-  m.fill(32, 31, 2, 2, 'C'); m.fill(38, 22, 9, 11);
-  m.fill(41, 3, 6, 19);
-  m.fill(37, 3, 1, 10);                              // el mástil de la bandera: se sube rebotando entre él y la torre
-  m.plat(38, 18, 3); m.plat(38, 14, 3);
-  m.bar(31, 11);                                     // la cuerda de banderines: atajo del tejado de Miren a la torre
+  check: { start: { x: 1, y: 32 }, goal: { x: 39, y: 0, w: 8, h: 3 } } }, (m) => {
+  m.fill(0, 33, 48, 1);                              // la calle
+  // Fachadas de fondo, con sus ventanas
+  m.deco('casa', 0, 32, { w: 11, h: 24 }); m.deco('casa', 12, 32, { w: 10, h: 18 }); m.deco('casa', 23, 32, { w: 8, h: 22 });
+  m.deco('cuerda', 4, 18, { w: 22 });                // banderines entre las fachadas
+  // Pasarela de balcones a la altura de la fila 22: cruza las fachadas y entra en la callejuela por la puerta
+  m.balcon(2, 22, 34);
+  // Puestos de la calle: sus toldos rebotan y lanzan a la pasarela
+  m.deco('puesto', 3, 32, { col: '#b5544a', goods: ['#d8a050', '#c88040', '#e8c070'] });
+  m.deco('puesto', 12, 32, { col: '#3e7cb1', goods: ['#a8b8c8', '#6a8aa8'] });
+  m.deco('puesto', 21, 32, { col: '#c9a24a', goods: ['#7ab04a', '#c84a3a', '#e8a040'] });
+  m.bounce(3, 30, 3, '#b5544a'); m.bounce(12, 30, 3, '#3e7cb1'); m.bounce(21, 30, 3, '#c9a24a');
+  m.deco('farola', 31, 32);
+  // Callejuela: paredes sólidas con una puerta a la altura de la pasarela (filas 21-22)
+  m.fill(32, 4, 2, 17, '#'); m.fill(32, 23, 2, 7, '#');
+  m.deco('puesto', 34, 32, { col: '#5a8ab0', goods: ['#e8e0d0', '#7ab04a'] }); m.bounce(34, 30, 3, '#5a8ab0');
+  // Voladizos en zigzag: a la izquierda, pegados a la pared; a la derecha, pegados a la torre
+  m.balcon(37, 19, 2); m.balcon(34, 16, 2); m.balcon(37, 13, 2); m.balcon(34, 10, 2); m.balcon(37, 7, 2); m.balcon(34, 4, 2);
+  // La torre del reloj: sólida, con la azotea en la fila 3
+  m.fill(39, 3, 9, 31, '#');
+  m.deco('cartel', 41, 12, { text: 'ERLOJUA' }); m.deco('antena', 44, 2); m.deco('chimenea', 40, 2, { h: 1 });
   m.e('item', 43, 2, { kind: 'gato', flag: 'gato', prompt: 'Coger al gato', script: 'gato' });
+  // Gente
   m.e('npc', 9, 32, { who: 'panadera', script: 'panadera' });
-  m.e('npc', 19, 32, { who: 'vecino', script: 'vecino' });
-  m.e('npc', 28, 32, { who: 'ane', script: 'ane' });
-  m.e('npc', 36, 32, { who: 'cartero', script: 'cartero' });
-  m.deco('cuerda', 26, 9, { w: 14 }); m.deco('chimenea', 18, 12, { h: 1 }); m.deco('antena', 33, 19); m.deco('maceta', 2, 25); m.deco('maceta', 16, 25);
-  m.deco('cartel', 42, 12, { text: 'ERLOJUA' });
-  m.arc(25.5, 30, 28, 20, 2, 2); m.arc(30, 19.5, 23.5, 16.5, 2, 1.2); m.col(24, 13, 15, 2); m.row(15, 21, 12.4, 3);
-  m.arc(13.5, 12.5, 10, 12.5, 1, 1); m.arc(8.5, 12, 5, 9.5, 2, 1);
-  m.arc(26, 12.5, 30.5, 11, 2, 1); m.arc(32, 11.5, 38, 13, 3, 1.6); m.col(39.5, 4, 11, 3.5); m.ch(37.5, 3.5); m.ch(36, 21); m.ch(39.5, 17);
-  m.e('hint', 2, 32, { text: 'Los toldos de los puestos rebotan. Mantén el salto para llegar a los balcones' });
+  m.e('npc', 17, 32, { who: 'vecino', script: 'vecino' });
+  m.e('npc', 26, 32, { who: 'ane', script: 'ane' });
+  m.e('npc', 30, 32, { who: 'cartero', script: 'cartero' });
+  m.deco('maceta', 2, 21); m.deco('maceta', 27, 21);
+  // Chispas: la ruta de la pasarela (arriba del balcón) y la de la callejuela, en zigzag
+  m.row(4, 30, 19.5, 4);
+  m.col(4.5, 23, 27, 2);                             // del toldo a la pasarela
+  m.col(35.5, 26, 23, 2);                            // del toldo de la callejuela a la puerta
+  const zig = [[37.5, 16.5], [34.5, 13.5], [37.5, 10.5], [34.5, 7.5], [37.5, 4.5], [34.5, 1.5]];
+  for (const [x, y] of zig) m.ch(x, y);
+  for (let i = 1; i < zig.length; i++) m.arc(zig[i - 1][0], zig[i - 1][1], zig[i][0], zig[i][1], 2, 0.8);
+  m.e('hint', 2, 32, { text: 'Los toldos rebotan: mantén el salto sobre uno y subirás a la pasarela de balcones' });
+  m.e('hint', 34, 28, { text: 'Callejuela: salta de un balcón a otro, en zigzag, hasta la torre' });
 });
 
 // ================================================================== IV · La tormenta
@@ -709,7 +717,7 @@ Object.assign(SCRIPTS, {
   ],
   // III · Cinco días
   casa_in: [
-    ['jonActor'], ['player', 'hide'],
+    ['jonActor'], ['player', 'hide'], ['do', 'flag', 'recados_on'],
     ['tint', 'jon', null],
     ['cam', 12, 8, 3],
     ['title', 'Prólogo · III', 'Cinco días', 3],
