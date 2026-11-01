@@ -925,7 +925,7 @@ Object.assign(SCRIPTS, {
     ['say', 'jon', 'Se acabó el búho. Hay luz al otro lado del claro.'],
   ],
   vista: [
-    ['jonActor'], ['do', 'pan'], ['wait', 1.6],
+    ['jonActor'], ['do', 'pan'], ['do', 'flag', 'acto1_on'], ['wait', 1.6],
     ['say', 'jon', 'Ibaia.'],
     ['say', 'jon', 'Y esos muros de luz... ámbar. Cerrando cada barrio.'],
     ['say', 'radio', '...shhhh... si alguien me oye... shhhh... baja por la sierra... busca las caracolas de bronce...'],

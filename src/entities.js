@@ -1359,10 +1359,10 @@ class Zip extends Ent {
     const p = G.player;
     if (p.zipCool > 0) { p.zipCool -= dt; return; }
     if (p.state !== 'normal' || p.onGround) return;
-    // Tirolina «de bajada»: solo engancha al caer sobre ella, nunca al pasar por debajo subiendo
-    if (this.d.down && p.vy < 40) return;
     const hx = p.cx, hy = p.y - 2;
     const t = clamp(((hx - this.x1) * (this.x2 - this.x1) + (hy - this.y1) * (this.y2 - this.y1)) / (this.len * this.len), 0, 1);
+    // Tirolina «de bajada»: solo engancha al caer, y solo en la mitad de la cofa; nunca al subir ni cerca del muelle
+    if (this.d.down && (p.vy < 40 || t > 0.5)) return;
     const lx = this.x1 + (this.x2 - this.x1) * t, ly = this.y1 + (this.y2 - this.y1) * t;
     if (Math.hypot(hx - lx, hy - ly) < 8 && t < 0.95) {
       p.state = 'zip'; p.zip = { x1: this.x1, y1: this.y1, x2: this.x2, y2: this.y2, len: this.len, t }; p.zipV = Math.max(80, Math.abs(p.vx));

@@ -231,6 +231,9 @@ room({ id: 'escarcha', area: 'ibaia', x: 48, y: 44, W: 48, H: 16, theme: 'escarc
   m.fill(14, 9, 2, 4, 'I'); m.fill(14, 1, 2, 8);
   m.fill(22, 10, 6, 1, '-'); m.fill(23, 6, 3, 1, '-');
   m.crumble(17, 7, 3);                               // carámbanos: se rompen al pisarlos
+  // Escalera de hielo a la izquierda: sube hasta la boca que da a la Antorcha
+  m.plat(9, 10, 3); m.plat(12, 7, 2); m.plat(9, 4, 3); m.plat(4, 1, 3);
+  m.ch(10, 8.5); m.ch(13, 5.5); m.ch(10, 2.5);
   m.fill(30, 1, 2, 12, 'F');
   m.fill(36, 9, 5, 1, '-'); m.crumble(41, 6, 3); m.bar(34, 5);
   m.set(20, 12, 'R'); m.set(42, 12, 'T');
@@ -274,13 +277,25 @@ const PAGES = {
 // ------------------------------------------------------------------ Guiones
 // ['say', quién, texto] · ['choice', [[texto, flag, valor], ...]] · ['card', título, subtítulo, texto, escena]
 // ['do', acción, ...args] · ['if', flag, [sí], [no]]
-// Recados de amona: el marcador de misión sale de aquí. (x, y) es el punto de la sala donde flota el rombo.
-const RECADOS = [
-  { flag: 'gato', place: 'El mercado', room: 'mercado', x: 43.5, y: 0, text: 'Sube a la torre del reloj y coge a Txuri, el gato de la panadera', after: null },
-  { flag: 'pan', place: 'El mercado', room: 'mercado', x: 9.5, y: 28.5, text: 'Lleva el gato a la panadera: abajo, a la izquierda del mercado', after: 'gato' },
-  { flag: 'red', place: 'El muelle', room: 'muelle', x: 23.5, y: 0, text: 'Sube a la cofa de la trainera y suelta la red de Patxi', after: null },
-  { flag: 'pescado', place: 'El muelle', room: 'muelle', x: 56.5, y: 15, text: 'Habla con Patxi, el pescador, para llevarle el pescado a amona', after: 'red' },
-  { flag: 'correo', place: 'El mirador', room: 'mirador', x: 17, y: 0, text: 'Sube al mirador a ver el barco del correo', after: null },
+// Misiones: el marcador sale de aquí. Cada paso dice dónde (sala, x, y) y cómo se sabe que está hecho.
+// «modo: paralelo» → cada paso puede hacerse en cualquier orden (respetando «after»); «orden» → uno detrás de otro.
+// «cuenta: false» → paso intermedio, no suma al contador de la misión.
+const MISIONES = [
+  { id: 'recados', titulo: 'RECADOS DE AMONA', on: 'recados_on', modo: 'paralelo', pasos: [
+    { id: 'gato', cuenta: false, lugar: 'El mercado', sala: 'mercado', x: 43.5, y: 0, texto: 'Sube a la torre del reloj y coge a Txuri, el gato de la panadera', hecho: (S) => !!S.flags.gato },
+    { id: 'pan', after: 'gato', lugar: 'El mercado', sala: 'mercado', x: 9.5, y: 28.5, texto: 'Lleva el gato a la panadera: abajo, a la izquierda del mercado', hecho: (S) => !!S.flags.pan },
+    { id: 'red', cuenta: false, lugar: 'El muelle', sala: 'muelle', x: 23.5, y: 0, texto: 'Sube a la cofa de la trainera y suelta la red de Patxi', hecho: (S) => !!S.flags.red },
+    { id: 'pescado', after: 'red', lugar: 'El muelle', sala: 'muelle', x: 56.5, y: 15, texto: 'Habla con Patxi, el pescador, para llevarle el pescado a amona', hecho: (S) => !!S.flags.pescado },
+    { id: 'correo', lugar: 'El mirador', sala: 'mirador', x: 17, y: 0, texto: 'Sube al mirador a ver el barco del correo', hecho: (S) => !!S.flags.correo },
+  ] },
+  { id: 'acto1', titulo: 'IBAIA · ACTO I', on: 'acto1_on', modo: 'orden', pasos: [
+    { id: 'ancla1', lugar: 'Las cocheras', sala: 'cocheras', x: 40, y: 23.5, texto: 'Carga el carro de Rosa con tu Energía (mantén E) y empújalo contra el Ancla', hecho: (S) => !!S.flags.ancla1 },
+    { id: 'pozo', lugar: 'El pozo del velo', sala: 'pozo', x: 12, y: 20, texto: 'Baja por el pozo del velo hasta la Forja', hecho: (S) => !!S.visited.forja1 },
+    { id: 'grilletes', lugar: 'La Forja', sala: 'taller', x: 41, y: 9.5, texto: 'Rompe los dos grilletes de Unai con disparos de Energía', hecho: (S) => !!S.flags.grilletes },
+    { id: 'temperatura', lugar: 'La Forja', sala: 'taller', x: 41, y: 9.5, texto: 'Mantén E junto a Unai para copiar la Temperatura', hecho: (S) => S.marks.includes('temperatura') },
+    { id: 'escarcha', lugar: 'Las cámaras de escarcha', sala: 'escarcha', x: 5, y: 0, texto: 'Sube la escalera de hielo hasta la boca que da a la Antorcha', hecho: (S) => !!S.visited.antorcha },
+    { id: 'ancla2', lugar: 'La Antorcha', sala: 'antorcha', x: 42, y: 9.5, texto: 'Agrieta el Ancla de la Antorcha: frío y calor, alternos', hecho: (S) => !!S.flags.ancla2 },
+  ] },
 ];
 
 const SCRIPTS = {

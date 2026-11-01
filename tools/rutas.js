@@ -128,7 +128,7 @@ window.RUTAS = (() => {
     const g = G.room.grid, M = S.marks;
     for (const row of g) for (let i = 0; i < row.length; i++) {
       if (M.includes('energia') && (row[i] === 'B' || row[i] === 'G')) row[i] = '.';
-      if (M.includes('temperatura')) { if (row[i] === 'I' || row[i] === 'F') row[i] = '.'; if (row[i] === 'k') row[i] = 'K'; }
+      if (M.includes('temperatura')) { if (row[i] === 'I' || row[i] === 'F') row[i] = '.'; if (row[i] === 'K') row[i] = 'k'; }
     }
     G.tileChanged();
     G.ents = G.room.ents = G.ents.filter((e) => DYN.includes(e.constructor.name) || PICK.includes(e.constructor.name));
