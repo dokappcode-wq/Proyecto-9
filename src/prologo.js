@@ -288,7 +288,7 @@ room({ id: 'muelle', area: 'pueblo', x: -64, y: -6, W: 64, H: 20, theme: 'dia', 
   m.bounce(43, 15, 2, '#e8e0d0'); m.plat(36, 12, 4); m.plat(41, 9, 4);
   m.bar(32, 10);                                     // la jarcia entre mástiles
   m.mover(14, 17, 16, 17, 2, 18, 0.6);               // una boya que va y viene entre los barcos
-  m.e('zip', 25, 4, { x2: 47, y2: 13 });            // de la cofa al muelle
+  m.e('zip', 28, 2, { x2: 47, y2: 13, down: true }); // de la cofa al muelle: solo se engancha al bajar, y lejos de la subida
   m.e('item', 23, 4, { kind: 'red', flag: 'red', prompt: 'Soltar la red', script: 'red' });
   m.e('pagina', 6, 6, { id: 'p7' });
   m.e('npc', 56, 18, { who: 'pescador', script: 'pescador' });
