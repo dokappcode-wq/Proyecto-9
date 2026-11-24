@@ -52,21 +52,22 @@ python3 reel-basqplan/montar_experiencia.py
 
 Todo es vídeo, todo vertical y en HD. Dura 30 s, con unos 4 s por plano. El montaje lleva un zoom lento sobre cada plano, transiciones variadas, textos que entran deslizándose sobre bandas navy y una barra dorada de progreso abajo. `portada.mp4` (de basqplan.com) no se sube al repositorio, así que hay que copiarlo en `fuentes/` antes de montar.
 
-Solo lleva tres textos: «10:30, vacas frente al Cantábrico.» / «13:00, cuatro txakolis.» / «Una sola reserva.»
+Solo lleva tres textos, todos en la parte de abajo: «10:30, vacas frente al Cantábrico.» / «13:00, cuatro txakolis.» / «Una sola reserva.». Al final aparecen el logo y el nombre «basqplan» debajo.
 
 | Plano | Texto | Vídeo |
 |---|---|---|
 | 1 | — (con despertador) | Persona mirando el mar desde un monte (basqplan.com) |
-| 2 | 10:30, vacas frente al Cantábrico. | Vacas en el prado (Commons, CC0) |
-| 3 | — | Costa y mar desde el dron (basqplan.com) |
-| 4 | — | Costa verde con caseríos (basqplan.com) |
-| 5 | 13:00, cuatro txakolis. | Espumoso sirviéndose (Commons) |
-| 6 | — | Sardinas a la brasa (Commons) |
-| 7 | Una sola reserva. + logo | Flysch desde el aire (basqplan.com) |
+| 2 | 10:30, vacas frente al Cantábrico. | Vacas en el prado |
+| 3 | — | Vaca de cuernos largos con ternero, de cerca |
+| 4 | — | Manada en el prado |
+| 5 | 13:00, cuatro txakolis. | Espumoso cayendo en la copa (cámara lenta) |
+| 6 | — | Platos de comida de colores |
+| 7 | logo + basqplan / Una sola reserva. | Flysch desde el aire (basqplan.com) |
 
 **Créditos que hay que poner en el texto del post** (los exigen las licencias):
 - Copas: Sarah Stierch, CC BY 4.0. https://commons.wikimedia.org/wiki/File:Turkovich_Family_Wines_-_June_2019_-_Stierch_03.ogv
-- Pescado: «Roasting fish», CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Roasting_fish.webm
-- Vacas: «Cattle near Aberfeldy», CC0. No exige crédito.
+- Comida: Sarah Stierch, CC BY 4.0. https://commons.wikimedia.org/wiki/File:Yuca_Mami_-_February_2024_-_Sarah_Stierch.webm
+- Ganado (planos 3 y 4): CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Eine_Herde_Schottische_Hochlandrinder_auf_einer_Weide_bei_Bederwitz_(482).webm y en el (488).
+- Vacas (plano 2): «Cattle near Aberfeldy», CC0. No exige crédito.
 
 Para cambiar un plano, copia el archivo en `fuentes/` y cambia `src` en `PLANOS`.

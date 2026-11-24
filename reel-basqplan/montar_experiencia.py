@@ -22,18 +22,20 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 # Todo vídeo, todo vertical y en HD.
 #   portada.mp4: vídeo de basqplan.com (1920x1080).
 #   vacas.webm: Wikimedia Commons, «Cattle near Aberfeldy» (CC0).
+#   ganado_cerca.webm / ganado_manada.webm: Wikimedia Commons, «Eine Herde Schottische Hochlandrinder
+#       auf einer Weide bei Bederwitz (482)» y «(488)» (CC BY-SA 4.0).
 #   copas.webm: Wikimedia Commons, «Turkovich Family Wines - June 2019 - Stierch 03», Sarah Stierch (CC BY 4.0).
-#   pescado.webm: Wikimedia Commons, «Roasting fish» (CC BY-SA 4.0).
+#   comida.webm: Wikimedia Commons, «Yuca Mami - February 2024 - Sarah Stierch» (CC BY 4.0).
 # fx: centro horizontal del recorte vertical (0-1); speed < 1 ralentiza; trans: transición de entrada.
 # Textos: solo «10:30, vacas frente al Cantábrico. 13:00, cuatro txakolis. Una sola reserva.»
 PLANOS = [
-    dict(src="portada.mp4", ss=57.8, dur=3.5, speed=0.85, fx=0.6, alarma=True),
+    dict(src="portada.mp4", ss=57.8, dur=3.5, speed=0.85, fx=0.6),
     dict(src="vacas.webm", ss=32.0, dur=4.5, fx=0.55, hora="10:30,", frase="vacas frente al Cantábrico.",
          trans="smoothleft"),
-    dict(src="portada.mp4", ss=62.8, dur=3.5, fx=0.5, trans="zoomin"),
-    dict(src="portada.mp4", ss=14.6, dur=3.5, fx=0.5, trans="smoothup"),
-    dict(src="copas.webm", ss=0.8, dur=4.5, hora="13:00,", frase="cuatro txakolis.", trans="smoothleft"),
-    dict(src="pescado.webm", ss=8.0, dur=3.5, fx=0.68, trans="zoomin"),
+    dict(src="ganado_cerca.webm", ss=3.0, dur=3.5, fx=0.58, trans="zoomin"),
+    dict(src="ganado_manada.webm", ss=2.0, dur=3.5, fx=0.5, trans="smoothup"),
+    dict(src="copas.webm", ss=1.8, dur=4.5, speed=0.75, hora="13:00,", frase="cuatro txakolis.", trans="smoothleft"),
+    dict(src="comida.webm", ss=0.5, dur=4.0, fx=0.45, trans="zoomin"),
     dict(src="portada.mp4", ss=52.6, dur=5.0, fx=0.5, final=True, trans="fade"),
 ]
 
@@ -110,23 +112,25 @@ def subtitulo(img, s):
 
 
 def capas(p, tmp, i):
-    """Devuelve [(png, inicio, fin, fade_in, fade_out, dy)] para el plano."""
+    """Devuelve [(png, inicio, fin, fade_in, fade_out, dy)] para el plano. Textos en la parte de abajo."""
     out = []
     def guarda(img, nombre, t0, t1, fi=0.5, fo=0.0, dy=60):
         path = os.path.join(tmp, f"c{i}_{nombre}.png"); img.save(path); out.append((path, t0, t1, fi, fo, dy))
     if p.get("hora"):
-        a = lienzo(); caja(a, H * 0.40, p["hora"], font(SERIF, 190, 600), alpha=150, padx=56, pady=14)
-        guarda(a, "hora", 0.3, p["dur"] + XF, dy=-50)
-        b = lienzo(); caja(b, H * 0.40 + 175, p["frase"], font(SERIF_I, 82, 500), alpha=165)
+        a = lienzo(); caja(a, H * 0.71, p["hora"], font(SERIF, 170, 600), alpha=150, padx=52, pady=12)
+        guarda(a, "hora", 0.3, p["dur"] + XF, dy=60)
+        b = lienzo(); caja(b, H * 0.71 + 165, p["frase"], font(SERIF_I, 80, 500), alpha=165)
         guarda(b, "frase", 0.8, p["dur"] + XF, dy=60)
     elif p.get("final"):
-        a = Image.new("RGBA", (W, H), NAVY + (110,))
-        logo = Image.open(FU("logo_crema.png")).convert("RGBA"); lw = 300
+        a = Image.new("RGBA", (W, H), NAVY + (115,))
+        logo = Image.open(FU("logo_crema.png")).convert("RGBA"); lw = 340
         logo = logo.resize((lw, int(logo.height * lw / logo.width)), Image.LANCZOS)
-        a.alpha_composite(logo, (int(W / 2 - lw / 2), int(H * 0.58)))
-        guarda(a, "logo", 1.4, p["dur"], fi=0.8, dy=0)
-        b = lienzo(); caja(b, H * 0.45, "Una sola reserva.", font(SERIF_I, 112, 500), alpha=170, padx=56, pady=30)
-        guarda(b, "frase", 0.5, p["dur"], fi=0.6, dy=60)
+        ly = int(H * 0.36)
+        a.alpha_composite(logo, (int(W / 2 - lw / 2), ly))
+        texto(a, (W / 2, ly + logo.height + 95), "basqplan", font(SERIF, 130, 600))
+        guarda(a, "logo", 0.4, p["dur"], fi=0.8, dy=0)
+        b = lienzo(); caja(b, H * 0.80, "Una sola reserva.", font(SERIF_I, 100, 500), alpha=170, padx=52, pady=28)
+        guarda(b, "frase", 1.2, p["dur"], fi=0.6, dy=60)
     return out
 
 
