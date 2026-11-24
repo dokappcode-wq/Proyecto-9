@@ -24,8 +24,10 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 #   vacas.webm: Wikimedia Commons, «Cattle near Aberfeldy» (CC0).
 #   ganado_cerca.webm / ganado_manada.webm: Wikimedia Commons, «Eine Herde Schottische Hochlandrinder
 #       auf einer Weide bei Bederwitz (482)» y «(488)» (CC BY-SA 4.0).
-#   copas.webm: Wikimedia Commons, «Turkovich Family Wines - June 2019 - Stierch 03», Sarah Stierch (CC BY 4.0).
-#   comida.webm: Wikimedia Commons, «Yuca Mami - February 2024 - Sarah Stierch» (CC BY 4.0).
+#   brindis.webm: Wikimedia Commons, «Buena Vista Winery - September 2024 - Sarah Stierch 02» (CC0).
+#   cocina.webm: Wikimedia Commons, «2026-0120 Hiden sushi making Seijun Okano» (CC BY 3.0).
+#   alarma.mp3: Wikimedia Commons, «Alarm clock - 01» (CC BY-SA 4.0).
+#   musica.mp3: Kevin MacLeod, «Long Trail» (dominio público según Wikimedia Commons).
 # fx: centro horizontal del recorte vertical (0-1); speed < 1 ralentiza; trans: transición de entrada.
 # Textos: solo «10:30, vacas frente al Cantábrico. 13:00, cuatro txakolis. Una sola reserva.»
 PLANOS = [
@@ -34,8 +36,8 @@ PLANOS = [
          trans="smoothleft"),
     dict(src="ganado_cerca.webm", ss=3.0, dur=3.5, fx=0.58, trans="zoomin"),
     dict(src="ganado_manada.webm", ss=2.0, dur=3.5, fx=0.5, trans="smoothup"),
-    dict(src="copas.webm", ss=1.8, dur=4.5, speed=0.75, hora="13:00,", frase="cuatro txakolis.", trans="smoothleft"),
-    dict(src="comida.webm", ss=0.5, dur=4.0, fx=0.45, trans="zoomin"),
+    dict(src="brindis.webm", ss=0.0, dur=4.5, speed=0.92, hora="13:00,", frase="cuatro txakolis.", trans="smoothleft"),
+    dict(src="cocina.webm", ss=0.3, dur=3.5, fx=0.28, trans="zoomin"),
     dict(src="portada.mp4", ss=52.6, dur=5.0, fx=0.5, final=True, trans="fade"),
 ]
 
@@ -209,10 +211,15 @@ def main():
     fc.append(f"color=c=0xC9A86B:s={W}x10:r={FPS}:d={total}[bar]")
     fc.append(f"[{prev}][bar]overlay=x='-{W}+{W}*t/{total}':y={H-10}:shortest=1[pb]")
     fc.append(f"[pb]fade=t=out:st={total-0.5}:d=0.5[vf]")
-    # despertador: pitidos de 1 kHz en ráfagas, que se apagan al aparecer el primer plan
-    alarma = ("aevalsrc='0.32*(sin(2*PI*1040*t)+0.35*sin(2*PI*2080*t))*lt(mod(t,0.2),0.1)"
-              f"*lt(mod(t,1),0.8)*lt(t,3.4)':s=48000:d={total}")
-    fc.append(f"{alarma},afade=t=in:d=0.05,afade=t=out:st=2.9:d=0.5,aformat=channel_layouts=stereo[a]")
+    # despertador real al principio + música que entra cuando se apaga
+    na = len(segs)
+    inputs += ["-ss", "2.3", "-t", "3.6", "-i", FU("alarma.mp3"), "-ss", "10.5", "-i", FU("musica.mp3")]
+    fc.append(f"[{na}:a]aresample=48000,volume=1.3,afade=t=out:st=3.0:d=0.6,adelay=200|200,"
+              f"apad,atrim=0:{total},aformat=channel_layouts=stereo[al]")
+    fc.append(f"[{na+1}:a]aresample=48000,atrim=0:{total-2.6},asetpts=PTS-STARTPTS,volume=1.35,"
+              f"afade=t=in:d=1.2,afade=t=out:st={total-2.6-2.5}:d=2.5,adelay=2600|2600,"
+              f"apad,atrim=0:{total},aformat=channel_layouts=stereo[mu]")
+    fc.append("[al][mu]amix=inputs=2:normalize=0,alimiter=limit=0.89[a]")
     out = os.path.join(BASE, "salida", "experiencia_basqplan.mp4")
     subprocess.run(["ffmpeg", "-y", *inputs, "-filter_complex", ";".join(fc), "-map", "[vf]", "-map", "[a]",
                     "-t", str(total), "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",

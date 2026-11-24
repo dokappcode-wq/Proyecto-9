@@ -56,18 +56,21 @@ Solo lleva tres textos, todos en la parte de abajo: «10:30, vacas frente al Can
 
 | Plano | Texto | Vídeo |
 |---|---|---|
-| 1 | — (con despertador) | Persona mirando el mar desde un monte (basqplan.com) |
+| 1 | — (despertador) | Persona mirando el mar desde un monte (basqplan.com) |
 | 2 | 10:30, vacas frente al Cantábrico. | Vacas en el prado |
 | 3 | — | Vaca de cuernos largos con ternero, de cerca |
 | 4 | — | Manada en el prado |
-| 5 | 13:00, cuatro txakolis. | Espumoso cayendo en la copa (cámara lenta) |
-| 6 | — | Platos de comida de colores |
+| 5 | 13:00, cuatro txakolis. | Brindis con copas en una bodega |
+| 6 | — | Chef cocinando en la barra (plano medio) |
 | 7 | logo + basqplan / Una sola reserva. | Flysch desde el aire (basqplan.com) |
 
+**Audio:** despertador real al principio y, en cuanto se apaga, la música «Long Trail» de Kevin MacLeod, con fundido de entrada y de salida.
+
 **Créditos que hay que poner en el texto del post** (los exigen las licencias):
-- Copas: Sarah Stierch, CC BY 4.0. https://commons.wikimedia.org/wiki/File:Turkovich_Family_Wines_-_June_2019_-_Stierch_03.ogv
-- Comida: Sarah Stierch, CC BY 4.0. https://commons.wikimedia.org/wiki/File:Yuca_Mami_-_February_2024_-_Sarah_Stierch.webm
 - Ganado (planos 3 y 4): CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Eine_Herde_Schottische_Hochlandrinder_auf_einer_Weide_bei_Bederwitz_(482).webm y en el (488).
-- Vacas (plano 2): «Cattle near Aberfeldy», CC0. No exige crédito.
+- Cocina: CC BY 3.0. El autor figura en https://commons.wikimedia.org/wiki/File:2026-0120_Hiden_sushi_making_Seijun_Okano.webm
+- Despertador: CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Alarm_clock_-_01.ogg
+- Música: «Long Trail», Kevin MacLeod (incompetech.com). Commons la marca como dominio público; citarlo es buena práctica.
+- Sin crédito obligatorio: vacas del plano 2 (CC0) y brindis (CC0, Sarah Stierch).
 
 Para cambiar un plano, copia el archivo en `fuentes/` y cambia `src` en `PLANOS`.
