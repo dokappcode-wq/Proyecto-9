@@ -25,7 +25,7 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 #   ganado_cerca.webm / ganado_manada.webm: Wikimedia Commons, «Eine Herde Schottische Hochlandrinder
 #       auf einer Weide bei Bederwitz (482)» y «(488)» (CC BY-SA 4.0).
 #   brindis.webm: Wikimedia Commons, «Buena Vista Winery - September 2024 - Sarah Stierch 02» (CC0).
-#   cocina.webm: Wikimedia Commons, «2026-0120 Hiden sushi making Seijun Okano» (CC BY 3.0).
+#   cocina.webm: Wikimedia Commons, «COMREL Cooking Demonstration (1015886)» (dominio público, DVIDS).
 #   alarma.mp3: Wikimedia Commons, «Alarm clock - 01» (CC BY-SA 4.0).
 #   musica.mp3: Kevin MacLeod, «Long Trail» (dominio público según Wikimedia Commons).
 # fx: centro horizontal del recorte vertical (0-1); speed < 1 ralentiza; trans: transición de entrada.
@@ -35,14 +35,12 @@ SK = dict(src="santaklara.mp4", limpia=True)
 PLANOS = [
     dict(src="portada.mp4", ss=0.2, dur=3.5, fx=0.5, titulo=True),
     dict(SK, ss=139.15, dur=2.8, speed=0.66, fx=0.55, hora="9:00", alarma=True, trans="zoomin"),
-    dict(SK, ss=49.05, dur=2.6, speed=0.95, fx=0.6, frase="Ganadería frente al Cantábrico", trans="slideleft"),
-    dict(SK, ss=69.0, dur=2.2, fx=0.45, trans="slideup"),
-    dict(SK, ss=63.1, dur=2.2, fx=0.42, trans="slideleft"),
-    dict(SK, ss=77.1, dur=2.2, speed=0.9, fx=0.45, trans="zoomin"),
-    dict(SK, ss=94.7, dur=2.4, fx=0.5, trans="slideleft"),
-    dict(SK, ss=83.4, dur=2.2, fx=0.5, trans="slideup"),
+    # Actividad 1: ganadería. Collage de 3 vídeos apilados (se ven mucho más nítidos que recortados en vertical)
+    dict(SK, dur=4.2, stack=[(49.05, 0.62), (69.0, 1.0), (63.1, 0.6)],
+         hora="10:00", frase="Ganadería frente al Cantábrico", trans="slideleft"),
+    dict(SK, dur=4.0, stack=[(77.1, 0.53), (94.7, 0.8), (83.4, 0.95)], trans="slideup"),
     dict(src="brindis.webm", ss=0.0, dur=4.0, speed=0.92, hora="13:00,", frase="cuatro txakolis.", trans="zoomin"),
-    dict(src="cocina.webm", ss=0.3, dur=3.0, fx=0.28, trans="slideleft"),
+    dict(src="cocina.webm", ss=0.5, dur=3.2, fx=0.45, trans="slideleft"),
     dict(src="portada.mp4", ss=52.6, dur=4.5, fx=0.5, final=True, trans="fade"),
 ]
 
@@ -109,6 +107,16 @@ def caja(img, cy, txt, fnt, fill=CREAM, alpha=165, padx=46, pady=26, radio=30):
     d.multiline_text((W / 2, cy), txt, font=fnt, fill=fill + (255,), anchor="mm", align="center", spacing=12)
 
 
+def ajusta(path, txt, size, wght, maxw=W - 160):
+    """Reduce el tamaño de letra hasta que el texto quepa en el ancho."""
+    d = ImageDraw.Draw(Image.new("RGBA", (10, 10)))
+    while size > 30:
+        f = font(path, size, wght)
+        if d.textlength(txt, font=f) <= maxw: return f
+        size -= 4
+    return font(path, size, wght)
+
+
 def reloj(img, hora):
     caja(img, 270, hora, font(SERIF, 132, 600), alpha=150, padx=44, pady=22)
 
@@ -142,10 +150,10 @@ def capas(p, tmp, i):
     elif p.get("hora"):
         a = lienzo(); caja(a, H * 0.71, p["hora"], font(SERIF, 170, 600), alpha=150, padx=52, pady=12)
         guarda(a, "hora", 0.3, fin, dy=60)
-        b = lienzo(); caja(b, H * 0.71 + 165, p["frase"], font(SERIF_I, 80, 500), alpha=165)
+        b = lienzo(); caja(b, H * 0.71 + 165, p["frase"], ajusta(SERIF_I, p["frase"], 80, 500), alpha=165)
         guarda(b, "frase", 0.8, fin, dy=60)
     elif p.get("frase"):
-        b = lienzo(); caja(b, H * 0.78, p["frase"], font(SERIF_I, 76, 500), alpha=165)
+        b = lienzo(); caja(b, H * 0.78, p["frase"], ajusta(SERIF_I, p["frase"], 76, 500), alpha=165)
         guarda(b, "frase", 0.3, fin, dy=60)
     if p.get("final"):
         a = Image.new("RGBA", (W, H), NAVY + (115,))
@@ -179,7 +187,23 @@ LOOK = ("eq=contrast=1.07:saturation=1.15:gamma=1.0,"
 def segmento(p, tmp, i, ultimo):
     d = p["dur"] + (0 if ultimo else XF)
     n = int(round(d * FPS))
-    if p["src"].lower().endswith((".mp4", ".mov", ".webm", ".m4v")):
+    off = 1
+    if p.get("stack"):
+        # 3 vídeos horizontales apilados sobre fondo navy, entrando de lado uno tras otro
+        cmd = ["ffmpeg", "-y"]
+        PH, GAP = 600, 14
+        y0 = (H - 3 * PH - 2 * GAP) // 2
+        fc0 = [f"color=c=0x{NAVY[0]:02x}{NAVY[1]:02x}{NAVY[2]:02x}:s={W}x{H}:r={FPS}:d={d}[can0]"]
+        for k, (ss, sp) in enumerate(p["stack"]):
+            cmd += ["-ss", str(ss), "-t", f"{d*sp+0.1:.3f}", "-i", FU(p["src"])]
+            fc0.append(f"[{k}:v]crop=640:356:0:2,hqdn3d=3:3:4:4,setpts=(PTS-STARTPTS)/{sp},fps={FPS},"
+                       f"scale={W}:{PH}:flags=lanczos,unsharp=5:5:0.7,setsar=1,trim=duration={d},setpts=PTS-STARTPTS[p{k}]")
+            t0 = 0.12 * k; sgn = -1 if k % 2 == 0 else 1
+            xe = f"if(lt(t,{t0}),{sgn}*{W},{sgn}*{W}*pow(1-min(1,(t-{t0})/0.55),3))"
+            fc0.append(f"[can{k}][p{k}]overlay=x='{xe}':y={y0 + k*(PH+GAP)}:eval=frame[can{k+1}]")
+        base = ";".join(fc0) + f";[can3]null"
+        off = 3
+    elif p["src"].lower().endswith((".mp4", ".mov", ".webm", ".m4v")):
         sp = p.get("speed", 1.0)
         cmd = ["ffmpeg", "-y", "-ss", str(p.get("ss", 0)), "-t", f"{d*sp+0.1:.3f}", "-i", FU(p["src"])]
         r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
@@ -204,7 +228,7 @@ def segmento(p, tmp, i, ultimo):
     prev = "b0"
     for k, (png, t0, t1, fi, fo, dy) in enumerate(capas(p, tmp, i)):
         cmd += ["-loop", "1", "-framerate", str(FPS), "-t", str(d), "-i", png]
-        f = f"[{k+1}:v]format=rgba,fade=t=in:st={t0}:d={fi}:alpha=1"
+        f = f"[{k+off}:v]format=rgba,fade=t=in:st={t0}:d={fi}:alpha=1"
         if fo: f += f",fade=t=out:st={t1-fo}:d={fo}:alpha=1"
         fc.append(f + f"[t{k}]")
         # entrada deslizándose con frenada suave

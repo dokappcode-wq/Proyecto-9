@@ -54,17 +54,17 @@ Todo es vídeo, todo vertical y en HD. Dura 30 s, con unos 4 s por plano. El mon
 
 Solo lleva tres textos, todos en la parte de abajo: «10:30, vacas frente al Cantábrico.» / «13:00, cuatro txakolis.» / «Una sola reserva.». Al final aparecen el logo y el nombre «basqplan» debajo.
 
-Estructura: «UN DÍA CON basqplan» → 9:00 → ganadería en Santa Klara (cortes rápidos de 2 s) → txakoli → cocina → final. Dura unos 32 s.
+Estructura: «UN DÍA CON basqplan» → 9:00 → 10:00 ganadería en Santa Klara (collage de 3 vídeos apilados) → txakoli → clase de cocina → final. Dura 26 s.
 
 | Plano | Texto | Vídeo |
 |---|---|---|
 | 1 | UN DÍA CON + logo + basqplan | Flysch desde el aire (basqplan.com) |
 | 2 | 9:00 (con despertador) | Santa Klara: gente en tumbonas al amanecer frente al mar |
-| 3 | Ganadería frente al Cantábrico | Santa Klara: vacas pastando junto al caserío y el mar (dron) |
-| 4–8 | — | Santa Klara: niños corriendo, dando de comer a las cabras, con el poni, vaca con terneros, paseo en poni |
-| 9 | 13:00, cuatro txakolis. | Brindis con copas en una bodega |
-| 10 | — | Chef cocinando en la barra |
-| 11 | logo + basqplan / Una sola reserva. | Flysch desde el aire (basqplan.com) |
+| 3 | 10:00 / Ganadería frente al Cantábrico | Collage: vacas junto al caserío y el mar · niños corriendo por el prado · familia con las cabras |
+| 4 | — | Collage: niños con el poni · vaca con terneros · paseo en poni |
+| 5 | 13:00, cuatro txakolis. | Brindis con copas en una bodega |
+| 6 | — | Clase de cocina: participantes cocinando con cocineros |
+| 7 | logo + basqplan / Una sola reserva. | Flysch desde el aire (basqplan.com) |
 
 `santaklara.mp4` (vídeo promocional del agroturismo) no se sube al repositorio. Hay que copiarlo en `fuentes/` antes de montar, y **hace falta permiso de Santa Klara** para publicarlo.
 
@@ -72,7 +72,7 @@ Estructura: «UN DÍA CON basqplan» → 9:00 → ganadería en Santa Klara (cor
 
 **Créditos que hay que poner en el texto del post** (los exigen las licencias):
 - Ganado (planos 3 y 4): CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Eine_Herde_Schottische_Hochlandrinder_auf_einer_Weide_bei_Bederwitz_(482).webm y en el (488).
-- Cocina: CC BY 3.0. El autor figura en https://commons.wikimedia.org/wiki/File:2026-0120_Hiden_sushi_making_Seijun_Okano.webm
+- Cocina: «COMREL Cooking Demonstration (1015886)», dominio público (DVIDS). No exige crédito.
 - Despertador: CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Alarm_clock_-_01.ogg
 - Música: «Long Trail», Kevin MacLeod (incompetech.com). Commons la marca como dominio público; citarlo es buena práctica.
 - Sin crédito obligatorio: vacas del plano 2 (CC0) y brindis (CC0, Sarah Stierch).
