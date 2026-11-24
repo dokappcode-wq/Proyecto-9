@@ -52,15 +52,17 @@ python3 reel-basqplan/montar_experiencia.py
 
 Todo es vídeo, todo vertical y en HD. Dura 30 s, con unos 4 s por plano. El montaje lleva un zoom lento sobre cada plano, transiciones variadas, textos que entran deslizándose sobre bandas navy y una barra dorada de progreso abajo. `portada.mp4` (de basqplan.com) no se sube al repositorio, así que hay que copiarlo en `fuentes/` antes de montar.
 
-| Hora | Texto | Vídeo |
+Solo lleva tres textos: «10:30, vacas frente al Cantábrico.» / «13:00, cuatro txakolis.» / «Una sola reserva.»
+
+| Plano | Texto | Vídeo |
 |---|---|---|
-| 10:00 | ¿Cómo es una experiencia con basqplan? / Despertar | Persona mirando el mar desde un monte (basqplan.com) |
-| 11:00 | 1. Plan · Ganadería | Vacas en el prado (Commons, CC0) |
-| 11:30 | 2. Plan | Costa y mar desde el dron (basqplan.com) |
-| 12:30 | Llegada a la txakolindegi | Costa verde con caseríos (basqplan.com) |
-| 13:00 | Sirviendo las copas | Espumoso sirviéndose (Commons) |
-| 13:30 | A comer | Sardinas a la brasa (Commons) |
-| — | logo + botón «Reserva en el enlace de la bio» | Flysch desde el aire (basqplan.com) |
+| 1 | — (con despertador) | Persona mirando el mar desde un monte (basqplan.com) |
+| 2 | 10:30, vacas frente al Cantábrico. | Vacas en el prado (Commons, CC0) |
+| 3 | — | Costa y mar desde el dron (basqplan.com) |
+| 4 | — | Costa verde con caseríos (basqplan.com) |
+| 5 | 13:00, cuatro txakolis. | Espumoso sirviéndose (Commons) |
+| 6 | — | Sardinas a la brasa (Commons) |
+| 7 | Una sola reserva. + logo | Flysch desde el aire (basqplan.com) |
 
 **Créditos que hay que poner en el texto del post** (los exigen las licencias):
 - Copas: Sarah Stierch, CC BY 4.0. https://commons.wikimedia.org/wiki/File:Turkovich_Family_Wines_-_June_2019_-_Stierch_03.ogv

@@ -25,13 +25,15 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 #   copas.webm: Wikimedia Commons, «Turkovich Family Wines - June 2019 - Stierch 03», Sarah Stierch (CC BY 4.0).
 #   pescado.webm: Wikimedia Commons, «Roasting fish» (CC BY-SA 4.0).
 # fx: centro horizontal del recorte vertical (0-1); speed < 1 ralentiza; trans: transición de entrada.
+# Textos: solo «10:30, vacas frente al Cantábrico. 13:00, cuatro txakolis. Una sola reserva.»
 PLANOS = [
-    dict(src="portada.mp4", ss=57.8, dur=5.0, speed=0.85, fx=0.6, intro=True, hora="10:00", sub="Despertar"),
-    dict(src="vacas.webm", ss=32.0, dur=4.0, fx=0.55, hora="11:00", sub="1. Plan\nGanadería", trans="smoothleft"),
-    dict(src="portada.mp4", ss=62.8, dur=4.0, fx=0.5, hora="11:30", sub="2. Plan", trans="zoomin"),
-    dict(src="portada.mp4", ss=14.6, dur=4.0, fx=0.5, hora="12:30", sub="Llegada a la txakolindegi", trans="smoothup"),
-    dict(src="copas.webm", ss=0.8, dur=4.0, hora="13:00", sub="Sirviendo las copas", trans="smoothleft"),
-    dict(src="pescado.webm", ss=8.0, dur=4.0, fx=0.68, hora="13:30", sub="A comer", trans="zoomin"),
+    dict(src="portada.mp4", ss=57.8, dur=3.5, speed=0.85, fx=0.6, alarma=True),
+    dict(src="vacas.webm", ss=32.0, dur=4.5, fx=0.55, hora="10:30,", frase="vacas frente al Cantábrico.",
+         trans="smoothleft"),
+    dict(src="portada.mp4", ss=62.8, dur=3.5, fx=0.5, trans="zoomin"),
+    dict(src="portada.mp4", ss=14.6, dur=3.5, fx=0.5, trans="smoothup"),
+    dict(src="copas.webm", ss=0.8, dur=4.5, hora="13:00,", frase="cuatro txakolis.", trans="smoothleft"),
+    dict(src="pescado.webm", ss=8.0, dur=3.5, fx=0.68, trans="zoomin"),
     dict(src="portada.mp4", ss=52.6, dur=5.0, fx=0.5, final=True, trans="fade"),
 ]
 
@@ -108,34 +110,23 @@ def subtitulo(img, s):
 
 
 def capas(p, tmp, i):
-    """Devuelve [(png, inicio, fin, fade_in, fade_out)] para el plano."""
+    """Devuelve [(png, inicio, fin, fade_in, fade_out, dy)] para el plano."""
     out = []
-    def guarda(img, nombre, t0, t1, fi=0.4, fo=0.0):
-        dy = {"reloj": -50, "sub": 70, "pregunta": 50, "hora": 50, "final": 60}.get(nombre, 0)
+    def guarda(img, nombre, t0, t1, fi=0.5, fo=0.0, dy=60):
         path = os.path.join(tmp, f"c{i}_{nombre}.png"); img.save(path); out.append((path, t0, t1, fi, fo, dy))
-    if p.get("intro"):
-        a = lienzo()
-        caja(a, H * 0.45, "¿Cómo es una\nexperiencia con\nbasqplan?", font(SERIF, 104, 600), alpha=175, pady=36)
-        guarda(a, "pregunta", 0.0, 2.4, fi=0.3, fo=0.4)
-        b = lienzo()
-        caja(b, H * 0.45, p["hora"], font(SERIF, 230, 600), alpha=165, padx=60, pady=10)
-        caja(b, H * 0.45 + 210, p["sub"], font(SERIF, 84, 600))
-        guarda(b, "hora", 2.4, p["dur"] + XF, fi=0.4, fo=0.5)
+    if p.get("hora"):
+        a = lienzo(); caja(a, H * 0.40, p["hora"], font(SERIF, 190, 600), alpha=150, padx=56, pady=14)
+        guarda(a, "hora", 0.3, p["dur"] + XF, dy=-50)
+        b = lienzo(); caja(b, H * 0.40 + 175, p["frase"], font(SERIF_I, 82, 500), alpha=165)
+        guarda(b, "frase", 0.8, p["dur"] + XF, dy=60)
     elif p.get("final"):
-        a = Image.new("RGBA", (W, H), NAVY + (120,)); velo(a, arriba=False, fuerza=200)
-        logo = Image.open(FU("logo_crema.png")).convert("RGBA"); lw = 340
+        a = Image.new("RGBA", (W, H), NAVY + (110,))
+        logo = Image.open(FU("logo_crema.png")).convert("RGBA"); lw = 300
         logo = logo.resize((lw, int(logo.height * lw / logo.width)), Image.LANCZOS)
-        a.alpha_composite(logo, (int(W / 2 - lw / 2), int(H * 0.40)))
-        texto(a, (W / 2, H * 0.40 + logo.height + 90), "basqplan", font(SERIF, 120, 600))
-        # botón dorado
-        d = ImageDraw.Draw(a); f = font(SANS, 44, 600); cy = H * 0.40 + logo.height + 230
-        l, t, r, b = d.textbbox((W / 2, cy), "Reserva en el enlace de la bio", font=f, anchor="mm")
-        d.rounded_rectangle([l - 44, t - 26, r + 44, b + 26], 40, fill=GOLD + (255,))
-        d.text((W / 2, cy), "Reserva en el enlace de la bio", font=f, fill=NAVY + (255,), anchor="mm")
-        guarda(a, "final", 0.8, p["dur"], fi=0.8)
-    else:
-        a = lienzo(); reloj(a, p["hora"]); guarda(a, "reloj", 0.0, p["dur"] + XF, fi=0.5)
-        b = lienzo(); subtitulo(b, p["sub"]); guarda(b, "sub", 0.6, p["dur"] + XF, fi=0.5)
+        a.alpha_composite(logo, (int(W / 2 - lw / 2), int(H * 0.58)))
+        guarda(a, "logo", 1.4, p["dur"], fi=0.8, dy=0)
+        b = lienzo(); caja(b, H * 0.45, "Una sola reserva.", font(SERIF_I, 112, 500), alpha=170, padx=56, pady=30)
+        guarda(b, "frase", 0.5, p["dur"], fi=0.6, dy=60)
     return out
 
 
@@ -216,8 +207,8 @@ def main():
     fc.append(f"[pb]fade=t=out:st={total-0.5}:d=0.5[vf]")
     # despertador: pitidos de 1 kHz en ráfagas, que se apagan al aparecer el primer plan
     alarma = ("aevalsrc='0.32*(sin(2*PI*1040*t)+0.35*sin(2*PI*2080*t))*lt(mod(t,0.2),0.1)"
-              f"*lt(mod(t,1),0.8)*lt(t,4.6)':s=48000:d={total}")
-    fc.append(f"{alarma},afade=t=in:d=0.05,afade=t=out:st=4.0:d=0.6,aformat=channel_layouts=stereo[a]")
+              f"*lt(mod(t,1),0.8)*lt(t,3.4)':s=48000:d={total}")
+    fc.append(f"{alarma},afade=t=in:d=0.05,afade=t=out:st=2.9:d=0.5,aformat=channel_layouts=stereo[a]")
     out = os.path.join(BASE, "salida", "experiencia_basqplan.mp4")
     subprocess.run(["ffmpeg", "-y", *inputs, "-filter_complex", ";".join(fc), "-map", "[vf]", "-map", "[a]",
                     "-t", str(total), "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
