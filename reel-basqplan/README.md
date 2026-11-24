@@ -50,17 +50,21 @@ Vídeo de 26 s en 9:16, montado con el material propio de basqplan.com (vídeo d
 python3 reel-basqplan/montar_experiencia.py
 ```
 
-Usa los vídeos `santaklara.mp4` (promo del agroturismo) y `dron.mp4` (dron por el País Vasco), que no se suben al repositorio. Hay que copiarlos en `fuentes/` antes de montar. Son de 640×360, así que se muestran enmarcados sobre un fondo desenfocado.
+Todo es vídeo y todo vertical, recortado a 9:16 a pantalla completa. `santaklara.mp4` y `dron.mp4` son los vídeos que aportaste: no se suben al repositorio, así que hay que copiarlos en `fuentes/` antes de montar.
 
-| Hora | Texto | Plano | ¿Encaja? |
+| Hora | Texto | Vídeo | Nota |
 |---|---|---|---|
-| 10:00 | ¿Cómo es una experiencia con basqplan? / despertar | Santa Klara al amanecer | sí |
-| 10:00 | 1. Plan | fachada del caserío Santa Klara | sí |
-| 11:00 | con los animales | terneros comiendo | **cambiado: no hay vídeo de pan** |
-| 11:30 | 2. Plan | coche por carretera entre prados (dron, ralentizado) | sí |
-| 12:30 | llegada a la txakolindegi | costa de Zumaia desde el aire | **genérico: no sale la bodega** |
-| 13:00 | sirviendo las copas | foto de basqplan.com | **es foto: falta un vídeo** |
-| 13:30 | a comer | comedor de Santa Klara (ralentizado) | aceptable |
-| — | logo + reserva | flysch desde el dron | sí |
+| 10:00 | ¿Cómo es una experiencia con basqplan? / despertar | Santa Klara al amanecer | — |
+| 10:00 | 1. Plan | Fachada del caserío Santa Klara | — |
+| 11:00 | elaboración de pan | Horno de leña con pan (`pan.webm`) | Grabado en Fuerteventura |
+| 11:30 | 2. Plan | Coche por carretera entre prados (dron) | Ralentizado |
+| 12:30 | llegada a la txakolindegi | Costa de Zumaia desde el aire | No sale la bodega |
+| 13:00 | sirviendo las copas | Espumoso sirviéndose (`copas.webm`) | — |
+| 13:30 | a comer | Comedor de Santa Klara | Ralentizado |
+| — | logo + reserva | Flysch (dron) | — |
+
+**Créditos que hay que poner en el texto del post** (los exige la licencia):
+- Copas: Sarah Stierch, CC BY 4.0. https://commons.wikimedia.org/wiki/File:Turkovich_Family_Wines_-_June_2019_-_Stierch_03.ogv
+- Pan: Wikimedia Commons, CC BY-SA 3.0. El autor figura en https://commons.wikimedia.org/wiki/File:Puerto_del_Rosario_-_Tefia_-_La_Alcogida_-_bread_baking_(oT)_03.ogv
 
 Para cambiar un plano, copia el archivo en `fuentes/` y cambia `src` en `PLANOS`.

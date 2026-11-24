@@ -19,20 +19,22 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 
 # src: archivo; half: 0/1 para fotos dobles de la web (izq/dcha); focus: punto hacia el que
 # se acerca la cámara (x, y en 0-1); zoom: acercamiento final; ss: segundo de inicio (vídeo)
-# Vídeos aportados: santaklara.mp4 (promo del agroturismo) y dron.mp4 (dron País Vasco), 640x360.
-# Se muestran enmarcados sobre un fondo desenfocado. crop: zona útil (sin bandas negras);
+# Todo vídeo y todo vertical (recorte 9:16 a pantalla completa).
+#   santaklara.mp4 / dron.mp4: vídeos aportados (640x360).
+#   pan.webm: Wikimedia Commons, «Puerto del Rosario - Tefia - La Alcogida - bread baking (oT) 03» (CC BY-SA 3.0).
+#   copas.webm: Wikimedia Commons, «Turkovich Family Wines - June 2019 - Stierch 03», Sarah Stierch (CC BY 4.0).
+# crop: zona útil del original (sin bandas negras); fx: centro horizontal del recorte vertical (0-1);
 # speed < 1 ralentiza para alargar planos cortos.
 DRON = (640, 288, 0, 36)
 PLANOS = [
-    dict(src="santaklara.mp4", ss=142.4, dur=4.0, intro=True, hora="10:00", sub="despertar"),
-    dict(src="santaklara.mp4", ss=28.1, dur=3.0, hora="10:00", sub="1. Plan"),
-    dict(src="santaklara.mp4", ss=90.2, dur=3.0, hora="11:00", sub="con los animales"),
-    dict(src="dron.mp4", ss=77.4, dur=3.0, speed=0.68, crop=DRON, hora="11:30", sub="2. Plan"),
-    dict(src="santaklara.mp4", ss=42.0, dur=3.0, hora="12:30", sub="llegada a la txakolindegi"),
-    dict(src="granja-txakoli.jpg", half=1, dur=3.0, focus=(0.45, 0.45), zoom=1.10,
-         hora="13:00", sub="sirviendo las copas"),
-    dict(src="santaklara.mp4", ss=107.6, dur=3.0, speed=0.72, hora="13:30", sub="a comer"),
-    dict(src="dron.mp4", ss=67.8, dur=4.0, crop=DRON, final=True),
+    dict(src="santaklara.mp4", ss=142.4, dur=4.0, fx=0.42, intro=True, hora="10:00", sub="despertar"),
+    dict(src="santaklara.mp4", ss=28.1, dur=3.0, fx=0.56, hora="10:00", sub="1. Plan"),
+    dict(src="pan.webm", ss=1.5, dur=3.0, fx=0.55, hora="11:00", sub="elaboración de pan"),
+    dict(src="dron.mp4", ss=77.4, dur=3.0, speed=0.68, crop=DRON, fx=0.5, hora="11:30", sub="2. Plan"),
+    dict(src="santaklara.mp4", ss=42.0, dur=3.0, fx=0.66, hora="12:30", sub="llegada a la txakolindegi"),
+    dict(src="copas.webm", ss=1.4, dur=3.0, hora="13:00", sub="sirviendo las copas"),
+    dict(src="santaklara.mp4", ss=107.6, dur=3.0, speed=0.72, fx=0.7, hora="13:30", sub="a comer"),
+    dict(src="dron.mp4", ss=67.8, dur=4.0, crop=DRON, fx=0.5, final=True),
 ]
 
 
@@ -150,13 +152,14 @@ def segmento(p, tmp, i, ultimo):
     if p["src"].lower().endswith((".mp4", ".mov", ".webm", ".m4v")):
         sp = p.get("speed", 1.0)
         cmd = ["ffmpeg", "-y", "-ss", str(p.get("ss", 0)), "-t", f"{d*sp+0.1:.3f}", "-i", FU(p["src"])]
-        cw, ch, cx, cy = p.get("crop", (640, 360, 0, 0))
-        fw = int(min(cw, ch * 1.556)) // 2 * 2; fx0 = cx + (cw - fw) // 2
-        base = (f"[0:v]crop={cw}:{ch}:{cx}:{cy},setpts=(PTS-STARTPTS)/{sp},fps={FPS},setsar=1,split[s1][s2];"
-                f"[s1]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
-                f"boxblur=28:2,eq=brightness=-0.10:saturation=0.8[bg];"
-                f"[s2]crop={fw}:{ch}:{fx0-cx}:0,scale={W}:-2:flags=lanczos,unsharp=5:5:0.6[fg];"
-                f"[bg][fg]overlay=0:(H-h)/2-20,trim=duration={d},setpts=PTS-STARTPTS")
+        r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+                            "stream=width,height", "-of", "csv=p=0", FU(p["src"])], capture_output=True, text=True)
+        iw, ih = map(int, r.stdout.strip().split(",")[:2])
+        cw, ch, cx, cy = p.get("crop", (iw, ih, 0, 0))
+        vw = min(cw, int(ch * 9 / 16)) // 2 * 2
+        vx = cx + int(min(max(p.get("fx", 0.5) * cw - vw / 2, 0), cw - vw))
+        base = (f"[0:v]crop={vw}:{ch}:{vx}:{cy},setpts=(PTS-STARTPTS)/{sp},fps={FPS},"
+                f"scale={W}:{H}:flags=lanczos,unsharp=5:5:0.7,setsar=1,trim=duration={d},setpts=PTS-STARTPTS")
     else:
         img = recorte_916(p, tmp, i)
         fx, fy = p.get("focus", (0.5, 0.5)); z = p.get("zoom", 1.1)
