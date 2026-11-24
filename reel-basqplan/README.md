@@ -39,3 +39,27 @@ El vídeo lleva solo el sonido ambiente de los clips. La música se añade dentr
 > 📍 Zumaia · Aia, Gipuzkoa
 
 Colaboración: invitar a Santa Klara y K5 como colaboradores solo si aceptan antes. Si no, mencionarlos y poner la ubicación «Zumaia».
+
+---
+
+# Reel 2 · «¿Cómo es una experiencia con basqplan?»
+
+Vídeo de 26 s en 9:16, montado con el material propio de basqplan.com (vídeo de portada y fotos de las experiencias). Usa las tipografías de la marca (Fraunces y Space Grotesk), los colores crema, dorado y navy, y el logo.
+
+```bash
+python3 reel-basqplan/montar_experiencia.py
+```
+
+| Hora | Texto | Plano usado | ¿Encaja? |
+|---|---|---|---|
+| — | ¿Cómo es una experiencia con basqplan? | amanecer sobre montes | sí |
+| 10:00 | despertar (con despertador) | amanecer | sí |
+| 10:00 | 1. Plan | caserío, acercándose a la puerta | sí (es foto, la puerta no se abre) |
+| 11:00 | elaboración de pan | taller (manos sobre la mesa) | **provisional: no es pan** |
+| 11:30 | 2. Plan | costa vasca desde el aire | **provisional: sin coche** |
+| 12:30 | llegada a la txakolindegi | bodega con viñedo y mar | sí |
+| 13:00 | sirviendo las copas | txakoli cayendo en copas | sí |
+| 13:30 | a comer | pintxos de anchoa preparándose | aceptable |
+| — | logo + reserva en el enlace de la bio | flysch desde el aire | sí |
+
+Para cambiar un plano, copia el archivo en `fuentes/` y cambia `src` en `PLANOS`.
