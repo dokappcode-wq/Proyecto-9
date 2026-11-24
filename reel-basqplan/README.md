@@ -54,17 +54,21 @@ Todo es vídeo, todo vertical y en HD. Dura 30 s, con unos 4 s por plano. El mon
 
 Solo lleva tres textos, todos en la parte de abajo: «10:30, vacas frente al Cantábrico.» / «13:00, cuatro txakolis.» / «Una sola reserva.». Al final aparecen el logo y el nombre «basqplan» debajo.
 
+Estructura: «UN DÍA CON basqplan» → 9:00 → ganadería en Santa Klara (cortes rápidos de 2 s) → txakoli → cocina → final. Dura unos 32 s.
+
 | Plano | Texto | Vídeo |
 |---|---|---|
-| 1 | — (despertador) | Persona mirando el mar desde un monte (basqplan.com) |
-| 2 | 10:30, vacas frente al Cantábrico. | Vacas en el prado |
-| 3 | — | Vaca de cuernos largos con ternero, de cerca |
-| 4 | — | Manada en el prado |
-| 5 | 13:00, cuatro txakolis. | Brindis con copas en una bodega |
-| 6 | — | Chef cocinando en la barra (plano medio) |
-| 7 | logo + basqplan / Una sola reserva. | Flysch desde el aire (basqplan.com) |
+| 1 | UN DÍA CON + logo + basqplan | Flysch desde el aire (basqplan.com) |
+| 2 | 9:00 (con despertador) | Santa Klara: gente en tumbonas al amanecer frente al mar |
+| 3 | Ganadería frente al Cantábrico | Santa Klara: vacas pastando junto al caserío y el mar (dron) |
+| 4–8 | — | Santa Klara: niños corriendo, dando de comer a las cabras, con el poni, vaca con terneros, paseo en poni |
+| 9 | 13:00, cuatro txakolis. | Brindis con copas en una bodega |
+| 10 | — | Chef cocinando en la barra |
+| 11 | logo + basqplan / Una sola reserva. | Flysch desde el aire (basqplan.com) |
 
-**Audio:** despertador real al principio y, en cuanto se apaga, la música «Long Trail» de Kevin MacLeod, con fundido de entrada y de salida.
+`santaklara.mp4` (vídeo promocional del agroturismo) no se sube al repositorio. Hay que copiarlo en `fuentes/` antes de montar, y **hace falta permiso de Santa Klara** para publicarlo.
+
+**Audio:** la música suena desde el principio y baja mientras suena el despertador del «9:00». Es «Long Trail» de Kevin MacLeod, con fundido de entrada y de salida.
 
 **Créditos que hay que poner en el texto del post** (los exigen las licencias):
 - Ganado (planos 3 y 4): CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Eine_Herde_Schottische_Hochlandrinder_auf_einer_Weide_bei_Bederwitz_(482).webm y en el (488).
