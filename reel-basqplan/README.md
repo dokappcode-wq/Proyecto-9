@@ -50,21 +50,21 @@ Vídeo de 26 s en 9:16, montado con el material propio de basqplan.com (vídeo d
 python3 reel-basqplan/montar_experiencia.py
 ```
 
-Todo es vídeo, todo vertical y dura 34 s: unos 4 s por plano, con fundidos de 0,5 s. Los textos van sobre bandas navy semitransparentes. `santaklara.mp4`, `dron.mp4` y `portada.mp4` (de basqplan.com) no se suben al repositorio, así que hay que copiarlos en `fuentes/` antes de montar.
+Todo es vídeo, todo vertical y en HD. Dura 30 s, con unos 4 s por plano. El montaje lleva un zoom lento sobre cada plano, transiciones variadas, textos que entran deslizándose sobre bandas navy y una barra dorada de progreso abajo. `portada.mp4` (de basqplan.com) no se sube al repositorio, así que hay que copiarlo en `fuentes/` antes de montar.
 
 | Hora | Texto | Vídeo |
 |---|---|---|
 | 10:00 | ¿Cómo es una experiencia con basqplan? / Despertar | Persona mirando el mar desde un monte (basqplan.com) |
-| 10:00 | 1. Plan | Fachada del caserío Santa Klara |
-| 11:00 | Elaboración de pan | Horno de leña (Commons, grabado en Fuerteventura) |
-| 11:30 | 2. Plan | Coche entre prados (dron, cámara lenta) |
-| 12:30 | Llegada a la txakolindegi | Costa verde con el mar (basqplan.com) |
+| 11:00 | 1. Plan · Ganadería | Vacas en el prado (Commons, CC0) |
+| 11:30 | 2. Plan | Costa y mar desde el dron (basqplan.com) |
+| 12:30 | Llegada a la txakolindegi | Costa verde con caseríos (basqplan.com) |
 | 13:00 | Sirviendo las copas | Espumoso sirviéndose (Commons) |
-| 13:30 | A comer | Comedor de Santa Klara (cámara lenta) |
+| 13:30 | A comer | Sardinas a la brasa (Commons) |
 | — | logo + botón «Reserva en el enlace de la bio» | Flysch desde el aire (basqplan.com) |
 
-**Créditos que hay que poner en el texto del post** (los exige la licencia):
+**Créditos que hay que poner en el texto del post** (los exigen las licencias):
 - Copas: Sarah Stierch, CC BY 4.0. https://commons.wikimedia.org/wiki/File:Turkovich_Family_Wines_-_June_2019_-_Stierch_03.ogv
-- Pan: Wikimedia Commons, CC BY-SA 3.0. El autor figura en https://commons.wikimedia.org/wiki/File:Puerto_del_Rosario_-_Tefia_-_La_Alcogida_-_bread_baking_(oT)_03.ogv
+- Pescado: «Roasting fish», CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Roasting_fish.webm
+- Vacas: «Cattle near Aberfeldy», CC0. No exige crédito.
 
 Para cambiar un plano, copia el archivo en `fuentes/` y cambia `src` en `PLANOS`.

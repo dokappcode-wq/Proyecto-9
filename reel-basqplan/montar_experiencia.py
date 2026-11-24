@@ -19,23 +19,20 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 
 # src: archivo; half: 0/1 para fotos dobles de la web (izq/dcha); focus: punto hacia el que
 # se acerca la cámara (x, y en 0-1); zoom: acercamiento final; ss: segundo de inicio (vídeo)
-# Todo vídeo y todo vertical (recorte 9:16 a pantalla completa).
-#   santaklara.mp4 / dron.mp4: vídeos aportados (640x360).
-#   pan.webm: Wikimedia Commons, «Puerto del Rosario - Tefia - La Alcogida - bread baking (oT) 03» (CC BY-SA 3.0).
+# Todo vídeo, todo vertical y en HD.
+#   portada.mp4: vídeo de basqplan.com (1920x1080).
+#   vacas.webm: Wikimedia Commons, «Cattle near Aberfeldy» (CC0).
 #   copas.webm: Wikimedia Commons, «Turkovich Family Wines - June 2019 - Stierch 03», Sarah Stierch (CC BY 4.0).
-# crop: zona útil del original (sin bandas negras); fx: centro horizontal del recorte vertical (0-1);
-# speed < 1 ralentiza para alargar planos cortos.
-DRON = (640, 288, 0, 36)
-# portada.mp4 = vídeo de basqplan.com (1920x1080, el más nítido).
+#   pescado.webm: Wikimedia Commons, «Roasting fish» (CC BY-SA 4.0).
+# fx: centro horizontal del recorte vertical (0-1); speed < 1 ralentiza; trans: transición de entrada.
 PLANOS = [
     dict(src="portada.mp4", ss=57.8, dur=5.0, speed=0.85, fx=0.6, intro=True, hora="10:00", sub="Despertar"),
-    dict(src="santaklara.mp4", ss=28.1, dur=4.0, speed=0.8, fx=0.56, limpia=True, hora="10:00", sub="1. Plan"),
-    dict(src="pan.webm", ss=1.5, dur=4.0, fx=0.47, hora="11:00", sub="Elaboración de pan"),
-    dict(src="dron.mp4", ss=77.4, dur=4.0, speed=0.5, crop=DRON, fx=0.5, limpia=True, hora="11:30", sub="2. Plan"),
-    dict(src="portada.mp4", ss=14.6, dur=4.0, fx=0.5, hora="12:30", sub="Llegada a la txakolindegi"),
-    dict(src="copas.webm", ss=0.8, dur=4.0, hora="13:00", sub="Sirviendo las copas"),
-    dict(src="santaklara.mp4", ss=107.7, dur=4.0, speed=0.52, fx=0.72, limpia=True, hora="13:30", sub="A comer"),
-    dict(src="portada.mp4", ss=52.6, dur=5.0, fx=0.5, final=True),
+    dict(src="vacas.webm", ss=32.0, dur=4.0, fx=0.55, hora="11:00", sub="1. Plan\nGanadería", trans="smoothleft"),
+    dict(src="portada.mp4", ss=62.8, dur=4.0, fx=0.5, hora="11:30", sub="2. Plan", trans="zoomin"),
+    dict(src="portada.mp4", ss=14.6, dur=4.0, fx=0.5, hora="12:30", sub="Llegada a la txakolindegi", trans="smoothup"),
+    dict(src="copas.webm", ss=0.8, dur=4.0, hora="13:00", sub="Sirviendo las copas", trans="smoothleft"),
+    dict(src="pescado.webm", ss=8.0, dur=4.0, fx=0.68, hora="13:30", sub="A comer", trans="zoomin"),
+    dict(src="portada.mp4", ss=52.6, dur=5.0, fx=0.5, final=True, trans="fade"),
 ]
 
 
@@ -114,7 +111,8 @@ def capas(p, tmp, i):
     """Devuelve [(png, inicio, fin, fade_in, fade_out)] para el plano."""
     out = []
     def guarda(img, nombre, t0, t1, fi=0.4, fo=0.0):
-        path = os.path.join(tmp, f"c{i}_{nombre}.png"); img.save(path); out.append((path, t0, t1, fi, fo))
+        dy = {"reloj": -50, "sub": 70, "pregunta": 50, "hora": 50, "final": 60}.get(nombre, 0)
+        path = os.path.join(tmp, f"c{i}_{nombre}.png"); img.save(path); out.append((path, t0, t1, fi, fo, dy))
     if p.get("intro"):
         a = lienzo()
         caja(a, H * 0.45, "¿Cómo es una\nexperiencia con\nbasqplan?", font(SERIF, 104, 600), alpha=175, pady=36)
@@ -155,8 +153,8 @@ def recorte_916(p, tmp, i):
     path = os.path.join(tmp, f"base{i}.png"); im.save(path); return path
 
 
-LOOK = ("eq=contrast=0.96:saturation=0.92:gamma=1.02,"
-        "colorbalance=rs=0.02:bs=-0.03:rm=0.01:bm=-0.02,noise=alls=3:allf=t")
+LOOK = ("eq=contrast=1.07:saturation=1.15:gamma=1.0,"
+        "colorbalance=rs=0.03:bs=-0.02:rm=0.02:bm=-0.02,vignette=PI/5,noise=alls=2:allf=t")
 
 
 def segmento(p, tmp, i, ultimo):
@@ -173,7 +171,8 @@ def segmento(p, tmp, i, ultimo):
         vx = cx + int(min(max(p.get("fx", 0.5) * cw - vw / 2, 0), cw - vw))
         dn = "hqdn3d=3:3:4:4," if p.get("limpia") else ""
         base = (f"[0:v]crop={vw}:{ch}:{vx}:{cy},{dn}setpts=(PTS-STARTPTS)/{sp},fps={FPS},"
-                f"scale={W}:{H}:flags=lanczos,unsharp=5:5:0.7,setsar=1,trim=duration={d},setpts=PTS-STARTPTS")
+                f"scale={int(W*1.5)}:{int(H*1.5)}:flags=lanczos,unsharp=5:5:0.6,setsar=1,trim=duration={d},setpts=PTS-STARTPTS,"
+                f"zoompan=z='1+0.09*on/{n}':d=1:s={W}x{H}:fps={FPS}:x='iw/2-iw/zoom/2':y='ih/2-ih/zoom/2'")
     else:
         img = recorte_916(p, tmp, i)
         fx, fy = p.get("focus", (0.5, 0.5)); z = p.get("zoom", 1.1)
@@ -184,12 +183,14 @@ def segmento(p, tmp, i, ultimo):
                 f"x='max(0,min(iw-iw/zoom,{fx}*iw-iw/zoom/2))':y='max(0,min(ih-ih/zoom,{fy}*ih-ih/zoom/2))',setsar=1")
     fc = [f"{base},{LOOK},format=yuv420p[b0]"]
     prev = "b0"
-    for k, (png, t0, t1, fi, fo) in enumerate(capas(p, tmp, i)):
+    for k, (png, t0, t1, fi, fo, dy) in enumerate(capas(p, tmp, i)):
         cmd += ["-loop", "1", "-framerate", str(FPS), "-t", str(d), "-i", png]
         f = f"[{k+1}:v]format=rgba,fade=t=in:st={t0}:d={fi}:alpha=1"
         if fo: f += f",fade=t=out:st={t1-fo}:d={fo}:alpha=1"
         fc.append(f + f"[t{k}]")
-        fc.append(f"[{prev}][t{k}]overlay=0:0:enable='between(t,{t0},{t1})'[b{k+1}]")
+        # entrada deslizándose con frenada suave
+        ye = f"if(lt(t,{t0}+0.6),pow(1-(t-{t0})/0.6,3)*{dy},0)"
+        fc.append(f"[{prev}][t{k}]overlay=x=0:y='{ye}':enable='between(t,{t0},{t1})'[b{k+1}]")
         prev = f"b{k+1}"
     out = os.path.join(tmp, f"seg{i}.mp4")
     cmd += ["-filter_complex", ";".join(fc), "-map", f"[{prev}]", "-t", str(d), "-an",
@@ -206,9 +207,13 @@ def main():
     for s, _ in segs: inputs += ["-i", s]
     for i in range(1, len(segs)):
         off += segs[i - 1][1] - XF
-        fc.append(f"[{prev}][{i}:v]xfade=transition=fade:duration={XF}:offset={off:.3f}[v{i}]")
+        tr = PLANOS[i].get("trans", "fade")
+        fc.append(f"[{prev}][{i}:v]xfade=transition={tr}:duration={XF}:offset={off:.3f}[v{i}]")
         prev = f"v{i}"
-    fc.append(f"[{prev}]fade=t=out:st={total-0.5}:d=0.5[vf]")
+    # barra dorada de progreso del día, abajo
+    fc.append(f"color=c=0xC9A86B:s={W}x10:r={FPS}:d={total}[bar]")
+    fc.append(f"[{prev}][bar]overlay=x='-{W}+{W}*t/{total}':y={H-10}:shortest=1[pb]")
+    fc.append(f"[pb]fade=t=out:st={total-0.5}:d=0.5[vf]")
     # despertador: pitidos de 1 kHz en ráfagas, que se apagan al aparecer el primer plan
     alarma = ("aevalsrc='0.32*(sin(2*PI*1040*t)+0.35*sin(2*PI*2080*t))*lt(mod(t,0.2),0.1)"
               f"*lt(mod(t,1),0.8)*lt(t,4.6)':s=48000:d={total}")
