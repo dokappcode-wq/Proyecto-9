@@ -50,18 +50,18 @@ Vídeo de 26 s en 9:16, montado con el material propio de basqplan.com (vídeo d
 python3 reel-basqplan/montar_experiencia.py
 ```
 
-Todo es vídeo y todo vertical, recortado a 9:16 a pantalla completa. `santaklara.mp4` y `dron.mp4` son los vídeos que aportaste: no se suben al repositorio, así que hay que copiarlos en `fuentes/` antes de montar.
+Todo es vídeo, todo vertical y dura 34 s: unos 4 s por plano, con fundidos de 0,5 s. Los textos van sobre bandas navy semitransparentes. `santaklara.mp4`, `dron.mp4` y `portada.mp4` (de basqplan.com) no se suben al repositorio, así que hay que copiarlos en `fuentes/` antes de montar.
 
-| Hora | Texto | Vídeo | Nota |
-|---|---|---|---|
-| 10:00 | ¿Cómo es una experiencia con basqplan? / despertar | Santa Klara al amanecer | — |
-| 10:00 | 1. Plan | Fachada del caserío Santa Klara | — |
-| 11:00 | elaboración de pan | Horno de leña con pan (`pan.webm`) | Grabado en Fuerteventura |
-| 11:30 | 2. Plan | Coche por carretera entre prados (dron) | Ralentizado |
-| 12:30 | llegada a la txakolindegi | Costa de Zumaia desde el aire | No sale la bodega |
-| 13:00 | sirviendo las copas | Espumoso sirviéndose (`copas.webm`) | — |
-| 13:30 | a comer | Comedor de Santa Klara | Ralentizado |
-| — | logo + reserva | Flysch (dron) | — |
+| Hora | Texto | Vídeo |
+|---|---|---|
+| 10:00 | ¿Cómo es una experiencia con basqplan? / Despertar | Persona mirando el mar desde un monte (basqplan.com) |
+| 10:00 | 1. Plan | Fachada del caserío Santa Klara |
+| 11:00 | Elaboración de pan | Horno de leña (Commons, grabado en Fuerteventura) |
+| 11:30 | 2. Plan | Coche entre prados (dron, cámara lenta) |
+| 12:30 | Llegada a la txakolindegi | Costa verde con el mar (basqplan.com) |
+| 13:00 | Sirviendo las copas | Espumoso sirviéndose (Commons) |
+| 13:30 | A comer | Comedor de Santa Klara (cámara lenta) |
+| — | logo + botón «Reserva en el enlace de la bio» | Flysch desde el aire (basqplan.com) |
 
 **Créditos que hay que poner en el texto del post** (los exige la licencia):
 - Copas: Sarah Stierch, CC BY 4.0. https://commons.wikimedia.org/wiki/File:Turkovich_Family_Wines_-_June_2019_-_Stierch_03.ogv

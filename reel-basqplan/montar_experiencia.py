@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 BASE = os.path.dirname(os.path.abspath(__file__))
 FU = lambda p: os.path.join(BASE, "fuentes", p)
 W, H, FPS = 1080, 1920, 30
-XF = 0.3
+XF = 0.5
 CREAM, GOLD, NAVY = (247, 243, 236), (201, 168, 107), (16, 24, 37)
 SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
                         ("Fraunces.ttf", "Fraunces-Italic.ttf", "SpaceGrotesk.ttf"))
@@ -26,15 +26,16 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 # crop: zona útil del original (sin bandas negras); fx: centro horizontal del recorte vertical (0-1);
 # speed < 1 ralentiza para alargar planos cortos.
 DRON = (640, 288, 0, 36)
+# portada.mp4 = vídeo de basqplan.com (1920x1080, el más nítido).
 PLANOS = [
-    dict(src="santaklara.mp4", ss=142.4, dur=4.0, fx=0.42, intro=True, hora="10:00", sub="despertar"),
-    dict(src="santaklara.mp4", ss=28.1, dur=3.0, fx=0.56, hora="10:00", sub="1. Plan"),
-    dict(src="pan.webm", ss=1.5, dur=3.0, fx=0.55, hora="11:00", sub="elaboración de pan"),
-    dict(src="dron.mp4", ss=77.4, dur=3.0, speed=0.68, crop=DRON, fx=0.5, hora="11:30", sub="2. Plan"),
-    dict(src="santaklara.mp4", ss=42.0, dur=3.0, fx=0.66, hora="12:30", sub="llegada a la txakolindegi"),
-    dict(src="copas.webm", ss=1.4, dur=3.0, hora="13:00", sub="sirviendo las copas"),
-    dict(src="santaklara.mp4", ss=107.6, dur=3.0, speed=0.72, fx=0.7, hora="13:30", sub="a comer"),
-    dict(src="dron.mp4", ss=67.8, dur=4.0, crop=DRON, fx=0.5, final=True),
+    dict(src="portada.mp4", ss=57.8, dur=5.0, speed=0.85, fx=0.6, intro=True, hora="10:00", sub="Despertar"),
+    dict(src="santaklara.mp4", ss=28.1, dur=4.0, speed=0.8, fx=0.56, limpia=True, hora="10:00", sub="1. Plan"),
+    dict(src="pan.webm", ss=1.5, dur=4.0, fx=0.47, hora="11:00", sub="Elaboración de pan"),
+    dict(src="dron.mp4", ss=77.4, dur=4.0, speed=0.5, crop=DRON, fx=0.5, limpia=True, hora="11:30", sub="2. Plan"),
+    dict(src="portada.mp4", ss=14.6, dur=4.0, fx=0.5, hora="12:30", sub="Llegada a la txakolindegi"),
+    dict(src="copas.webm", ss=0.8, dur=4.0, hora="13:00", sub="Sirviendo las copas"),
+    dict(src="santaklara.mp4", ss=107.7, dur=4.0, speed=0.52, fx=0.72, limpia=True, hora="13:30", sub="A comer"),
+    dict(src="portada.mp4", ss=52.6, dur=5.0, fx=0.5, final=True),
 ]
 
 
@@ -90,41 +91,53 @@ def velo(img, arriba=True, abajo=True, fuerza=150):
     img.alpha_composite(c)
 
 
-def reloj(img, hora):
-    texto(img, (W / 2, 250), hora, font(SERIF, 118, 500), radio=12)
+def caja(img, cy, txt, fnt, fill=CREAM, alpha=165, padx=46, pady=26, radio=30):
+    """Texto centrado sobre una banda navy semitransparente: se lee sobre cualquier fondo."""
     d = ImageDraw.Draw(img)
-    d.line([(W / 2 - 34, 338), (W / 2 + 34, 338)], fill=GOLD + (255,), width=3)
+    l, t, r, b = d.multiline_textbbox((W / 2, cy), txt, font=fnt, anchor="mm", align="center", spacing=12)
+    capa = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    ImageDraw.Draw(capa).rounded_rectangle([l - padx, t - pady, r + padx, b + pady], radio, fill=NAVY + (alpha,))
+    img.alpha_composite(capa)
+    d.multiline_text((W / 2, cy), txt, font=fnt, fill=fill + (255,), anchor="mm", align="center", spacing=12)
+
+
+def reloj(img, hora):
+    caja(img, 270, hora, font(SERIF, 132, 600), alpha=150, padx=44, pady=22)
 
 
 def subtitulo(img, s):
-    texto(img, (W / 2, H * 0.80), s, font(SERIF_I, 92 if s[:2] in ("1.", "2.") else 82, 400))
+    plan = s[:2] in ("1.", "2.")
+    caja(img, H * 0.79, s, font(SERIF, 96 if plan else 76, 600), fill=GOLD if plan else CREAM)
 
 
 def capas(p, tmp, i):
     """Devuelve [(png, inicio, fin, fade_in, fade_out)] para el plano."""
     out = []
-    def guarda(img, nombre, t0, t1, fi=0.3, fo=0.0):
+    def guarda(img, nombre, t0, t1, fi=0.4, fo=0.0):
         path = os.path.join(tmp, f"c{i}_{nombre}.png"); img.save(path); out.append((path, t0, t1, fi, fo))
     if p.get("intro"):
-        a = lienzo(); velo(a, arriba=False)
-        texto(a, (W / 2, H * 0.47), "¿Cómo es una\nexperiencia con\nbasqplan?", font(SERIF, 104, 500), radio=18)
-        guarda(a, "pregunta", 0.0, 1.8, fi=0.25, fo=0.3)
-        b = lienzo(); velo(b, arriba=False)
-        texto(b, (W / 2, H * 0.47), p["hora"], font(SERIF, 280, 500), radio=20)
-        texto(b, (W / 2, H * 0.47 + 200), p["sub"], font(SERIF_I, 88, 400))
-        guarda(b, "hora", 1.8, p["dur"] + XF, fi=0.3, fo=0.45)
+        a = lienzo()
+        caja(a, H * 0.45, "¿Cómo es una\nexperiencia con\nbasqplan?", font(SERIF, 104, 600), alpha=175, pady=36)
+        guarda(a, "pregunta", 0.0, 2.4, fi=0.3, fo=0.4)
+        b = lienzo()
+        caja(b, H * 0.45, p["hora"], font(SERIF, 230, 600), alpha=165, padx=60, pady=10)
+        caja(b, H * 0.45 + 210, p["sub"], font(SERIF, 84, 600))
+        guarda(b, "hora", 2.4, p["dur"] + XF, fi=0.4, fo=0.5)
     elif p.get("final"):
-        a = Image.new("RGBA", (W, H), NAVY + (105,)); velo(a, arriba=False, fuerza=200)
-        logo = Image.open(FU("logo_crema.png")).convert("RGBA"); lw = 300
+        a = Image.new("RGBA", (W, H), NAVY + (120,)); velo(a, arriba=False, fuerza=200)
+        logo = Image.open(FU("logo_crema.png")).convert("RGBA"); lw = 340
         logo = logo.resize((lw, int(logo.height * lw / logo.width)), Image.LANCZOS)
-        a.alpha_composite(logo, (int(W / 2 - lw / 2), int(H * 0.58)))
-        texto(a, (W / 2, H * 0.58 + logo.height + 70), "basqplan", font(SERIF, 92, 500))
-        texto(a, (W / 2, H * 0.58 + logo.height + 160), "RESERVA EN EL ENLACE DE LA BIO",
-              font(SANS, 30, 500), fill=GOLD, tracking=6, sombra=150, radio=8)
-        guarda(a, "final", 0.6, p["dur"], fi=0.6)
+        a.alpha_composite(logo, (int(W / 2 - lw / 2), int(H * 0.40)))
+        texto(a, (W / 2, H * 0.40 + logo.height + 90), "basqplan", font(SERIF, 120, 600))
+        # botón dorado
+        d = ImageDraw.Draw(a); f = font(SANS, 44, 600); cy = H * 0.40 + logo.height + 230
+        l, t, r, b = d.textbbox((W / 2, cy), "Reserva en el enlace de la bio", font=f, anchor="mm")
+        d.rounded_rectangle([l - 44, t - 26, r + 44, b + 26], 40, fill=GOLD + (255,))
+        d.text((W / 2, cy), "Reserva en el enlace de la bio", font=f, fill=NAVY + (255,), anchor="mm")
+        guarda(a, "final", 0.8, p["dur"], fi=0.8)
     else:
-        a = lienzo(); velo(a); reloj(a, p["hora"]); guarda(a, "reloj", 0.0, p["dur"] + XF, fi=0.35)
-        b = lienzo(); subtitulo(b, p["sub"]); guarda(b, "sub", 0.35, p["dur"] + XF, fi=0.35)
+        a = lienzo(); reloj(a, p["hora"]); guarda(a, "reloj", 0.0, p["dur"] + XF, fi=0.5)
+        b = lienzo(); subtitulo(b, p["sub"]); guarda(b, "sub", 0.6, p["dur"] + XF, fi=0.5)
     return out
 
 
@@ -143,7 +156,7 @@ def recorte_916(p, tmp, i):
 
 
 LOOK = ("eq=contrast=0.96:saturation=0.92:gamma=1.02,"
-        "colorbalance=rs=0.02:bs=-0.03:rm=0.01:bm=-0.02,noise=alls=5:allf=t")
+        "colorbalance=rs=0.02:bs=-0.03:rm=0.01:bm=-0.02,noise=alls=3:allf=t")
 
 
 def segmento(p, tmp, i, ultimo):
@@ -158,7 +171,8 @@ def segmento(p, tmp, i, ultimo):
         cw, ch, cx, cy = p.get("crop", (iw, ih, 0, 0))
         vw = min(cw, int(ch * 9 / 16)) // 2 * 2
         vx = cx + int(min(max(p.get("fx", 0.5) * cw - vw / 2, 0), cw - vw))
-        base = (f"[0:v]crop={vw}:{ch}:{vx}:{cy},setpts=(PTS-STARTPTS)/{sp},fps={FPS},"
+        dn = "hqdn3d=3:3:4:4," if p.get("limpia") else ""
+        base = (f"[0:v]crop={vw}:{ch}:{vx}:{cy},{dn}setpts=(PTS-STARTPTS)/{sp},fps={FPS},"
                 f"scale={W}:{H}:flags=lanczos,unsharp=5:5:0.7,setsar=1,trim=duration={d},setpts=PTS-STARTPTS")
     else:
         img = recorte_916(p, tmp, i)
@@ -197,8 +211,8 @@ def main():
     fc.append(f"[{prev}]fade=t=out:st={total-0.5}:d=0.5[vf]")
     # despertador: pitidos de 1 kHz en ráfagas, que se apagan al aparecer el primer plan
     alarma = ("aevalsrc='0.32*(sin(2*PI*1040*t)+0.35*sin(2*PI*2080*t))*lt(mod(t,0.2),0.1)"
-              f"*lt(mod(t,1),0.8)*lt(t,3.6)':s=48000:d={total}")
-    fc.append(f"{alarma},afade=t=in:d=0.05,afade=t=out:st=3.0:d=0.7,aformat=channel_layouts=stereo[a]")
+              f"*lt(mod(t,1),0.8)*lt(t,4.6)':s=48000:d={total}")
+    fc.append(f"{alarma},afade=t=in:d=0.05,afade=t=out:st=4.0:d=0.6,aformat=channel_layouts=stereo[a]")
     out = os.path.join(BASE, "salida", "experiencia_basqplan.mp4")
     subprocess.run(["ffmpeg", "-y", *inputs, "-filter_complex", ";".join(fc), "-map", "[vf]", "-map", "[a]",
                     "-t", str(total), "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
