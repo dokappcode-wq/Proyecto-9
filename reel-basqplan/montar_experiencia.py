@@ -19,21 +19,20 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 
 # src: archivo; half: 0/1 para fotos dobles de la web (izq/dcha); focus: punto hacia el que
 # se acerca la cámara (x, y en 0-1); zoom: acercamiento final; ss: segundo de inicio (vídeo)
+# Vídeos aportados: santaklara.mp4 (promo del agroturismo) y dron.mp4 (dron País Vasco), 640x360.
+# Se muestran enmarcados sobre un fondo desenfocado. crop: zona útil (sin bandas negras);
+# speed < 1 ralentiza para alargar planos cortos.
+DRON = (640, 288, 0, 36)
 PLANOS = [
-    dict(src="nosotros-bilbao.jpg", dur=4.0, focus=(0.62, 0.35), zoom=1.10, intro=True,
-         hora="10:00", sub="despertar"),
-    dict(src="pagoeta-txakoli.jpg", half=0, dur=3.0, focus=(0.62, 0.62), zoom=1.30,
-         hora="10:00", sub="1. Plan"),
-    dict(src="k5-ceramica.jpg", half=1, dur=3.0, focus=(0.45, 0.75), zoom=1.12,
-         hora="11:00", sub="elaboración de pan"),
-    dict(src="costa.mp4", dur=3.0, ss=0.0, hora="11:30", sub="2. Plan"),
-    dict(src="barco-flysch-ganeta.jpg", half=1, dur=3.0, focus=(0.6, 0.55), zoom=1.15,
-         hora="12:30", sub="llegada a la txakolindegi"),
+    dict(src="santaklara.mp4", ss=142.4, dur=4.0, intro=True, hora="10:00", sub="despertar"),
+    dict(src="santaklara.mp4", ss=28.1, dur=3.0, hora="10:00", sub="1. Plan"),
+    dict(src="santaklara.mp4", ss=90.2, dur=3.0, hora="11:00", sub="con los animales"),
+    dict(src="dron.mp4", ss=77.4, dur=3.0, speed=0.68, crop=DRON, hora="11:30", sub="2. Plan"),
+    dict(src="santaklara.mp4", ss=42.0, dur=3.0, hora="12:30", sub="llegada a la txakolindegi"),
     dict(src="granja-txakoli.jpg", half=1, dur=3.0, focus=(0.45, 0.45), zoom=1.10,
          hora="13:00", sub="sirviendo las copas"),
-    dict(src="pagoeta-anchoas-getaria.jpg", half=1, dur=3.0, focus=(0.4, 0.8), zoom=1.12,
-         hora="13:30", sub="a comer"),
-    dict(src="flysch.mp4", dur=4.0, ss=0.0, final=True),
+    dict(src="santaklara.mp4", ss=107.6, dur=3.0, speed=0.72, hora="13:30", sub="a comer"),
+    dict(src="dron.mp4", ss=67.8, dur=4.0, crop=DRON, final=True),
 ]
 
 
@@ -149,9 +148,15 @@ def segmento(p, tmp, i, ultimo):
     d = p["dur"] + (0 if ultimo else XF)
     n = int(round(d * FPS))
     if p["src"].lower().endswith((".mp4", ".mov", ".webm", ".m4v")):
-        cmd = ["ffmpeg", "-y", "-ss", str(p.get("ss", 0)), "-t", str(d), "-i", FU(p["src"])]
-        base = (f"[0:v]scale=-2:{int(H*1.06)},crop={W}:{H}:x='(in_w-{W})/2+(in_w-{W})*0.04*(t/{d}-0.5)':"
-                f"y='(in_h-{H})/2',fps={FPS},setsar=1")
+        sp = p.get("speed", 1.0)
+        cmd = ["ffmpeg", "-y", "-ss", str(p.get("ss", 0)), "-t", f"{d*sp+0.1:.3f}", "-i", FU(p["src"])]
+        cw, ch, cx, cy = p.get("crop", (640, 360, 0, 0))
+        fw = int(min(cw, ch * 1.556)) // 2 * 2; fx0 = cx + (cw - fw) // 2
+        base = (f"[0:v]crop={cw}:{ch}:{cx}:{cy},setpts=(PTS-STARTPTS)/{sp},fps={FPS},setsar=1,split[s1][s2];"
+                f"[s1]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
+                f"boxblur=28:2,eq=brightness=-0.10:saturation=0.8[bg];"
+                f"[s2]crop={fw}:{ch}:{fx0-cx}:0,scale={W}:-2:flags=lanczos,unsharp=5:5:0.6[fg];"
+                f"[bg][fg]overlay=0:(H-h)/2-20,trim=duration={d},setpts=PTS-STARTPTS")
     else:
         img = recorte_916(p, tmp, i)
         fx, fy = p.get("focus", (0.5, 0.5)); z = p.get("zoom", 1.1)

@@ -50,16 +50,17 @@ Vídeo de 26 s en 9:16, montado con el material propio de basqplan.com (vídeo d
 python3 reel-basqplan/montar_experiencia.py
 ```
 
-| Hora | Texto | Plano usado | ¿Encaja? |
+Usa los vídeos `santaklara.mp4` (promo del agroturismo) y `dron.mp4` (dron por el País Vasco), que no se suben al repositorio. Hay que copiarlos en `fuentes/` antes de montar. Son de 640×360, así que se muestran enmarcados sobre un fondo desenfocado.
+
+| Hora | Texto | Plano | ¿Encaja? |
 |---|---|---|---|
-| — | ¿Cómo es una experiencia con basqplan? | amanecer sobre montes | sí |
-| 10:00 | despertar (con despertador) | amanecer | sí |
-| 10:00 | 1. Plan | caserío, acercándose a la puerta | sí (es foto, la puerta no se abre) |
-| 11:00 | elaboración de pan | taller (manos sobre la mesa) | **provisional: no es pan** |
-| 11:30 | 2. Plan | costa vasca desde el aire | **provisional: sin coche** |
-| 12:30 | llegada a la txakolindegi | bodega con viñedo y mar | sí |
-| 13:00 | sirviendo las copas | txakoli cayendo en copas | sí |
-| 13:30 | a comer | pintxos de anchoa preparándose | aceptable |
-| — | logo + reserva en el enlace de la bio | flysch desde el aire | sí |
+| 10:00 | ¿Cómo es una experiencia con basqplan? / despertar | Santa Klara al amanecer | sí |
+| 10:00 | 1. Plan | fachada del caserío Santa Klara | sí |
+| 11:00 | con los animales | terneros comiendo | **cambiado: no hay vídeo de pan** |
+| 11:30 | 2. Plan | coche por carretera entre prados (dron, ralentizado) | sí |
+| 12:30 | llegada a la txakolindegi | costa de Zumaia desde el aire | **genérico: no sale la bodega** |
+| 13:00 | sirviendo las copas | foto de basqplan.com | **es foto: falta un vídeo** |
+| 13:30 | a comer | comedor de Santa Klara (ralentizado) | aceptable |
+| — | logo + reserva | flysch desde el dron | sí |
 
 Para cambiar un plano, copia el archivo en `fuentes/` y cambia `src` en `PLANOS`.
