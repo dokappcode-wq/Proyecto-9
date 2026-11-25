@@ -44,7 +44,7 @@ PLANOS = [
     # Txakoli en K5 (vídeo promocional de Bodega K5, Full HD): collages de 3 para verlo entero y sin huecos
     dict(src="k5.mp4", crop=K5, dur=4.2, stack=[(62.95, 0.74), (66.5, 0.97), (5.0, 0.97)],
          hora="13:00,", frase="cuatro txakolis.", trans="zoomin"),
-    dict(src="k5.mp4", crop=K5, dur=4.0, stack=[(57.75, 0.62), (35.05, 0.75), (1.0, 1.0)], trans="slideup"),
+    dict(src="k5.mp4", crop=K5, dur=4.0, stack=[(57.75, 0.62), (35.05, 0.75), (0.8, 0.88)], trans="slideup"),
     dict(src="portada.mp4", ss=52.6, dur=4.5, fx=0.5, final=True, trans="fade"),
 ]
 
