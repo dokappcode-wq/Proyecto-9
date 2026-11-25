@@ -35,9 +35,10 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 K5 = (1920, 752, 0, 164)
 SK = dict(src="santaklara.mp4", limpia=True)
 PLANOS = [
-    # Apertura en un solo plano con vistas: «UN DÍA CON basqplan» y luego, en el centro, «9:00 · Despertar»
-    dict(src="portada.mp4", ss=57.7, dur=6.0, speed=0.76, fx=0.6, brillo=True, titulo=True,
-         hora="9:00", frase="Despertar", centro=True, alarma=True, alarma_t=2.9),
+    # Apertura: título sobre el flysch y, después, en el centro «9:00 · Despertar» con vistas al mar
+    dict(src="portada.mp4", ss=0.2, dur=3.5, fx=0.5, titulo=True),
+    dict(src="portada.mp4", ss=57.7, dur=3.2, speed=0.8, fx=0.6, brillo=True,
+         hora="9:00", frase="Despertar", centro=True, alarma=True, alarma_t=0.3, trans="zoomin"),
     # Actividad 1: ganadería. Collage de 3 vídeos apilados (se ven mucho más nítidos que recortados en vertical)
     dict(SK, dur=4.2, stack=[(49.05, 0.62), (69.0, 1.0), (63.1, 0.6)],
          hora="10:00", frase="Ganadería frente al Cantábrico", trans="slideleft"),
