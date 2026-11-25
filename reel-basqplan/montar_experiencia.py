@@ -175,7 +175,8 @@ def capas(p, tmp, i):
         a.alpha_composite(lg, (int(W / 2 - 170), ly))
         texto(a, (W / 2, ly + lg.height + 95), "basqplan", font(SERIF, 130, 600))
         guarda(a, "logo", 0.4, p["dur"], fi=0.8, dy=0)
-        b = lienzo(); caja(b, H * 0.80, "Una sola reserva.", font(SERIF_I, 100, 500), alpha=170, padx=52, pady=28)
+        cierre = "Una reserva única,\nllena de experiencias."
+        b = lienzo(); caja(b, H * 0.79, cierre, ajusta(SERIF_I, "llena de experiencias.", 92, 500), alpha=170, padx=52, pady=28)
         guarda(b, "frase", 1.2, p["dur"], fi=0.6, dy=60)
     return out
 

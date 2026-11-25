@@ -52,7 +52,7 @@ python3 reel-basqplan/montar_experiencia.py
 
 Todo es vídeo, todo vertical y en HD. Dura 30 s, con unos 4 s por plano. El montaje lleva un zoom lento sobre cada plano, transiciones variadas, textos que entran deslizándose sobre bandas navy y una barra dorada de progreso abajo. `portada.mp4` (de basqplan.com) no se sube al repositorio, así que hay que copiarlo en `fuentes/` antes de montar.
 
-Textos: «UN DÍA CON basqplan» al principio; abajo, «10:00 / Ganadería: aprender con los animales» y «13:00 / Cata de txakoli en bodega»; al final, el logo con «basqplan» y «Una sola reserva.».
+Textos: «UN DÍA CON basqplan» al principio; abajo, «10:00 / Ganadería: aprender con los animales» y «13:00 / Cata de txakoli en bodega»; al final, el logo con «basqplan» y «Una reserva única, llena de experiencias.».
 
 Estructura: «UN DÍA CON basqplan» → 10:00 ganadería en Santa Klara → 13:00 cata de txakoli en K5 → final. Dura 24 s. Todo llena la pantalla: los collages son 3 franjas de 1080×640 apiladas, sin huecos.
 
@@ -63,7 +63,7 @@ Estructura: «UN DÍA CON basqplan» → 10:00 ganadería en Santa Klara → 13:
 | 4 | — | Collage Santa Klara: niños con el poni · vaca con terneros · paseo en poni |
 | 5 | 13:00 / Cata de txakoli en bodega | Collage K5: abriendo la botella · chicas catando frente al mar · paseo por el viñedo |
 | 6 | — | Collage K5: cata en la mesa con el chef · selección de uva · viñedo desde el aire |
-| 7 | logo + basqplan / Una sola reserva. | Flysch desde el aire (basqplan.com) |
+| 7 | logo + basqplan / Una reserva única, llena de experiencias. | Flysch desde el aire (basqplan.com) |
 
 `santaklara.mp4` y `k5.mp4` (vídeos promocionales de Santa Klara y Bodega K5) no se suben al repositorio. Hay que copiarlos en `fuentes/` antes de montar, y **hace falta permiso de los dos** para publicarlos.
 
