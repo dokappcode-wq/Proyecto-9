@@ -26,26 +26,23 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 #       auf einer Weide bei Bederwitz (482)» y «(488)» (CC BY-SA 4.0).
 #   brindis.webm: Wikimedia Commons, «Buena Vista Winery - September 2024 - Sarah Stierch 02» (CC0).
 #   cocina.webm: Wikimedia Commons, «COMREL Cooking Demonstration (1015886)» (dominio público, DVIDS).
-#   alarma.mp3: Wikimedia Commons, «Alarm clock - 01» (CC BY-SA 4.0).
-#   musica.mp3: Kevin MacLeod, «Long Trail» (dominio público según Wikimedia Commons).
+#   musica.mp3: Scott Buckley, «Wanderlust» (CC BY 4.0, Wikimedia Commons).
 # fx: centro horizontal del recorte vertical (0-1); speed < 1 ralentiza; trans: transición de entrada.
 #   k5.mp4: vídeo promocional de Bodega K5 (aportado; pedir permiso).
 #   santaklara.mp4: vídeo promocional del agroturismo Santa Klara (aportado; pedir permiso).
-# Estructura: «Un día con basqplan» → 9:00 → ganadería en Santa Klara (cortes rápidos) → txakoli → cocina → final.
+# Estructura: «Un día con basqplan» → 10:00 ganadería en Santa Klara (cortes rápidos) → txakoli → cocina → final.
 K5 = (1920, 752, 0, 164)
 SK = dict(src="santaklara.mp4", limpia=True)
 PLANOS = [
     # Apertura: título sobre el flysch y, después, en el centro «9:00 · Despertar» con vistas al mar
     dict(src="portada.mp4", ss=0.2, dur=3.5, fx=0.5, titulo=True),
-    dict(src="portada.mp4", ss=57.7, dur=3.2, speed=0.8, fx=0.6, brillo=True,
-         hora="9:00", frase="Despertar", centro=True, alarma=True, alarma_t=0.3, trans="zoomin"),
     # Actividad 1: ganadería. Collage de 3 vídeos apilados (se ven mucho más nítidos que recortados en vertical)
     dict(SK, dur=4.2, stack=[(49.05, 0.62), (69.0, 1.0), (63.1, 0.6)],
-         hora="10:00", frase="Ganadería frente al Cantábrico", trans="slideleft"),
+         hora="10:00", frase="Ganadería: aprender con los animales", trans="slideleft"),
     dict(SK, dur=4.0, stack=[(77.1, 0.53), (94.7, 0.8), (83.4, 0.95)], trans="slideup"),
     # Txakoli en K5 (vídeo promocional de Bodega K5, Full HD): collages de 3 para verlo entero y sin huecos
     dict(src="k5.mp4", crop=K5, dur=4.2, stack=[(62.95, 0.74), (66.5, 0.97), (5.0, 0.97)],
-         hora="13:00,", frase="cuatro txakolis.", trans="zoomin"),
+         hora="13:00", frase="Cata de txakoli en bodega", trans="zoomin"),
     dict(src="k5.mp4", crop=K5, dur=4.0, stack=[(57.75, 0.62), (35.05, 0.75), (0.8, 0.88)], trans="slideup"),
     dict(src="portada.mp4", ss=52.6, dur=4.5, fx=0.5, final=True, trans="fade"),
 ]
@@ -165,7 +162,9 @@ def capas(p, tmp, i):
     elif p.get("hora"):
         a = lienzo(); caja(a, H * 0.71, p["hora"], font(SERIF, 170, 600), alpha=150, padx=52, pady=12)
         guarda(a, "hora", 0.3, fin, dy=60)
-        b = lienzo(); caja(b, H * 0.71 + 165, p["frase"], ajusta(SERIF_I, p["frase"], 80, 500), alpha=165)
+        fr = p["frase"].replace(": ", ":\n")   # «Ganadería: aprender…» en dos líneas
+        lin = max(fr.split("\n"), key=len)
+        b = lienzo(); caja(b, H * 0.71 + 165 + (45 if "\n" in fr else 0), fr, ajusta(SERIF_I, lin, 80, 500), alpha=165)
         guarda(b, "frase", 0.8, fin, dy=60)
     elif p.get("frase"):
         b = lienzo(); caja(b, H * 0.78, p["frase"], ajusta(SERIF_I, p["frase"], 76, 500), alpha=165)
@@ -281,18 +280,12 @@ def main():
     fc.append(f"color=c=0xC9A86B:s={W}x10:r={FPS}:d={total}[bar]")
     fc.append(f"[{prev}][bar]overlay=x='-{W}+{W}*t/{total}':y={H-10}:shortest=1[pb]")
     fc.append(f"[pb]fade=t=out:st={total-0.5}:d=0.5[vf]")
-    # música desde el principio; el despertador suena con el «9:00» y la música se baja mientras
-    t_al = sum(PLANOS[k]["dur"] for k in range(len(PLANOS)) if k < next(j for j, q in enumerate(PLANOS) if q.get("alarma")))
+    # música (sin despertador): entra con fundido y sale con fundido al final
     na = len(segs)
-    inputs += ["-ss", "2.3", "-t", "3.0", "-i", FU("alarma.mp3"), "-ss", "10.5", "-i", FU("musica.mp3")]
-    t_al += next(q for q in PLANOS if q.get("alarma")).get("alarma_t", 0)
-    ms = int(t_al * 1000) + 250
-    fc.append(f"[{na}:a]aresample=48000,volume=1.2,afade=t=out:st=2.4:d=0.6,adelay={ms}|{ms},"
-              f"apad,atrim=0:{total},aformat=channel_layouts=stereo[al]")
-    fc.append(f"[{na+1}:a]aresample=48000,atrim=0:{total},asetpts=PTS-STARTPTS,"
-              f"volume='if(between(t,{t_al+0.1:.2f},{t_al+3.0:.2f}),0.45,1.35)':eval=frame,"
-              f"afade=t=in:d=1.0,afade=t=out:st={total-2.5}:d=2.5,apad,atrim=0:{total},aformat=channel_layouts=stereo[mu]")
-    fc.append("[al][mu]amix=inputs=2:normalize=0,alimiter=limit=0.89[a]")
+    inputs += ["-ss", "34.5", "-i", FU("musica.mp3")]
+    fc.append(f"[{na}:a]aresample=48000,atrim=0:{total},asetpts=PTS-STARTPTS,volume=1.0,"
+              f"afade=t=in:d=1.0,afade=t=out:st={total-2.5}:d=2.5,apad,atrim=0:{total},"
+              f"aformat=channel_layouts=stereo,alimiter=limit=0.89[a]")
     out = os.path.join(BASE, "salida", "experiencia_basqplan.mp4")
     subprocess.run(["ffmpeg", "-y", *inputs, "-filter_complex", ";".join(fc), "-map", "[vf]", "-map", "[a]",
                     "-t", str(total), "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",

@@ -54,25 +54,23 @@ Todo es vídeo, todo vertical y en HD. Dura 30 s, con unos 4 s por plano. El mon
 
 Solo lleva tres textos, todos en la parte de abajo: «10:30, vacas frente al Cantábrico.» / «13:00, cuatro txakolis.» / «Una sola reserva.». Al final aparecen el logo y el nombre «basqplan» debajo.
 
-Estructura: «UN DÍA CON basqplan» → 9:00 → 10:00 ganadería en Santa Klara → 13:00 txakoli en K5 → final. Dura 27 s. Todo llena la pantalla: los collages son 3 franjas de 1080×640 apiladas, sin huecos.
+Estructura: «UN DÍA CON basqplan» → 10:00 ganadería en Santa Klara → 13:00 cata de txakoli en K5 → final. Dura 24 s. Todo llena la pantalla: los collages son 3 franjas de 1080×640 apiladas, sin huecos.
 
 | Plano | Texto | Vídeo |
 |---|---|---|
 | 1 | UN DÍA CON + logo + basqplan | Flysch desde el aire (basqplan.com) |
-| 2 | En el centro: 9:00 · Despertar (con despertador) | Persona contemplando el mar desde un monte (basqplan.com) |
-| 3 | 10:00 / Ganadería frente al Cantábrico | Collage Santa Klara: vacas junto al caserío y el mar · niños corriendo · familia con las cabras |
+| 3 | 10:00 / Ganadería: aprender con los animales | Collage Santa Klara: vacas junto al caserío y el mar · niños corriendo · familia con las cabras |
 | 4 | — | Collage Santa Klara: niños con el poni · vaca con terneros · paseo en poni |
-| 5 | 13:00, cuatro txakolis. | Collage K5: abriendo la botella · chicas catando frente al mar · paseo por el viñedo |
+| 5 | 13:00 / Cata de txakoli en bodega | Collage K5: abriendo la botella · chicas catando frente al mar · paseo por el viñedo |
 | 6 | — | Collage K5: cata en la mesa con el chef · selección de uva · viñedo desde el aire |
 | 7 | logo + basqplan / Una sola reserva. | Flysch desde el aire (basqplan.com) |
 
 `santaklara.mp4` y `k5.mp4` (vídeos promocionales de Santa Klara y Bodega K5) no se suben al repositorio. Hay que copiarlos en `fuentes/` antes de montar, y **hace falta permiso de los dos** para publicarlos.
 
-**Audio:** la música suena desde el principio y baja mientras suena el despertador del «9:00». Es «Long Trail» de Kevin MacLeod, con fundido de entrada y de salida.
+**Audio:** música «Wanderlust» de Scott Buckley (CC BY 4.0), con fundido de entrada y de salida. Sin despertador.
 
 **Créditos que hay que poner en el texto del post:**
-- Despertador: «Alarm clock - 01», Wikimedia Commons, CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Alarm_clock_-_01.ogg
-- Música: «Long Trail», Kevin MacLeod (incompetech.com). Commons la marca como dominio público; citarlo es buena práctica.
+- Música: «Wanderlust», Scott Buckley (scottbuckley.com.au), CC BY 4.0.
 - El resto de imágenes son de basqplan.com, Santa Klara y Bodega K5. Para estas dos últimas hace falta su permiso, y se recomienda etiquetarlas como colaboradoras.
 
 Para cambiar un plano, copia el archivo en `fuentes/` y cambia `src` en `PLANOS`.
