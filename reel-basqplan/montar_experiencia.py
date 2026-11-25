@@ -34,7 +34,7 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 SK = dict(src="santaklara.mp4", limpia=True)
 PLANOS = [
     dict(src="portada.mp4", ss=0.2, dur=3.5, fx=0.5, titulo=True),
-    dict(SK, ss=139.15, dur=2.8, speed=0.66, fx=0.55, hora="9:00", alarma=True, trans="zoomin"),
+    dict(src="portada.mp4", ss=57.8, dur=2.8, speed=0.9, fx=0.6, brillo=True, hora="9:00", alarma=True, trans="zoomin"),
     # Actividad 1: ganadería. Collage de 3 vídeos apilados (se ven mucho más nítidos que recortados en vertical)
     dict(SK, dur=4.2, stack=[(49.05, 0.62), (69.0, 1.0), (63.1, 0.6)],
          hora="10:00", frase="Ganadería frente al Cantábrico", trans="slideleft"),
@@ -213,6 +213,7 @@ def segmento(p, tmp, i, ultimo):
         vw = min(cw, int(ch * 9 / 16)) // 2 * 2
         vx = cx + int(min(max(p.get("fx", 0.5) * cw - vw / 2, 0), cw - vw))
         dn = "hqdn3d=3:3:4:4," if p.get("limpia") else ""
+        if p.get("brillo"): dn += "eq=brightness=0.05:gamma=1.12:saturation=1.1,"
         base = (f"[0:v]crop={vw}:{ch}:{vx}:{cy},{dn}setpts=(PTS-STARTPTS)/{sp},fps={FPS},"
                 f"scale={int(W*1.5)}:{int(H*1.5)}:flags=lanczos,unsharp=5:5:0.6,setsar=1,trim=duration={d},setpts=PTS-STARTPTS,"
                 f"zoompan=z='1+0.09*on/{n}':d=1:s={W}x{H}:fps={FPS}:x='iw/2-iw/zoom/2':y='ih/2-ih/zoom/2'")
