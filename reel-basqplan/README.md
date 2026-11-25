@@ -54,19 +54,19 @@ Todo es vídeo, todo vertical y en HD. Dura 30 s, con unos 4 s por plano. El mon
 
 Solo lleva tres textos, todos en la parte de abajo: «10:30, vacas frente al Cantábrico.» / «13:00, cuatro txakolis.» / «Una sola reserva.». Al final aparecen el logo y el nombre «basqplan» debajo.
 
-Estructura: «UN DÍA CON basqplan» → 9:00 → 10:00 ganadería en Santa Klara (collage de 3 vídeos apilados) → txakoli → clase de cocina → final. Dura 26 s.
+Estructura: «UN DÍA CON basqplan» → 9:00 → 10:00 ganadería en Santa Klara → 13:00 txakoli en K5 → final. Dura 27 s. Todo llena la pantalla: los collages son 3 franjas de 1080×640 apiladas, sin huecos.
 
 | Plano | Texto | Vídeo |
 |---|---|---|
 | 1 | UN DÍA CON + logo + basqplan | Flysch desde el aire (basqplan.com) |
-| 2 | 9:00 (con despertador) | Persona contemplando el mar desde un monte por la mañana (basqplan.com, Full HD) |
-| 3 | 10:00 / Ganadería frente al Cantábrico | Collage: vacas junto al caserío y el mar · niños corriendo por el prado · familia con las cabras |
-| 4 | — | Collage: niños con el poni · vaca con terneros · paseo en poni |
-| 5 | 13:00, cuatro txakolis. | Brindis con copas en una bodega |
-| 6 | — | Clase de cocina: participantes cocinando con cocineros |
+| 2 | 9:00 (con despertador) | Persona contemplando el mar desde un monte (basqplan.com) |
+| 3 | 10:00 / Ganadería frente al Cantábrico | Collage Santa Klara: vacas junto al caserío y el mar · niños corriendo · familia con las cabras |
+| 4 | — | Collage Santa Klara: niños con el poni · vaca con terneros · paseo en poni |
+| 5 | 13:00, cuatro txakolis. | Collage K5: abriendo la botella · chicas catando frente al mar · paseo por el viñedo |
+| 6 | — | Collage K5: cata en la mesa con el chef · selección de uva · viñedo desde el aire |
 | 7 | logo + basqplan / Una sola reserva. | Flysch desde el aire (basqplan.com) |
 
-`santaklara.mp4` (vídeo promocional del agroturismo) no se sube al repositorio. Hay que copiarlo en `fuentes/` antes de montar, y **hace falta permiso de Santa Klara** para publicarlo.
+`santaklara.mp4` y `k5.mp4` (vídeos promocionales de Santa Klara y Bodega K5) no se suben al repositorio. Hay que copiarlos en `fuentes/` antes de montar, y **hace falta permiso de los dos** para publicarlos.
 
 **Audio:** la música suena desde el principio y baja mientras suena el despertador del «9:00». Es «Long Trail» de Kevin MacLeod, con fundido de entrada y de salida.
 

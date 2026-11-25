@@ -29,8 +29,10 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 #   alarma.mp3: Wikimedia Commons, «Alarm clock - 01» (CC BY-SA 4.0).
 #   musica.mp3: Kevin MacLeod, «Long Trail» (dominio público según Wikimedia Commons).
 # fx: centro horizontal del recorte vertical (0-1); speed < 1 ralentiza; trans: transición de entrada.
+#   k5.mp4: vídeo promocional de Bodega K5 (aportado; pedir permiso).
 #   santaklara.mp4: vídeo promocional del agroturismo Santa Klara (aportado; pedir permiso).
 # Estructura: «Un día con basqplan» → 9:00 → ganadería en Santa Klara (cortes rápidos) → txakoli → cocina → final.
+K5 = (1920, 752, 0, 164)
 SK = dict(src="santaklara.mp4", limpia=True)
 PLANOS = [
     dict(src="portada.mp4", ss=0.2, dur=3.5, fx=0.5, titulo=True),
@@ -39,8 +41,10 @@ PLANOS = [
     dict(SK, dur=4.2, stack=[(49.05, 0.62), (69.0, 1.0), (63.1, 0.6)],
          hora="10:00", frase="Ganadería frente al Cantábrico", trans="slideleft"),
     dict(SK, dur=4.0, stack=[(77.1, 0.53), (94.7, 0.8), (83.4, 0.95)], trans="slideup"),
-    dict(src="brindis.webm", ss=0.0, dur=4.0, speed=0.92, hora="13:00,", frase="cuatro txakolis.", trans="zoomin"),
-    dict(src="cocina.webm", ss=0.5, dur=3.2, fx=0.45, trans="slideleft"),
+    # Txakoli en K5 (vídeo promocional de Bodega K5, Full HD): collages de 3 para verlo entero y sin huecos
+    dict(src="k5.mp4", crop=K5, dur=4.2, stack=[(62.95, 0.74), (66.5, 0.97), (5.0, 0.97)],
+         hora="13:00,", frase="cuatro txakolis.", trans="zoomin"),
+    dict(src="k5.mp4", crop=K5, dur=4.0, stack=[(57.75, 0.62), (35.05, 0.75), (1.0, 1.0)], trans="slideup"),
     dict(src="portada.mp4", ss=52.6, dur=4.5, fx=0.5, final=True, trans="fade"),
 ]
 
@@ -191,13 +195,21 @@ def segmento(p, tmp, i, ultimo):
     if p.get("stack"):
         # 3 vídeos horizontales apilados sobre fondo navy, entrando de lado uno tras otro
         cmd = ["ffmpeg", "-y"]
-        PH, GAP = 600, 14
-        y0 = (H - 3 * PH - 2 * GAP) // 2
+        PH, GAP = H // 3, 0   # 3 franjas de 1080x640 que llenan toda la pantalla, sin huecos
+        y0 = 0
         fc0 = [f"color=c=0x{NAVY[0]:02x}{NAVY[1]:02x}{NAVY[2]:02x}:s={W}x{H}:r={FPS}:d={d}[can0]"]
+        r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+                            "stream=width,height", "-of", "csv=p=0", FU(p["src"])], capture_output=True, text=True)
+        iw, ih = map(int, r.stdout.strip().split(",")[:2])
+        cw, ch, cx, cy = p.get("crop", (iw, ih, 0, 0))
+        A = W / PH
+        sw = min(cw, int(ch * A)) // 2 * 2; sh = min(ch, int(sw / A)) // 2 * 2
+        sx = cx + (cw - sw) // 2; sy = cy + (ch - sh) // 2
+        dn = "hqdn3d=3:3:4:4," if p.get("limpia") else ""
         for k, (ss, sp) in enumerate(p["stack"]):
             cmd += ["-ss", str(ss), "-t", f"{d*sp+0.1:.3f}", "-i", FU(p["src"])]
-            fc0.append(f"[{k}:v]crop=640:356:0:2,hqdn3d=3:3:4:4,setpts=(PTS-STARTPTS)/{sp},fps={FPS},"
-                       f"scale={W}:{PH}:flags=lanczos,unsharp=5:5:0.7,setsar=1,trim=duration={d},setpts=PTS-STARTPTS[p{k}]")
+            fc0.append(f"[{k}:v]crop={sw}:{sh}:{sx}:{sy},{dn}setpts=(PTS-STARTPTS)/{sp},fps={FPS},"
+                       f"scale={W}:{PH}:flags=lanczos,unsharp=5:5:0.6,setsar=1,trim=duration={d},setpts=PTS-STARTPTS[p{k}]")
             t0 = 0.12 * k; sgn = -1 if k % 2 == 0 else 1
             xe = f"if(lt(t,{t0}),{sgn}*{W},{sgn}*{W}*pow(1-min(1,(t-{t0})/0.55),3))"
             fc0.append(f"[can{k}][p{k}]overlay=x='{xe}':y={y0 + k*(PH+GAP)}:eval=frame[can{k+1}]")
