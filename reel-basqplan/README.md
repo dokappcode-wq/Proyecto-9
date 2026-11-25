@@ -52,7 +52,7 @@ python3 reel-basqplan/montar_experiencia.py
 
 Todo es vídeo, todo vertical y en HD. Dura 30 s, con unos 4 s por plano. El montaje lleva un zoom lento sobre cada plano, transiciones variadas, textos que entran deslizándose sobre bandas navy y una barra dorada de progreso abajo. `portada.mp4` (de basqplan.com) no se sube al repositorio, así que hay que copiarlo en `fuentes/` antes de montar.
 
-Solo lleva tres textos, todos en la parte de abajo: «10:30, vacas frente al Cantábrico.» / «13:00, cuatro txakolis.» / «Una sola reserva.». Al final aparecen el logo y el nombre «basqplan» debajo.
+Textos: «UN DÍA CON basqplan» al principio; abajo, «10:00 / Ganadería: aprender con los animales» y «13:00 / Cata de txakoli en bodega»; al final, el logo con «basqplan» y «Una sola reserva.».
 
 Estructura: «UN DÍA CON basqplan» → 10:00 ganadería en Santa Klara → 13:00 cata de txakoli en K5 → final. Dura 24 s. Todo llena la pantalla: los collages son 3 franjas de 1080×640 apiladas, sin huecos.
 
