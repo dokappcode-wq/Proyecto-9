@@ -70,11 +70,9 @@ Estructura: «UN DÍA CON basqplan» → 9:00 → 10:00 ganadería en Santa Klar
 
 **Audio:** la música suena desde el principio y baja mientras suena el despertador del «9:00». Es «Long Trail» de Kevin MacLeod, con fundido de entrada y de salida.
 
-**Créditos que hay que poner en el texto del post** (los exigen las licencias):
-- Ganado (planos 3 y 4): CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Eine_Herde_Schottische_Hochlandrinder_auf_einer_Weide_bei_Bederwitz_(482).webm y en el (488).
-- Cocina: «COMREL Cooking Demonstration (1015886)», dominio público (DVIDS). No exige crédito.
-- Despertador: CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Alarm_clock_-_01.ogg
+**Créditos que hay que poner en el texto del post:**
+- Despertador: «Alarm clock - 01», Wikimedia Commons, CC BY-SA 4.0. El autor figura en https://commons.wikimedia.org/wiki/File:Alarm_clock_-_01.ogg
 - Música: «Long Trail», Kevin MacLeod (incompetech.com). Commons la marca como dominio público; citarlo es buena práctica.
-- Sin crédito obligatorio: vacas del plano 2 (CC0) y brindis (CC0, Sarah Stierch).
+- El resto de imágenes son de basqplan.com, Santa Klara y Bodega K5. Para estas dos últimas hace falta su permiso, y se recomienda etiquetarlas como colaboradoras.
 
 Para cambiar un plano, copia el archivo en `fuentes/` y cambia `src` en `PLANOS`.
