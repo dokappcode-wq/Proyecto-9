@@ -58,8 +58,7 @@ Estructura: «UN DÍA CON basqplan» → 9:00 → 10:00 ganadería en Santa Klar
 
 | Plano | Texto | Vídeo |
 |---|---|---|
-| 1 | UN DÍA CON + logo + basqplan | Flysch desde el aire (basqplan.com) |
-| 2 | 9:00 (con despertador) | Persona contemplando el mar desde un monte (basqplan.com) |
+| 1–2 | UN DÍA CON + logo + basqplan → en el centro «9:00 · Despertar» (con despertador) | Un solo plano: persona contemplando el mar desde un monte (basqplan.com) |
 | 3 | 10:00 / Ganadería frente al Cantábrico | Collage Santa Klara: vacas junto al caserío y el mar · niños corriendo · familia con las cabras |
 | 4 | — | Collage Santa Klara: niños con el poni · vaca con terneros · paseo en poni |
 | 5 | 13:00, cuatro txakolis. | Collage K5: abriendo la botella · chicas catando frente al mar · paseo por el viñedo |

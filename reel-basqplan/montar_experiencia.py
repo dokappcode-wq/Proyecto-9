@@ -35,8 +35,9 @@ SERIF, SERIF_I, SANS = (os.path.join(BASE, "fonts", f) for f in
 K5 = (1920, 752, 0, 164)
 SK = dict(src="santaklara.mp4", limpia=True)
 PLANOS = [
-    dict(src="portada.mp4", ss=0.2, dur=3.5, fx=0.5, titulo=True),
-    dict(src="portada.mp4", ss=57.8, dur=2.8, speed=0.9, fx=0.6, brillo=True, hora="9:00", alarma=True, trans="zoomin"),
+    # Apertura en un solo plano con vistas: «UN DÍA CON basqplan» y luego, en el centro, «9:00 · Despertar»
+    dict(src="portada.mp4", ss=57.7, dur=6.0, speed=0.76, fx=0.6, brillo=True, titulo=True,
+         hora="9:00", frase="Despertar", centro=True, alarma=True, alarma_t=2.9),
     # Actividad 1: ganadería. Collage de 3 vídeos apilados (se ven mucho más nítidos que recortados en vertical)
     dict(SK, dur=4.2, stack=[(49.05, 0.62), (69.0, 1.0), (63.1, 0.6)],
          hora="10:00", frase="Ganadería frente al Cantábrico", trans="slideleft"),
@@ -142,12 +143,21 @@ def capas(p, tmp, i):
         path = os.path.join(tmp, f"c{i}_{nombre}.png"); img.save(path); out.append((path, t0, t1, fi, fo, dy))
     fin = p["dur"] + XF
     if p.get("titulo"):
+        tf = 2.75 if p.get("centro") else fin          # si luego viene la hora, el título se va antes
+        fo = 0.4 if p.get("centro") else 0.0
         a = Image.new("RGBA", (W, H), NAVY + (95,))
         texto(a, (W / 2, H * 0.33), "UN DÍA CON", font(SANS, 70, 600), fill=GOLD, tracking=18, sombra=160, radio=10)
-        guarda(a, "undia", 0.2, fin, fi=0.5, dy=-60)
+        guarda(a, "undia", 0.2, tf, fi=0.5, fo=fo, dy=-60)
         b = lienzo(); lg = logo_img(330); b.alpha_composite(lg, (int(W / 2 - 165), int(H * 0.39)))
         texto(b, (W / 2, H * 0.39 + lg.height + 110), "basqplan", font(SERIF, 190, 600), radio=20)
-        guarda(b, "marca", 0.7, fin, fi=0.6, dy=80)
+        guarda(b, "marca", 0.7, tf, fi=0.6, fo=fo, dy=80)
+    if p.get("centro"):
+        t0 = p.get("alarma_t", 0.3)
+        a = lienzo(); caja(a, H * 0.46, p["hora"], font(SERIF, 280, 600), alpha=160, padx=70, pady=6)
+        guarda(a, "hora", t0, fin, dy=70)
+        b = lienzo(); caja(b, H * 0.46 + 215, p["frase"], font(SERIF_I, 96, 500), alpha=165, padx=50, pady=22)
+        guarda(b, "frase", t0 + 0.4, fin, dy=60)
+        return out
     if p.get("hora") and not p.get("frase"):
         a = lienzo(); caja(a, H * 0.72, p["hora"], font(SERIF, 260, 600), alpha=160, padx=70, pady=6)
         guarda(a, "hora", 0.25, fin, dy=70)
@@ -274,6 +284,7 @@ def main():
     t_al = sum(PLANOS[k]["dur"] for k in range(len(PLANOS)) if k < next(j for j, q in enumerate(PLANOS) if q.get("alarma")))
     na = len(segs)
     inputs += ["-ss", "2.3", "-t", "3.0", "-i", FU("alarma.mp3"), "-ss", "10.5", "-i", FU("musica.mp3")]
+    t_al += next(q for q in PLANOS if q.get("alarma")).get("alarma_t", 0)
     ms = int(t_al * 1000) + 250
     fc.append(f"[{na}:a]aresample=48000,volume=1.2,afade=t=out:st=2.4:d=0.6,adelay={ms}|{ms},"
               f"apad,atrim=0:{total},aformat=channel_layouts=stereo[al]")
