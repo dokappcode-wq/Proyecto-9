@@ -38,11 +38,11 @@ PLANOS = [
     dict(src="portada.mp4", ss=0.2, dur=3.5, fx=0.5, titulo=True),
     # Actividad 1: ganadería. Collage de 3 vídeos apilados (se ven mucho más nítidos que recortados en vertical)
     dict(SK, dur=4.2, stack=[(49.05, 0.62), (69.0, 1.0), (63.1, 0.6)],
-         hora="10:00", frase="Ganadería: aprender con los animales", trans="slideleft"),
+         hora="10:00", etiqueta="GANADERÍA", frase="aprender con los animales", trans="slideleft"),
     dict(SK, dur=4.0, stack=[(77.1, 0.53), (94.7, 0.8), (83.4, 0.95)], trans="slideup"),
     # Txakoli en K5 (vídeo promocional de Bodega K5, Full HD): collages de 3 para verlo entero y sin huecos
     dict(src="k5.mp4", crop=K5, dur=4.2, stack=[(62.95, 0.74), (66.5, 0.97), (5.0, 0.97)],
-         hora="13:00", frase="Cata de txakoli en bodega", trans="zoomin"),
+         hora="13:00", etiqueta="CATA DE TXAKOLI", frase="en bodega", trans="zoomin"),
     dict(src="k5.mp4", crop=K5, dur=4.0, stack=[(57.75, 0.62), (35.05, 0.75), (0.8, 0.88)], trans="slideup"),
     dict(src="portada.mp4", ss=52.6, dur=4.5, fx=0.5, final=True, trans="fade"),
 ]
@@ -120,6 +120,37 @@ def ajusta(path, txt, size, wght, maxw=W - 160):
     return font(path, size, wght)
 
 
+def suave(img, xy, txt, fnt, fill=CREAM, tracking=0):
+    """Texto sin caja: doble sombra difusa (halo amplio + sombra cercana) para leerse sobre cualquier fondo."""
+    for alpha, r in ((150, 26), (170, 7)):
+        capa = Image.new("RGBA", img.size, (0, 0, 0, 0))
+        dc = ImageDraw.Draw(capa)
+        if tracking:
+            total = sum(dc.textlength(c, font=fnt) for c in txt) + tracking * (len(txt) - 1)
+            x = xy[0] - total / 2
+            for c in txt:
+                dc.text((x, xy[1]), c, font=fnt, fill=(10, 14, 22, alpha), anchor="lm"); x += dc.textlength(c, font=fnt) + tracking
+        else:
+            dc.multiline_text(xy, txt, font=fnt, fill=(10, 14, 22, alpha), anchor="mm", align="center", spacing=14)
+        img.alpha_composite(capa.filter(ImageFilter.GaussianBlur(r)))
+    d = ImageDraw.Draw(img)
+    if tracking:
+        total = sum(d.textlength(c, font=fnt) for c in txt) + tracking * (len(txt) - 1)
+        x = xy[0] - total / 2
+        for c in txt:
+            d.text((x, xy[1]), c, font=fnt, fill=fill + (255,), anchor="lm"); x += d.textlength(c, font=fnt) + tracking
+    else:
+        d.multiline_text(xy, txt, font=fnt, fill=fill + (255,), anchor="mm", align="center", spacing=14)
+
+
+def filete(img, cy, ancho=150):
+    """Línea dorada fina con sombra suave."""
+    capa = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    ImageDraw.Draw(capa).line([(W / 2 - ancho / 2, cy), (W / 2 + ancho / 2, cy)], fill=(10, 14, 22, 160), width=6)
+    img.alpha_composite(capa.filter(ImageFilter.GaussianBlur(6)))
+    ImageDraw.Draw(img).line([(W / 2 - ancho / 2, cy), (W / 2 + ancho / 2, cy)], fill=GOLD + (255,), width=3)
+
+
 def reloj(img, hora):
     caja(img, 270, hora, font(SERIF, 132, 600), alpha=150, padx=44, pady=22)
 
@@ -143,7 +174,7 @@ def capas(p, tmp, i):
     if p.get("titulo"):
         tf = 2.75 if p.get("centro") else fin          # si luego viene la hora, el título se va antes
         fo = 0.4 if p.get("centro") else 0.0
-        a = Image.new("RGBA", (W, H), NAVY + (95,))
+        a = Image.new("RGBA", (W, H), NAVY + (55,))
         texto(a, (W / 2, H * 0.33), "UN DÍA CON", font(SANS, 70, 600), fill=GOLD, tracking=18, sombra=160, radio=10)
         guarda(a, "undia", 0.2, tf, fi=0.5, fo=fo, dy=-60)
         b = lienzo(); lg = logo_img(330); b.alpha_composite(lg, (int(W / 2 - 165), int(H * 0.39)))
@@ -160,23 +191,25 @@ def capas(p, tmp, i):
         a = lienzo(); caja(a, H * 0.72, p["hora"], font(SERIF, 260, 600), alpha=160, padx=70, pady=6)
         guarda(a, "hora", 0.25, fin, dy=70)
     elif p.get("hora"):
-        a = lienzo(); caja(a, H * 0.71, p["hora"], font(SERIF, 170, 600), alpha=150, padx=52, pady=12)
-        guarda(a, "hora", 0.3, fin, dy=60)
-        fr = p["frase"].replace(": ", ":\n")   # «Ganadería: aprender…» en dos líneas
-        lin = max(fr.split("\n"), key=len)
-        b = lienzo(); caja(b, H * 0.71 + 165 + (45 if "\n" in fr else 0), fr, ajusta(SERIF_I, lin, 80, 500), alpha=165)
-        guarda(b, "frase", 0.8, fin, dy=60)
+        y = H * 0.68
+        a = lienzo(); suave(a, (W / 2, y), p["hora"], font(SERIF, 200, 500)); filete(a, y + 128)
+        guarda(a, "hora", 0.3, fin, dy=50)
+        b = lienzo()
+        suave(b, (W / 2, y + 200), p["etiqueta"], font(SANS, 50, 700), fill=(227, 210, 178), tracking=12)
+        suave(b, (W / 2, y + 285), p["frase"], ajusta(SERIF_I, p["frase"], 84, 400))
+        guarda(b, "frase", 0.8, fin, dy=50)
     elif p.get("frase"):
         b = lienzo(); caja(b, H * 0.78, p["frase"], ajusta(SERIF_I, p["frase"], 76, 500), alpha=165)
         guarda(b, "frase", 0.3, fin, dy=60)
     if p.get("final"):
-        a = Image.new("RGBA", (W, H), NAVY + (115,))
+        a = Image.new("RGBA", (W, H), NAVY + (60,))
         lg = logo_img(340); ly = int(H * 0.36)
         a.alpha_composite(lg, (int(W / 2 - 170), ly))
         texto(a, (W / 2, ly + lg.height + 95), "basqplan", font(SERIF, 130, 600))
         guarda(a, "logo", 0.4, p["dur"], fi=0.8, dy=0)
-        cierre = "Una reserva única,\nllena de experiencias."
-        b = lienzo(); caja(b, H * 0.79, cierre, ajusta(SERIF_I, "llena de experiencias.", 92, 500), alpha=170, padx=52, pady=28)
+        b = lienzo()
+        suave(b, (W / 2, H * 0.76), "Una reserva única,", font(SERIF_I, 96, 400))
+        suave(b, (W / 2, H * 0.76 + 110), "llena de experiencias.", font(SERIF_I, 96, 400), fill=(227, 210, 178))
         guarda(b, "frase", 1.2, p["dur"], fi=0.6, dy=60)
     return out
 
